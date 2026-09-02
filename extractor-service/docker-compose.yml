@@ -1,0 +1,27 @@
+services:
+  extractor:
+    build: .
+    init: true
+    ports:
+      - "127.0.0.1:8788:8080"
+    environment:
+      MIQDAR_EXTRACTOR_TOKEN: ${MIQDAR_EXTRACTOR_TOKEN}
+      MIQDAR_MAX_CONCURRENCY: ${MIQDAR_MAX_CONCURRENCY:-2}
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    profiles:
+      - tunnel
+    command: tunnel --protocol http2 --no-autoupdate --url http://extractor:8080
+    depends_on:
+      extractor:
+        condition: service_healthy
+    restart: unless-stopped

@@ -1,0 +1,5 @@
+fastapi>=0.116,<1
+python-multipart>=0.0.20,<1
+playwright>=1.55,<2
+uvicorn[standard]>=0.35,<1
+yt-dlp==2026.7.4
