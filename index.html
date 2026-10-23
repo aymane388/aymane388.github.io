@@ -2872,6 +2872,21 @@ html.nv-video-in-viewport #nv-nav-frost{-webkit-backdrop-filter:none!important;b
 .nv-side-cloud-variant-c::before{transform:scaleX(1.1) scaleY(.83) rotate(8deg)}
 @media(max-width:700px){.nv-side-cloud-variant-b,.nv-side-cloud-variant-c{width:76vw;height:55vw}}
 </style>
+<style id="nv-side-cloud-edge-artifact-fix-20261023">
+/* Élimine les découpes rectangulaires visibles autour des volumes latéraux :
+   fondu appliqué au conteneur entier, y compris aux filtres SVG. */
+.nv-site-side-cloud,
+#nv-contact-sequence .nv-contact-cloud{
+  -webkit-mask-image:radial-gradient(ellipse 65% 66% at 50% 50%,#000 22%,rgba(0,0,0,.96) 38%,rgba(0,0,0,.65) 58%,rgba(0,0,0,.18) 76%,transparent 96%)!important;
+  mask-image:radial-gradient(ellipse 65% 66% at 50% 50%,#000 22%,rgba(0,0,0,.96) 38%,rgba(0,0,0,.65) 58%,rgba(0,0,0,.18) 76%,transparent 96%)!important;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-size:100% 100%;mask-size:100% 100%;
+}
+.nv-site-side-cloud::before,
+#nv-contact-sequence .nv-contact-cloud::before{
+  filter:blur(17px)!important;
+}
+</style>
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" style="position:absolute">
