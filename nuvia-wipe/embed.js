@@ -37,10 +37,23 @@
     if(!protocolReady||!iframe.contentWindow)return;
     iframe.contentWindow.postMessage({channel:TOKEN,type,...extra},location.origin);
   };
-  /* Pas de rafales liées à la molette ou au tactile : elles déplacent le
-     tissu différemment selon le sens, et cassent la trajectoire réversible.
-     Le moteur WebGL continue d'animer la matière indépendamment. */
-  const sendGust=()=>{};
+  /* Restore the original V204 scroll-to-physics gust channel.
+     The scroll-linked carrier stays centered/reversible; the actual
+     cloth is once again pulled and deformed by wheel/touch/scroll.
+     A smooth ramp near the video edge avoids a sudden physics kick
+     while the cloth is still emerging from beneath the tabs. */
+  const sendGust=(delta)=>{
+    if(!protocolReady||!modelReady||paused||videoVisible||
+       !Number.isFinite(delta)||Math.abs(delta)<.01)return;
+    const launch=window.NuviaWipeLaunch?.getState?.();
+    if(!launch?.ready||launch.fade<=0)return;
+    const progress=launch.progress||0;
+    const strength=smooth((progress-.18)/.72);
+    if(strength<=0)return;
+    sendMessage("gust",{
+      deltaY:Math.max(-550,Math.min(550,delta*strength))
+    });
+  };
   const enqueue=(delta)=>{
     queuedDelta+=delta;
     if(scrollFrame)return;
