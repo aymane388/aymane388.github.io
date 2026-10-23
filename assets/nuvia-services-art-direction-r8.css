@@ -1,0 +1,110 @@
+
+/*
+ NUVIA Services — visual audit R8
+ Only page content. No navbar or footer selector is overridden.
+ Source visual comparison: Air / Digital Asset Management and
+ Air / Sports, Media & Entertainment — October 2026.
+*/
+/* Shared editorial rhythm: tighter optical sizing and fewer empty transitions. */
+.sn-hero{padding-bottom:clamp(72px,7vw,105px)}
+.sn-hero-grid{grid-template-columns:minmax(0,.98fr) minmax(0,1.02fr);gap:clamp(48px,6.4vw,99px)}
+.sn-hero-title{font-weight:530;max-width:690px;font-size:clamp(51px,5.1vw,80px);line-height:1.075;letter-spacing:-.073em}
+.sn-hero-copy>p{max-width:440px;font-size:15px;line-height:1.8}
+.sn-hero-stage{background:#dfeaf0;aspect-ratio:1.14;min-height:420px}
+.sn-hero-stage:after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid #ffffff22}
+.sn-hero-label{letter-spacing:.1em}
+.sn-hero-bottom{margin-top:54px}
+.sn-manifesto{padding:58px 0 65px}
+.sn-manifesto h2{max-width:690px;font-size:clamp(34px,3.8vw,59px)}
+.sn-manifesto p{font-size:14px}
+/* Design: turn the baked infographic into a deliberately framed editorial plate. */
+.sn-design{padding:100px 0 125px;background:#f5f6f6}
+.sn-design-head{margin-bottom:38px}
+.sn-design-head h2{font-weight:530}
+.sn-design-head>p{max-width:350px;font-size:14px}
+.sn-design-tabs{gap:4px;margin-bottom:14px}
+.sn-design-tabs button{font-weight:650;background:transparent;border-color:transparent;border-bottom:1px solid #cfd7da;border-radius:0;padding:13px 20px}
+.sn-design-tabs button[aria-selected=true]{border-color:transparent;border-bottom:2px solid #28353e;background:#fff;box-shadow:none}
+.sn-demo{border:1px solid #e5e7e8;min-height:530px;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+.sn-demo-visual{background:radial-gradient(circle at 12% 14%,#eef8ff,#e0e8ea 58%,#e7edea);display:flex;align-items:center;justify-content:center;isolation:isolate;overflow:hidden}
+.sn-demo-visual:before{content:"";position:absolute;width:83%;height:76%;border:1px solid #ffffff93;left:9%;top:12%;transform:rotate(-4deg);pointer-events:none}
+.sn-demo-visual img{position:relative;inset:auto;width:min(84%,520px);height:auto;max-height:80%;aspect-ratio:1.14;object-fit:contain;object-position:center;border-radius:2px;transform:rotate(-3deg);box-shadow:0 24px 56px rgba(24,51,65,.17),0 3px 9px rgba(24,51,65,.08);transition:opacity .35s ease,transform .55s cubic-bezier(.2,.7,.2,1)}
+.sn-demo-visual img.sn-swapping{opacity:.18;transform:rotate(-3deg) translateY(10px)}
+.sn-demo-label{top:21px;left:22px;background:#fffffff0;border:1px solid #e4e8ea;font-size:9px}
+.sn-demo-copy{padding:clamp(43px,5.1vw,77px)}
+.sn-demo-copy h3{font-size:clamp(29px,3vw,43px);letter-spacing:-.055em}
+.sn-demo-copy p{font-size:13px;max-width:360px}
+.sn-demo-copy .sn-link{margin-top:29px}
+/* Production: do not present a preproduction infographic as a full-bleed factory photo. */
+.sn-production{padding:105px 0 114px;background:#181e23}
+.sn-prod-head h2{font-weight:530;line-height:1.08;font-size:clamp(46px,5.7vw,87px)}
+.sn-prod-head p{font-size:14px;max-width:340px}
+.sn-prod-display{margin-top:47px;min-height:470px;background:#242e35;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.sn-prod-image{display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 33% 32%,#42667c,#253c4c 62%,#1b2d37);isolation:isolate;padding:clamp(26px,3.5vw,55px)}
+.sn-prod-image:before{content:"";position:absolute;inset:9%;border:1px solid #dceaf31e;pointer-events:none}
+.sn-prod-image img{position:relative;inset:auto;width:auto;max-width:78%;height:auto;max-height:390px;object-fit:contain;border-radius:3px;box-shadow:0 24px 54px #030e1952;transform:rotate(-3deg)}
+.sn-prod-image small{left:24px;bottom:21px;color:#e9f1f3;background:#1b2e38ed;border:1px solid #a9cad130;font-size:9px}
+.sn-prod-count{padding:clamp(38px,5vw,76px)}
+.sn-prod-count strong{font-size:clamp(70px,8.6vw,127px);line-height:1}
+.sn-prod-count h3{font-size:18px}
+.sn-prod-count p{font-size:13px;max-width:340px}
+.sn-prod-meta{margin-top:25px}
+/* Stockage: stop cropping the actual pallet. Use the full image as a contained source visual. */
+.sn-storage{padding:120px 0}
+.sn-storage-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(53px,7vw,110px)}
+.sn-storage-image{display:flex;align-items:center;justify-content:center;aspect-ratio:1.08;background:linear-gradient(138deg,#eef4f6,#dce9ee 64%,#e8eef0);isolation:isolate;padding:clamp(19px,3.8vw,58px)}
+.sn-storage-image:before{content:"";position:absolute;inset:8%;border:1px solid #fff9;pointer-events:none}
+.sn-storage-image img{position:relative;inset:auto;width:auto;max-width:90%;height:auto;max-height:82%;object-fit:contain;box-shadow:0 18px 35px rgba(33,73,86,.10)}
+.sn-storage-badge{z-index:2;font-size:9px;background:#ffffffef;border:1px solid #e7edf0}
+.sn-storage-copy h2{font-weight:530;font-size:clamp(42px,4.7vw,70px);max-width:570px}
+.sn-storage-copy .sn-text{font-size:15px;max-width:380px}
+.sn-storage-features{gap:22px;margin:31px 0 27px}
+/* Delivery: the restaurant video shows the end-use experience, not a delivery truck.
+   Copy and composition now describe the customer-facing outcome accurately. */
+.sn-delivery{background:#edf2f3;padding:105px 0 120px}
+.sn-delivery-header{margin-bottom:40px}
+.sn-delivery-header h2{font-size:clamp(44px,4.85vw,73px);font-weight:530}
+.sn-delivery-header p{max-width:520px;font-size:14px}
+.sn-delivery-scene{grid-template-columns:minmax(0,1.22fr) minmax(0,.78fr);min-height:450px;border:1px solid #e6e9ea}
+.sn-delivery-scene-copy{padding:clamp(35px,4vw,65px)}
+.sn-delivery-scene-copy h3{font-size:clamp(28px,2.7vw,40px)}
+.sn-delivery-media{background:#dbe8ec}
+.sn-delivery-meta{padding-top:23px;gap:9px}
+.sn-delivery-meta span{border-color:#d1dadd;background:#ffffff93;padding:8px 12px;font-size:10px}
+.sn-finale{padding:112px 0 125px}
+.sn-finale h2{font-size:clamp(45px,5.5vw,84px);font-weight:530}
+@media(max-width:1020px){
+ .sn-hero-grid{gap:40px}
+ .sn-prod-display{min-height:410px}
+ .sn-prod-image img{max-height:315px}
+}
+@media(max-width:830px){
+ .sn-hero-stage{aspect-ratio:1.25;min-height:0}
+ .sn-manifesto{padding:54px 0 57px}
+ .sn-design{padding:81px 0 92px}
+ .sn-demo{min-height:0}
+ .sn-demo-visual{min-height:400px;aspect-ratio:1.42}
+ .sn-demo-visual img{max-height:80%;width:min(70%,460px)}
+ .sn-production{padding:82px 0 92px}
+ .sn-prod-display{min-height:0}
+ .sn-prod-image{min-height:370px;aspect-ratio:1.55}
+ .sn-prod-image img{max-height:86%}
+ .sn-prod-count{padding:38px}
+ .sn-storage{padding:82px 0}
+ .sn-storage-grid{gap:33px}
+ .sn-storage-image{aspect-ratio:1.23}
+ .sn-storage-image img{max-height:84%}
+ .sn-delivery{padding:83px 0 92px}
+ .sn-delivery-scene{min-height:0}
+ .sn-finale{padding:88px 0}
+}
+@media(max-width:520px){
+ .sn-demo-visual{min-height:280px}
+ .sn-demo-visual img{width:77%}
+ .sn-prod-image{min-height:295px}
+ .sn-prod-image img{max-height:80%}
+ .sn-storage-image{aspect-ratio:1}
+}
+@media(prefers-reduced-motion:reduce){
+ .sn-demo-visual img{transition:none}
+}

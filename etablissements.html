@@ -1,0 +1,598 @@
+<!doctype html><html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fbfcfe">
+<title>Établissements — Restaurants, Hôtellerie, Événementiel & Groupes | NUVIA</title>
+<meta name="description" content="NUVIA crée des lingettes individuelles personnalisées pour les restaurants, hôtels, événements et réseaux. Design, production dès 10 000 unités par design, stockage et réassort.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style id="nv-home-navigation-base">
+
+/* Soleil/Lune : animation locale uniquement, sans thème sombre/clair */
+#nuvia-react-navigation .nv-nav{display:flex;align-items:center;gap:12px}
+#nuvia-react-navigation .nv-links{flex:0 1 auto;min-width:0}
+#nuvia-react-navigation .nv-sunmoon-toggle{
+  position:relative;isolation:isolate;flex:0 0 40px;width:40px;height:40px;
+  margin:0;padding:0;border:1px solid rgba(255,255,255,.74);
+  border-radius:50%;overflow:hidden;touch-action:manipulation;
+  background:rgba(255,255,255,.85);color:#e99e27;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.84),0 1px 8px rgba(48,84,117,.12);
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+#nuvia-react-navigation .nv-sunmoon-toggle:hover{background:rgba(255,255,255,.95);border-color:#fff}
+#nuvia-react-navigation .nv-sunmoon-toggle:focus-visible{outline:2px solid #287fff;outline-offset:3px}
+#nuvia-react-navigation .nv-sunmoon-toggle .nv-sm-body{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;will-change:transform,opacity;
+}
+#nuvia-react-navigation .nv-sunmoon-toggle .nv-sm-body svg{display:block;width:20px;height:20px}
+#nuvia-react-navigation .nv-sunmoon-toggle .nv-sm-sun{opacity:1;transform:none;color:#ed9a28}
+#nuvia-react-navigation .nv-sunmoon-toggle .nv-sm-moon{opacity:0;transform:translate(-115%,115%) rotate(-25deg) scale(.72);color:#c48d36}
+#nuvia-react-navigation .nv-sunmoon-toggle[data-state="moon"] .nv-sm-sun{opacity:0;transform:translate(115%,115%) rotate(120deg) scale(.72)}
+#nuvia-react-navigation .nv-sunmoon-toggle[data-state="moon"] .nv-sm-moon{opacity:1;transform:none}
+@media(max-width:820px){
+  #nuvia-react-navigation{overflow:visible}
+  #nuvia-react-navigation .nv-nav{width:100%;gap:8px}
+  #nuvia-react-navigation .nv-links{
+    flex:1 1 auto;width:auto;max-width:calc(100% - 50px);
+    overflow-x:auto;overscroll-behavior-x:contain;
+    scrollbar-width:none;-ms-overflow-style:none
+  }
+  #nuvia-react-navigation .nv-links::-webkit-scrollbar{display:none}
+  #nuvia-react-navigation .nv-navitem{flex:0 0 auto}
+  #nuvia-react-navigation .nv-sunmoon-toggle{margin-left:auto;flex:0 0 40px}
+}
+@media(prefers-reduced-motion:reduce){
+  #nuvia-react-navigation .nv-sunmoon-toggle{transition:none}
+  #nuvia-react-navigation .nv-sm-body{will-change:auto}
+}
+
+#nuvia-react-navigation{position:fixed;z-index:90;top:24px;left:50%;transform:translateX(-50%);width:min(1164px,calc(100vw - 48px));pointer-events:none;font:400 14px/1.5 Inter,ui-sans-serif,system-ui,sans-serif;color:#09090b;}
+#nuvia-react-navigation *{box-sizing:border-box;}
+#nuvia-react-navigation .nv-nav{pointer-events:auto;width:100%;}
+#nuvia-react-navigation ul{margin:0;padding:0;list-style:none;}
+#nuvia-react-navigation .nv-links{display:flex;align-items:center;gap:0;}
+#nuvia-react-navigation button{font:inherit;white-space:nowrap;border:0;background:none;cursor:pointer;color:#71717a;padding:6px 16px;display:flex;align-items:center;justify-content:center;gap:4px;position:relative;transition:color .3s ease;border-radius:999px;}
+#nuvia-react-navigation .nv-chevron{width:16px;height:16px;display:block;transition:transform .3s ease}
+#nuvia-react-navigation .nv-chevron svg{display:block;width:100%;height:100%}
+#nuvia-react-navigation .nv-navitem{position:relative}
+#nuvia-react-navigation .nv-navitem:hover button,#nuvia-react-navigation .nv-navitem[data-open=true]>button{background:rgba(24,24,27,.10);color:#09090b}
+#nuvia-react-navigation .nv-navitem[data-open=true] .nv-chevron{transform:rotate(180deg)}
+#nuvia-react-navigation .nv-menu{position:absolute;top:100%;left:0;padding-top:8px;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .22s ease,transform .26s cubic-bezier(.2,.7,.2,1),visibility .22s;}
+#nuvia-react-navigation .nv-navitem[data-open=true] .nv-menu{opacity:1;visibility:visible;transform:translateY(0)}
+#nuvia-react-navigation .nv-columns{display:flex;gap:36px;width:max-content;padding:16px;background:#fff;border:1px solid #e4e4e7;border-radius:16px;}
+#nuvia-react-navigation .nv-col{flex:1 0 auto;min-width:260px;}
+#nuvia-react-navigation .nv-col h3{color:#71717a;font-size:14px;line-height:20px;font-weight:500;margin:0 0 16px;text-transform:capitalize;}
+#nuvia-react-navigation .nv-col ul{display:flex;flex-direction:column;gap:24px;}
+#nuvia-react-navigation .nv-item{display:flex;align-items:flex-start;gap:12px;text-decoration:none;color:#09090b;white-space:nowrap;}
+#nuvia-react-navigation .nv-icon{width:36px;height:36px;flex:0 0 36px;display:flex;align-items:center;justify-content:center;border:1px solid #e4e4e7;border-radius:6px;color:#09090b;transition:background .3s,color .3s;}
+#nuvia-react-navigation .nv-item:hover .nv-icon{background:#f4f4f5}
+#nuvia-react-navigation .nv-item strong{display:block;font-size:14px;line-height:20px;font-weight:500;}
+#nuvia-react-navigation .nv-item small{display:block;font-size:12px;line-height:20px;color:#71717a;font-weight:400;}
+@media(max-width:820px){#nuvia-react-navigation{top:10px;width:calc(100vw - 16px);left:8px;transform:none;overflow-x:auto;}#nuvia-react-navigation .nv-links{width:max-content}#nuvia-react-navigation .nv-menu{position:fixed;top:46px;left:8px;max-width:calc(100vw - 16px);overflow-x:auto}#nuvia-react-navigation .nv-columns{gap:16px}#nuvia-react-navigation .nv-col{min-width:210px}}
+/* NUVIA — voile vitré fixe derrière la navigation.
+   Flou bord à bord, sommet assombri et disparition progressive vers le ciel.
+   Couche indépendante : aucun impact sur les menus et les clics. */
+#nv-nav-frost{
+  position:fixed;top:0;left:0;right:0;height:100px;z-index:89;
+  pointer-events:none;
+  background:transparent;
+  -webkit-backdrop-filter:blur(16px) saturate(1.12);
+  backdrop-filter:blur(16px) saturate(1.12);
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 47%,rgba(0,0,0,.74) 69%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 0%,#000 47%,rgba(0,0,0,.74) 69%,transparent 100%);
+}
+@media(max-width:820px){
+  #nv-nav-frost{height:135px;}
+}
+
+/* NUVIA — navigation anglaise épurée, inspirée des alignements Air.
+   Les panneaux déroulants et leurs interactions d'origine sont conservés. */
+#nuvia-react-navigation{
+  top:22px;
+  width:min(1550px,calc(100vw - 10vw));
+  font:500 14px/1.35 Inter,ui-sans-serif,system-ui,sans-serif;
+  color:#fff;
+}
+#nuvia-react-navigation .nv-nav{
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+}
+#nuvia-react-navigation .nv-links{
+  display:flex;align-items:center;gap:26px;flex:0 1 auto;min-width:0;
+}
+#nuvia-react-navigation .nv-navitem{flex:0 0 auto}
+#nuvia-react-navigation .nv-navitem>button{
+  min-height:40px;padding:4px 0;background:transparent;border-radius:0;
+  color:rgba(255,255,255,.96);font-weight:600;
+  transition:opacity .2s ease,color .2s ease;
+}
+#nuvia-react-navigation .nv-navitem:hover>button,
+#nuvia-react-navigation .nv-navitem[data-open=true]>button{
+  background:transparent;color:#fff;opacity:.85;
+}
+#nuvia-react-navigation .nv-chevron{width:13px;height:13px;margin-left:3px}
+/* NUVIA - filet sous le seul libellé, sans décaler bouton ni chevron.
+   Le trait naît au centre au survol et repart en douceur à la sortie. */
+#nuvia-react-navigation .nv-navitem>button .nv-nav-label{
+  display:inline-block;
+  position:relative;
+  white-space:nowrap;
+}
+#nuvia-react-navigation .nv-navitem>button .nv-nav-label::after{
+  content:"";
+  position:absolute;
+  left:0;right:0;bottom:-10px;
+  height:1px;
+  background:rgba(255,255,255,.96);
+  pointer-events:none;
+  opacity:0;
+  transform:scaleX(0);
+  transform-origin:center;
+  transition:transform .32s cubic-bezier(.22,1,.36,1),opacity .2s ease;
+}
+#nuvia-react-navigation .nv-navitem:hover>button .nv-nav-label::after,
+#nuvia-react-navigation .nv-navitem[data-open="true"]>button .nv-nav-label::after,
+#nuvia-react-navigation .nv-navitem>button:focus-visible .nv-nav-label::after{
+  opacity:1;
+  transform:scaleX(1);
+}
+#nuvia-react-navigation .nv-navitem>button:focus-visible,
+#nuvia-react-navigation .nv-action:focus-visible{
+  outline:2px solid #fff;outline-offset:3px;
+}
+#nuvia-react-navigation .nv-actions{
+  display:flex;align-items:center;gap:8px;margin-left:auto;flex:0 0 auto;
+}
+/* Deux hover specifiques Nuvia : halo orbital / ouverture radiale.
+   Ni dimensions ni position ne changent durant l'animation. */
+@property --nv-action-orbit{
+  syntax:"<angle>";inherits:false;initial-value:0deg;
+}
+@property --nv-action-erase{
+  syntax:"<length>";inherits:true;initial-value:-12px;
+}
+#nuvia-react-navigation .nv-actions .nv-action{
+  position:relative;isolation:isolate;overflow:hidden;
+  min-height:40px;padding:0 17px;
+  border:1px solid rgba(255,255,255,.98);border-radius:8px;
+  background:transparent;
+  font:500 14px/1 Inter,ui-sans-serif,system-ui,sans-serif;
+  white-space:nowrap;
+  transition:color .24s ease .08s,border-color .25s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+#nuvia-react-navigation .nv-action-label{
+  position:relative;z-index:3;pointer-events:none;
+}
+/* Let’s Talk : passage de lumiere sur tout le pourtour,
+   suivi d'un remplissage translucide legerement satine. */
+#nuvia-react-navigation .nv-action--outline{
+  background:transparent;color:#fff;
+}
+#nuvia-react-navigation .nv-action--outline::before{
+  --nv-action-orbit:0deg;
+  content:"";position:absolute;inset:-1px;z-index:2;
+  padding:1.5px;border-radius:inherit;pointer-events:none;
+  background:conic-gradient(from var(--nv-action-orbit),
+    transparent 0deg 190deg,
+    rgba(255,255,255,.12) 222deg,
+    #fff 273deg,
+    rgba(255,255,255,.24) 318deg,
+    transparent 353deg 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  opacity:0;
+  transition:--nv-action-orbit .84s cubic-bezier(.4,0,.2,1),opacity .2s ease;
+}
+#nuvia-react-navigation .nv-action--outline::after{
+  content:"";position:absolute;inset:0;z-index:1;
+  border-radius:inherit;pointer-events:none;
+  background:linear-gradient(128deg,rgba(255,255,255,.39),rgba(255,255,255,.21));
+  opacity:0;transition:opacity .44s ease .12s;
+}
+#nuvia-react-navigation .nv-action--outline:hover::before,
+#nuvia-react-navigation .nv-action--outline:focus-visible::before{
+  --nv-action-orbit:360deg;opacity:1;
+}
+#nuvia-react-navigation .nv-action--outline:hover::after,
+#nuvia-react-navigation .nv-action--outline:focus-visible::after{
+  opacity:1;
+}
+/* Sample Kit : le blanc est une couche et non le fond du bouton.
+   Un trou radial nait au centre, s'elargit et fait apparaitre le ciel. */
+#nuvia-react-navigation .nv-action--solid{
+  /* Typed, inherited radius controls background and all letters together. */
+  --nv-action-erase:-12px;
+  --nv-label-base:#202126;
+  --nv-label-reveal:#fff;
+  background:transparent;color:#202126;
+  transition:--nv-action-erase .78s cubic-bezier(.42,0,.58,1);
+}
+#nuvia-react-navigation .nv-action--solid .nv-action-label{
+  /* Keep the original text fully painted at every animation frame. */
+  position:relative;display:block;
+  background:none;
+  color:var(--nv-label-base);
+  -webkit-text-fill-color:var(--nv-label-base);
+}
+#nuvia-react-navigation .nv-action--solid .nv-action-label::after{
+  /* Second layer, character-for-character identical and perfectly
+     aligned. Revealed by EXACTLY the same expanding radial mask as the
+     background. The growing circle crosses p/l/e, then its outer letters. */
+  content:attr(data-nv-text);
+  position:absolute;inset:0;display:block;
+  color:var(--nv-label-reveal);
+  -webkit-text-fill-color:var(--nv-label-reveal);
+  font:inherit;letter-spacing:inherit;line-height:inherit;
+  white-space:nowrap;text-align:inherit;
+  pointer-events:none;
+  -webkit-mask-image:radial-gradient(circle at center,
+    #000 calc(var(--nv-action-erase) - 6px),
+    transparent calc(var(--nv-action-erase) + 6px));
+  mask-image:radial-gradient(circle at center,
+    #000 calc(var(--nv-action-erase) - 6px),
+    transparent calc(var(--nv-action-erase) + 6px));
+}
+#nuvia-react-navigation .nv-action--solid::before{
+  content:"";position:absolute;inset:-1px;z-index:1;
+  border-radius:inherit;pointer-events:none;background:#fff;
+  -webkit-mask-image:radial-gradient(circle at center,
+    transparent calc(var(--nv-action-erase) - 6px),
+    #000 calc(var(--nv-action-erase) + 6px));
+  mask-image:radial-gradient(circle at center,
+    transparent calc(var(--nv-action-erase) - 6px),
+    #000 calc(var(--nv-action-erase) + 6px));
+}
+#nuvia-react-navigation .nv-action--solid:hover,
+#nuvia-react-navigation .nv-action--solid:focus-visible{
+  /* Keep the original radial wipe and 780 ms easing.
+     Use the button's useful radius instead of overshooting to 160px:
+     glyphs reveal gradually, from the central letters to the edges. */
+  --nv-action-erase:96px;
+}
+@media(max-width:820px){
+  #nuvia-react-navigation{
+    top:10px;left:8px;transform:none;width:calc(100vw - 16px);
+    overflow:visible;
+  }
+  #nuvia-react-navigation .nv-nav{
+    display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;
+  }
+  #nuvia-react-navigation .nv-links{
+    flex:1 1 100%;width:100%;max-width:100%;min-width:0;
+    overflow-x:auto;gap:18px;scrollbar-width:none;
+  }
+  #nuvia-react-navigation .nv-links::-webkit-scrollbar{display:none}
+  #nuvia-react-navigation .nv-navitem>button{min-height:32px;font-size:13px}
+  #nuvia-react-navigation .nv-actions{
+    margin-left:auto;gap:7px;padding-top:2px;
+  }
+  #nuvia-react-navigation .nv-actions .nv-action{
+    min-height:34px;padding:0 12px;font-size:12px;
+  }
+  #nuvia-react-navigation .nv-menu{
+    position:fixed;top:91px;left:8px;max-width:calc(100vw - 16px);
+    overflow-x:auto;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #nuvia-react-navigation .nv-navitem>button .nv-nav-label::after{transition:none}
+  #nuvia-react-navigation .nv-navitem>button,
+  #nuvia-react-navigation .nv-actions .nv-action{transition:none}
+  #nuvia-react-navigation .nv-actions .nv-action::before,
+  #nuvia-react-navigation .nv-actions .nv-action::after{transition:none}
+}
+
+/* NAVBAR NUVIA | inversion du contraste sur les surfaces claires.
+   Même alignement et mêmes animations; seules les couleurs s'inversent.
+   Deux voiles se croisent en fondu au lieu de faire apparaître un fond brutal. */
+#nv-nav-frost::before,
+#nv-nav-frost::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  transition:opacity .42s cubic-bezier(.22,1,.36,1);
+}
+#nv-nav-frost::before{
+  background:linear-gradient(180deg,
+    rgba(11,24,42,.64) 0%,
+    rgba(19,40,69,.40) 38%,
+    rgba(25,50,81,.14) 72%,
+    rgba(25,50,81,0) 100%);
+  opacity:1;
+}
+#nv-nav-frost::after{
+  /* Glass remains blurred on white. Neutral-gray tint restores a
+     perceptible frosted edge without introducing a solid header bar. */
+  background:linear-gradient(180deg,
+    rgba(43,49,59,.34) 0%,
+    rgba(57,63,74,.20) 38%,
+    rgba(82,90,104,.055) 72%,
+    rgba(82,90,104,0) 100%);
+  opacity:0;
+}
+#nv-nav-frost[data-nv-contrast="ink"]::before{opacity:0}
+#nv-nav-frost[data-nv-contrast="ink"]::after{opacity:1}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem>button{
+  color:#161616;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem:hover>button,
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem[data-open=true]>button{
+  color:#000;opacity:.77;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem>button .nv-nav-label::after{
+  background:#161616;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem>button:focus-visible,
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action:focus-visible{
+  outline-color:#171717;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-actions .nv-action{
+  border-color:#202020;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action--outline{
+  color:#161616;background:transparent;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action--outline::before{
+  background:conic-gradient(from var(--nv-action-orbit),
+    transparent 0deg 190deg,
+    rgba(0,0,0,.13) 222deg,
+    #090909 273deg,
+    rgba(0,0,0,.25) 318deg,
+    transparent 353deg 360deg);
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action--outline::after{
+  background:linear-gradient(128deg,rgba(0,0,0,.12),rgba(0,0,0,.045));
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action--solid{
+  --nv-label-base:#fff;
+  --nv-label-reveal:#171717;
+  background:transparent;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action--solid::before{
+  background:#171717;
+}
+/* Label and its backing fill are driven by one animation on the parent. */
+@media(prefers-reduced-motion:reduce){
+  #nv-nav-frost::before,#nv-nav-frost::after{transition:none}
+}
+
+</style>
+<link rel="stylesheet" href="./assets/nuvia-nav-panels-air.css">
+<link rel="stylesheet" href="./assets/etablissements-r8.css">
+<link rel="stylesheet" href="./assets/etablissements-air-visual-upgrade.css">
+</head>
+<body>
+<div id="nv-nav-frost" data-nv-contrast="ink" data-nv-contrast="ink" data-nv-contrast="ink" data-nv-contrast="ink" aria-hidden="true"></div>
+<div id="nuvia-react-navigation" data-nv-contrast="ink" data-nv-contrast="ink" data-nv-contrast="ink" data-nv-contrast="ink" aria-label="Navigation principale"><nav class="nv-nav" aria-label="Navigation"><ul class="nv-links"><li class="nv-navitem" tabindex="-1"><button type="button" aria-expanded="false"><span class="nv-nav-label">Explore</span><span class="nv-chevron"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m5 7 5 5 5-5"/></svg></span></button><div class="nv-menu nv-menu--explore" role="region" aria-label="Menu Explore"><div class="nuvi-panel"><div class="nuvi-panel-column"><div class="nuvi-panel-group"><h3>À découvrir</h3><ul class="nuvi-panel-list"><li><a class="nuvi-panel-row" href="./index.html#hero" data-nuvi-art="./assets/carousel/nuvia-art-01.webp" data-nuvi-a="#42cce6" data-nuvi-b="#ffca63" data-nuvi-icon="universe"><span class="nuvi-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="nuvi-icon-motion"><path d="m11 3 1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9L11 3Z"/></g><g class="nuvi-icon-detail"><path d="m19 3 .5 1.5L21 5l-1.5.5L19 7l-.5-1.5L17 5l1.5-.5L19 3ZM18 17l.7 1.3L20 19l-1.3.7L18 21l-.7-1.3L16 19l1.3-.7L18 17Z"/></g></svg></span><span class="nuvi-panel-copy"><strong>Pourquoi NUVIA ?</strong><small>Valorisez votre marque au dernier geste</small></span></a></li><li><a class="nuvi-panel-row" href="./index.html#nuvia-curved-gallery" data-nuvi-art="./assets/carousel/nuvia-art-04.webp" data-nuvi-a="#47ead1" data-nuvi-b="#fc9f5b" data-nuvi-icon="creations"><span class="nuvi-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="13.5" height="13" rx="2"/><g class="nuvi-icon-motion"><rect x="7.5" y="3.5" width="13.5" height="13" rx="2"/><circle cx="12.3" cy="8.2" r="1.2"/><path d="m9.5 14 3-3 2.2 1.8 2.2-2.3 2.1 2.4"/></g></svg></span><span class="nuvi-panel-copy"><strong>La lingette NUVIA</strong><small>Découvrez le produit et son sachet</small></span></a></li><li><a class="nuvi-panel-row" href="./services.html#design" data-nuvi-art="./assets/nuvia-process/step-2.webp" data-nuvi-a="#afc0ef" data-nuvi-b="#fca77f" data-nuvi-icon="textures"><span class="nuvi-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="nuvi-icon-motion"><path d="m3.5 8.5 8.5-5 8.5 5-8.5 5-8.5-5Z"/></g><g class="nuvi-icon-detail"><path d="m3.5 12.5 8.5 5 8.5-5M3.5 16.5l8.5 5 8.5-5"/></g></svg></span><span class="nuvi-panel-copy"><strong>Personnalisez votre sachet</strong><small>Votre logo, vos couleurs, votre signature</small></span></a></li></ul></div></div><div class="nuvi-panel-picture nuvi-explore-picture"><div class="nuvi-panel-picture-surface" role="img" aria-label="Visuel de la collection NUVIA"></div></div></div></div></li><li class="nv-navitem" tabindex="-1"><button type="button" aria-expanded="false"><span class="nv-nav-label">Solutions</span><span class="nv-chevron"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m5 7 5 5 5-5"/></svg></span></button><div class="nv-menu nv-menu--solutions" role="region" aria-label="Menu Solutions"><div class="nuvi-panel"><div class="nuvi-panel-column"><div class="nuvi-panel-group"><h3>Par établissement</h3><ul class="nuvi-panel-list"><li><a class="nuvi-panel-row" href="#restaurants" data-nuvi-icon="restaurants"><span class="nuvi-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 9h13v4.5a6.5 6.5 0 0 1-13 0V9ZM17.5 10h1.3a2.8 2.8 0 0 1 0 5.6h-1.9M4 21h15"/><g class="nuvi-icon-motion"><path d="M8 3c-2 2.1 2 2.9 0 4.5M13 3c-2 2.1 2 2.9 0 4.5"/></g></svg></span><span class="nuvi-panel-copy"><strong>Restaurants & cafés</strong><small>Le dernier geste du service</small></span></a></li><li><a class="nuvi-panel-row" href="#hotellerie" data-nuvi-icon="hotel"><span class="nuvi-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9.5 21v-5h5v5"/><g class="nuvi-icon-motion"><path d="M8 7h2m4 0h2M8 11h2m4 0h2"/></g></svg></span><span class="nuvi-panel-copy"><strong>Hôtellerie</strong><small>L'attention portée à chaque client</small></span></a></li><li><a class="nuvi-panel-row" href="#evenementiel" data-nuvi-icon="event"><span class="nuvi-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 20 5-11 6 6-11 5Z"/><path d="m9 9 6 6"/><g class="nuvi-icon-motion"><path d="m15 4 1-2M19 9l2-1M13 7l2-2M19 3v2M20 13h2"/></g></svg></span><span class="nuvi-panel-copy"><strong>Événementiel</strong><small>Un souvenir personnalisé pour vos moments</small></span></a></li><li><a class="nuvi-panel-row" href="#groupes" data-nuvi-icon="groups"><span class="nuvi-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18v11H3V10ZM3 10l2-6h14l2 6M9 4v6M15 4v6M9 13v8m6-8v8"/><g class="nuvi-icon-motion"><path d="M3 10c1.5 1.8 4.5 1.8 6 0 1.5 1.8 4.5 1.8 6 0 1.5 1.8 4.5 1.8 6 0"/></g></svg></span><span class="nuvi-panel-copy"><strong>Groupes & enseignes</strong><small>Une signature cohérente à grande échelle</small></span></a></li></ul></div></div><div class="nuvi-panel-column nuvi-panel-column--divided"><div class="nuvi-panel-group"><h3>Nos services</h3><ul class="nuvi-panel-list"><li><a class="nuvi-panel-row" href="./services.html#design" data-nuvi-icon="print"><span class="nuvi-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="10" rx="2"/><path d="M7 8V3h10v5M6.5 18v3h11v-3M17.2 11.5h.2"/><g class="nuvi-icon-motion"><path d="M9 16h6M9 18.5h4"/></g></svg></span><span class="nuvi-panel-copy"><strong>Design & personnalisation</strong><small>Votre identité, notre savoir-faire</small></span></a></li><li><a class="nuvi-panel-row" href="./services.html#production" data-nuvi-icon="production"><span class="nuvi-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="12" width="8" height="8" rx="1"/><rect x="13" y="12" width="8" height="8" rx="1"/><path d="M7 12v8M17 12v8"/><g class="nuvi-icon-motion"><rect x="8" y="3" width="8" height="8" rx="1"/><path d="M12 3v8"/></g></svg></span><span class="nuvi-panel-copy"><strong>Production sur mesure</strong><small>Dès 10 000 unités par design</small></span></a></li><li><a class="nuvi-panel-row" href="./services.html#stockage" data-nuvi-icon="stocks"><span class="nuvi-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h18M3 16h18M4 21V4M20 21V4"/><rect x="6" y="4" width="4" height="4" rx=".6"/><rect x="12.5" y="4" width="5" height="4" rx=".6"/><rect x="6" y="12" width="5" height="4" rx=".6"/><g class="nuvi-icon-motion"><rect x="13" y="12" width="4.5" height="4" rx=".6"/></g></svg></span><span class="nuvi-panel-copy"><strong>Stockage & gestion des stocks</strong><small>Vos produits disponibles selon vos besoins</small></span></a></li><li><a class="nuvi-panel-row" href="./services.html#livraison" data-nuvi-icon="delivery"><span class="nuvi-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h11v10H3V8ZM14 11h4l3 4v3h-7"/><circle cx="7" cy="18.5" r="1.7"/><circle cx="17.5" cy="18.5" r="1.7"/><g class="nuvi-icon-motion"><path d="M5 4a6 6 0 0 1 10.5 1M16.5 2.8v3h-3"/></g></svg></span><span class="nuvi-panel-copy"><strong>Livraison & réassort</strong><small>Des livraisons adaptées à votre calendrier</small></span></a></li></ul></div></div><aside class="nuvi-panel-feature"><div class="nuvi-panel-feature-text"><strong>Une solution à votre image.</strong><p>Design, fabrication, stockage et livraison : toutes nos expertises sur une seule page.</p><a href="./services.html#services">Découvrir tous nos services <span aria-hidden="true">↗</span></a></div></aside></div></div></li><li class="nv-navitem" tabindex="-1"><button type="button" aria-expanded="false"><span class="nv-nav-label">Pricing</span></button></li><li class="nv-navitem nv-navitem--studio" tabindex="-1"><button type="button" data-href="./index.html#usage" aria-label="Studio — découvrir la personnalisation"><span class="nv-nav-label">Studio</span></button></li><li class="nv-navitem" tabindex="-1"><button type="button" aria-expanded="false"><span class="nv-nav-label">About</span></button></li></ul></nav><a class="nv-page-home-logo" href="./index.html" aria-label="NUVIA — accueil">NUVIA</a></div>
+
+
+
+
+
+<script id="nuvi-editorial-menu-images">
+(function(){
+  'use strict';
+  var root=document.getElementById('nuvia-react-navigation');
+  if(!root)return;
+  var menuNames=['explore'];
+  menuNames.forEach(function(name){
+    var menu=root.querySelector('.nv-menu--'+name);
+    if(!menu)return;
+    var stage=menu.querySelector('.nuvi-panel-picture-surface');
+    if(!stage)return;
+    var links=Array.prototype.slice.call(menu.querySelectorAll('.nuvi-panel-row[data-nuvi-art]'));
+    if(!links.length)return;
+    stage.classList.add('nuvi-editorial-art-stage');
+    var artStack=document.createElement('span');
+    artStack.className='nuvi-editorial-art-stack';
+    artStack.setAttribute('aria-hidden','true');
+    stage.appendChild(artStack);
+    // Seamless video for the first Explore item; other items keep their images.
+    var universeFilm=document.createElement('video');
+    universeFilm.className='nuvi-universe-menu-film';
+    universeFilm.muted=true;universeFilm.loop=true;universeFilm.playsInline=true;
+    universeFilm.setAttribute('muted','');universeFilm.setAttribute('playsinline','');
+    universeFilm.preload='none';
+    universeFilm.src='./assets/video/NUVIA_UNIVERS_BOUCLE_CORRIGEE.mp4';
+    universeFilm.addEventListener('error',function(){universeFilm.classList.remove('is-visible');});
+    universeFilm.addEventListener('loadeddata',function(){if(selected===0)universeFilm.classList.add('is-visible');});
+    stage.appendChild(universeFilm);
+    function syncUniverseFilm(index){
+      if(index===0){
+        if(universeFilm.readyState>=2)universeFilm.classList.add('is-visible');
+        var play=universeFilm.play();if(play&&play.catch)play.catch(function(){universeFilm.classList.remove('is-visible');});
+      }else{
+        universeFilm.classList.remove('is-visible');universeFilm.pause();
+      }
+    }
+
+    var selected=-1,revision=0;
+    function show(index){
+      if(index===selected||index<0||index>=links.length)return;
+      selected=index;
+      syncUniverseFilm(index);
+      var seq=++revision,link=links[index];
+      var url=link.getAttribute('data-nuvi-art');
+      stage.setAttribute('aria-label','Univers visuel : '+link.querySelector('strong').textContent);
+      var img=new Image();
+      img.className='nuvi-editorial-art-image';
+      img.alt='';img.decoding='async';
+      var settled=false;
+      function ready(){
+        if(settled)return;settled=true;
+        if(seq!==revision)return;
+        artStack.appendChild(img);
+        // Flush layout so opacity interpolates even after cached image loads.
+        img.getBoundingClientRect();
+        img.classList.add('nuvi-editorial-art-visible');
+        Array.prototype.slice.call(artStack.children).forEach(function(el){
+          if(el===img)return;
+          el.classList.remove('nuvi-editorial-art-visible');
+          window.setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},430);
+        });
+      }
+      img.onload=ready;
+      img.onerror=function(){
+        if(seq!==revision)return;
+        // Preserve the colorful gradient rather than showing a broken image.
+        stage.classList.add('nuvi-editorial-image-unavailable');
+      };
+      stage.classList.remove('nuvi-editorial-image-unavailable');
+      img.src=url;
+      if(img.complete&&img.naturalWidth)ready();
+    }
+    links.forEach(function(link,index){
+      link.addEventListener('pointerenter',function(){show(index);},{passive:true});
+      link.addEventListener('focus',function(){show(index);});
+    });
+    menu.addEventListener('pointerleave',function(){show(0);},{passive:true});
+    show(0);
+  });
+})();
+</script>
+<main>
+<section class="hero" id="top" aria-labelledby="hero-title">
+<div class="wrap">
+<div class="hero-grid">
+  <div>
+    <span class="cap hero-kicker">NUVIA / PAR ÉTABLISSEMENT</span>
+    <h1 id="hero-title">Chaque lieu.<br><span class="serif">Sa signature.</span></h1>
+  </div>
+  <div class="hero-aside">
+    <p>Une lingette individuelle personnalisée, conçue pour prolonger votre expérience et faire du dernier geste un détail qui vous ressemble.</p>
+    <a class="btn" href="#univers">Découvrir les univers <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+  </div>
+</div>
+<div class="hero-film">
+  <img class="hero-product-backup" src="./assets/nuvia-process/step-3.png" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+  <video autoplay muted playsinline loop preload="metadata" poster="./assets/nuvia-process/step-3.webp" aria-label="Présentation de sachets NUVIA personnalisés"><source src="./assets/nuvia-packaging-loop.mp4" type="video/mp4"></video>
+  <div class="hero-film-top"><span class="film-note cap"><i></i>THE NUVIA EXPERIENCE</span><span class="cap">001 / STUDIO</span></div>
+  <span class="hero-feature-note" aria-hidden="true">PERSONNALISATION PAR DESIGN</span>
+  <div class="hero-film-bottom"><strong>Make it yours.</strong><span class="cap">NUVIA / SIGNATURE COLLECTION</span></div>
+</div>
+<div class="hero-foot"><span class="cap">L’ATTENTION DANS CHAQUE DÉTAIL</span><a class="cap" href="#univers">EXPLORER <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a></div>
+</div>
+</section>
+<section class="index" id="univers" aria-labelledby="univers-title">
+  <div class="wrap">
+    <div class="index-head">
+      <div><span class="cap" style="color:#8497a8">QUATRE UNIVERS / QUATRE USAGES</span><h2 id="univers-title">À chaque métier,<br><span class="serif">son attention.</span></h2></div>
+      <p>De la table d’un restaurant à l’ensemble d’un réseau, NUVIA adapte l’identité de la lingette à la vôtre. Choisissez l’univers qui vous correspond.</p>
+    </div>
+    <nav class="index-list" aria-label="Les quatre secteurs NUVIA"><a class="index-item" href="#restaurants" aria-label="Découvrir : Restaurants & cafés"><span class="index-no">01</span><strong>Restaurants & cafés</strong><span class="index-sub">Le dernier geste du service</span><span class="index-go"><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span></a>
+<a class="index-item" href="#hotellerie" aria-label="Découvrir : Hôtellerie"><span class="index-no">02</span><strong>Hôtellerie</strong><span class="index-sub">Le soin porté à chaque détail</span><span class="index-go"><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span></a>
+<a class="index-item" href="#evenementiel" aria-label="Découvrir : Événementiel"><span class="index-no">03</span><strong>Événementiel</strong><span class="index-sub">Un moment à votre image</span><span class="index-go"><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span></a>
+<a class="index-item" href="#groupes" aria-label="Découvrir : Groupes & enseignes"><span class="index-no">04</span><strong>Groupes & enseignes</strong><span class="index-sub">Une identité, plusieurs adresses</span><span class="index-go"><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span></a></nav>
+  </div>
+</section>
+<section class="story restaurant" id="restaurants" aria-labelledby="restaurant-title">
+<div class="wrap restaurant-grid">
+  <div class="restaurant-film">
+    <img src="./assets/nuvia-process/step-1.png" loading="lazy" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+    <video autoplay muted playsinline loop preload="metadata" aria-label="Présentation de NUVIA dans l’univers de la restauration"><source src="./assets/nuvia-restaurant-pingpong.mp4" type="video/mp4"></video>
+    <span class="restaurant-film-caption">The final touch.</span>
+  </div>
+  <div class="story-copy">
+    <span class="ch-label"><span class="rule"></span>01 / RESTAURANTS & CAFÉS</span>
+    <h2 id="restaurant-title">Le repas se termine.<br><span class="serif">L’attention reste.</span></h2>
+    <p>Sur une table de restaurant ou à la fin d’un service, le sachet personnalisé prolonge votre identité jusque dans les mains de vos clients.</p>
+    <a class="story-link" href="./index.html#nv-contact-form">Parler de mon restaurant <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+    <div class="story-breadcrumbs"><span>Restaurants</span><span>Brasseries</span><span>Cafés</span></div>
+  </div>
+</div>
+</section>
+<section class="story hotel" id="hotellerie" aria-labelledby="hotel-title">
+<div class="wrap">
+  <div class="hotel-heading">
+    <div><span class="ch-label"><span class="rule"></span>02 / HÔTELLERIE</span><h2 id="hotel-title">L’hospitalité est<br><span class="serif">une affaire de détails.</span></h2></div>
+    <p>À l’accueil, en chambre ou dans vos espaces de restauration, une attention discrète s’inscrit naturellement dans l’univers de votre établissement.</p>
+  </div>
+  <div class="hotel-scene hotel-scene--product">
+    <div class="hotel-product-window">
+      <img src="./assets/nuvia-process/step-3.png" loading="lazy" alt="Packaging NUVIA illustrant les options de personnalisation du sachet">
+      <span class="hotel-scene-caption">Nuvia for hospitality.</span>
+    </div>
+    <div class="hotel-touchpoints">
+      <span class="h-label">UNE IDENTITÉ COHÉRENTE</span>
+      <div class="h-main">Une attention<span>dans chaque espace.</span></div>
+      <ul aria-label="Espaces d’utilisation">
+        <li>Accueil <span>01</span></li>
+        <li>Chambre <span>02</span></li>
+        <li>Restauration <span>03</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="hotel-foot"><p>Une signature cohérente d’un espace à l’autre.</p><a class="story-link" href="./index.html#nv-contact-form">Imaginer mon projet hôtelier <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a></div>
+</div>
+</section>
+<section class="story event" id="evenementiel" aria-labelledby="event-title">
+<div class="wrap event-grid">
+  <div class="story-copy">
+    <span class="ch-label"><span class="rule"></span>03 / ÉVÉNEMENTIEL</span>
+    <h2 id="event-title">Une occasion.<br><span class="serif">Votre signature.</span></h2>
+    <p>Pour une réception, un lancement ou un événement d’entreprise, concevez un sachet à votre image et accordé à votre direction artistique.</p>
+    <a class="story-link" href="./index.html#nv-contact-form">Parler de mon événement <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+    <div class="story-breadcrumbs"><span>Réceptions</span><span>Lancements</span><span>Événements de marque</span></div>
+  </div>
+  <div class="event-scene event-scene--studio">
+    <span class="event-studio-label">PERSONNALISATION NUVIA / VISUELS STUDIO</span>
+    <div class="event-studio-primary">
+      <img src="./assets/nuvia-process/step-2.png" loading="lazy" alt="Deux propositions de sachets NUVIA et options de personnalisation du studio">
+    </div>
+    <div class="event-studio-secondary">
+      <img src="./assets/nuvia-process/step-3.png" loading="lazy" alt="Exemple de packaging NUVIA personnalisé">
+    </div>
+    <span class="event-studio-badge">Votre design, votre occasion</span>
+    <div class="event-scene-bottom"><strong>A moment made yours.</strong><span class="cap">NUVIA / 03</span></div>
+  </div>
+</div>
+</section>
+<section class="story networks" id="groupes" aria-labelledby="network-title">
+<div class="wrap networks-grid">
+  <div class="networks-scene">
+    <img src="./assets/nuvia-process/step-4.png" loading="lazy" alt="Cartons NUVIA sur palette, représentant les besoins de livraison et de réassort des groupes">
+    <span class="cap net-caption">NUVIA / PRODUCTION & LOGISTIQUE</span>
+  </div>
+  <div class="story-copy">
+    <span class="ch-label"><span class="rule"></span>04 / GROUPES & ENSEIGNES</span>
+    <h2 id="network-title">Une marque.<br><span class="serif">Toutes vos adresses.</span></h2>
+    <p>Un design cohérent dans vos établissements, une production adaptée aux volumes de votre réseau et une organisation pensée pour vos livraisons.</p>
+    <div class="networks-detail">
+      <div><strong>Identité commune</strong><span>La même signature visuelle à chaque adresse.</span></div>
+      <div><strong>Réassort organisé</strong><span>Un stockage physique selon vos besoins.</span></div>
+    </div>
+    <a class="story-link" href="./index.html#nv-contact-form">Étudier mon réseau <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+  </div>
+</div>
+</section>
+<section class="proof" aria-labelledby="proof-title">
+<div class="wrap proof-grid">
+  <div><span class="cap" style="color:#8194a6">NUVIA / L’ACCOMPAGNEMENT</span><h2 id="proof-title">Une seule exigence.<br><span class="serif">La vôtre.</span></h2></div>
+  <div class="proof-item"><strong>Accompagnement graphique</strong><span>Design et équipe dédiée à la personnalisation.</span></div>
+  <div class="proof-item"><strong>Dès 10 000 unités</strong><span>Quantité minimale par design.</span></div>
+  <div class="proof-item"><strong>Stockage & réassort</strong><span>Organisation physique, production et livraison.</span></div>
+</div>
+</section>
+<section class="closing" id="contact" aria-labelledby="closing-title">
+<div class="wrap closing-grid">
+  <div><span class="cap">VOTRE PROCHAIN PROJET</span><h2 id="closing-title">Le dernier geste<br><span class="serif">porte votre nom.</span></h2></div>
+  <div class="closing-aside"><p>Un établissement ou plusieurs adresses : imaginons un produit qui vous ressemble et une organisation adaptée à vos besoins.</p><a class="btn" href="./index.html#nv-contact-form">Parler de mon projet <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a></div>
+</div>
+</section>
+</main>
+<footer class="footer" aria-label="Pied de page NUVIA">
+<div class="wrap">
+  <div class="footer-main">
+    <a class="footer-logo" href="./index.html" aria-label="NUVIA, accueil">NUVIA</a>
+    <nav class="footer-links" aria-label="Navigation de bas de page">
+      <div><h3>Explorer</h3><a href="./index.html">Accueil</a><a href="./index.html#hero">L’univers NUVIA</a><a href="./services.html#services">Nos services</a></div>
+      <div><h3>Établissements</h3><a href="#restaurants">Restaurants & cafés</a><a href="#hotellerie">Hôtellerie</a><a href="#evenementiel">Événementiel</a><a href="#groupes">Groupes & enseignes</a></div>
+      <div><h3>Services</h3><a href="./services.html#design">Design</a><a href="./services.html#production">Production</a><a href="./services.html#stockage">Stockage & réassort</a></div>
+    </nav>
+  </div>
+  <div class="footer-bottom"><span>© 2026 NUVIA — Chaque détail compte.</span><a href="#top">Retour en haut ↑</a></div>
+</div>
+</footer>
+<script src="./assets/etablissements-r8.js" defer></script>
+</body></html>

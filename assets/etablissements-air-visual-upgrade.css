@@ -1,0 +1,97 @@
+/* NUVIA — Air visual comparison corrections / R8.1
+   Uses existing NUVIA assets; intentionally does not imitate Air branding. */
+
+/* More controlled above-the-fold proportions, similar to an editorial product page. */
+.hero{padding-top:146px;padding-bottom:88px}
+.hero-grid{grid-template-columns:minmax(0,1.08fr) minmax(0,.72fr);gap:clamp(42px,7vw,116px)}
+.hero h1{font-size:clamp(66px,7.15vw,116px);line-height:1.025}
+.hero-aside{padding-bottom:10px}
+.hero-aside p{max-width:415px}
+.hero-film{height:clamp(445px,46vw,610px);margin-top:61px}
+.hero-film .hero-product-backup{object-position:center 63%;filter:saturate(.92)}
+.hero-film video{object-position:center}
+.hero-film .hero-feature-note{position:absolute;z-index:3;bottom:94px;right:38px;display:inline-flex;align-items:center;gap:11px;padding:11px 15px;background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.64);border-radius:6px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 36px rgba(14,43,73,.08);color:#34536d;font:650 10px/1.45 Inter,Arial,sans-serif;letter-spacing:.065em}
+.hero-feature-note:before{content:"";display:block;width:7px;height:7px;border-radius:50%;background:#bf9e63}
+.index{padding-top:90px;padding-bottom:91px}
+.index-item{min-height:94px}
+.index-head{margin-bottom:35px}
+.index-head h2{font-size:clamp(52px,5.6vw,88px)}
+/* Restaurant video stays the cinematic anchor. */
+.restaurant{padding:93px 0 97px}
+.restaurant-film{min-height:550px}
+.restaurant .story-copy p{max-width:450px}
+/* Hotel: an actual product detail, paired with a quiet visual index of guest touchpoints. */
+.hotel{padding:105px 0 110px;background:linear-gradient(140deg,#f2f8fd,#eaf4fa)}
+.hotel-heading{margin-bottom:44px}
+.hotel-scene.hotel-scene--product{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(285px,.66fr);height:585px;background:#e4f3fc;isolation:isolate}
+.hotel-scene.hotel-scene--product:after{display:none}
+.hotel-scene--product .hotel-product-window{height:100%;position:relative;min-width:0;overflow:hidden;background:#b6d7ee}
+.hotel-scene--product .hotel-product-window img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 64%;z-index:1;transform:scale(1.03)}
+.hotel-scene--product .hotel-product-window:after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(15,61,99,.08),transparent 55%,rgba(20,64,98,.38))}
+.hotel-scene--product .hotel-product-window .hotel-scene-caption{bottom:27px;left:28px;font-size:34px}
+.hotel-scene--product .hotel-touchpoints{display:flex;flex-direction:column;justify-content:space-between;padding:37px clamp(22px,3.2vw,50px);position:relative;z-index:1;background:radial-gradient(ellipse at 100% 0%,rgba(255,255,255,.88),transparent 75%),#e9f5fb;color:#26425e}
+.hotel-touchpoints .h-label{display:inline-flex;align-items:center;gap:11px;color:#7795ad;font-size:10px;font-weight:750;letter-spacing:.15em}
+.hotel-touchpoints .h-label:before{content:"";width:19px;height:1px;background:#ba9b62}
+.hotel-touchpoints .h-main{font:italic clamp(34px,3vw,51px)/1.04 "Instrument Serif",Georgia,serif;letter-spacing:-.03em;color:#2a6ca7}
+.hotel-touchpoints .h-main span{display:block}
+.hotel-touchpoints ul{list-style:none;padding:0;margin:0;border-top:1px solid #cfe0eb}
+.hotel-touchpoints li{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #cfe0eb;padding:16px 0;color:#627d91;font-size:11px;font-weight:650;letter-spacing:.04em}
+.hotel-touchpoints li span{color:#9aafbf;font-size:9px;letter-spacing:.1em}
+/* Event: show the design process and two actual NUVIA pouches, not a duplicate autoplay loop. */
+.event{padding:108px 0 116px;background:#fff9f6}
+.event-scene.event-scene--studio{background:radial-gradient(ellipse at 65% 30%,#fff9f4,#f4d9d5 66%,#eec9ca);height:570px;position:relative;isolation:isolate;overflow:hidden}
+.event-scene--studio:before{content:"";inset:0;position:absolute;z-index:0;background:radial-gradient(ellipse at 15% 5%,rgba(255,255,255,.92),transparent 51%),radial-gradient(ellipse at 90% 94%,rgba(206,143,160,.32),transparent 50%)}
+.event-scene--studio:after{background:linear-gradient(180deg,rgba(94,51,71,.02),transparent 62%,rgba(75,40,55,.08))}
+.event-scene--studio .event-studio-label{position:absolute;z-index:4;top:29px;left:33px;font:750 10px/1.4 Inter,Arial,sans-serif;letter-spacing:.13em;color:#916d78}
+.event-scene--studio .event-studio-label:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#bd948b;margin-right:10px}
+.event-scene--studio .event-studio-primary{position:absolute;z-index:1;inset:65px 30% 72px 38px;border-radius:11px;overflow:hidden;background:#c1e0e9;box-shadow:0 25px 65px rgba(119,64,84,.17);transform:rotate(-5deg)}
+.event-scene--studio .event-studio-primary img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 59%;filter:saturate(.90);transform:scale(1.02)}
+.event-scene--studio .event-studio-secondary{position:absolute;z-index:2;right:7%;bottom:85px;width:39%;height:50%;border:8px solid rgba(255,255,255,.95);border-radius:13px;overflow:hidden;background:#b4d2e8;box-shadow:0 22px 50px rgba(87,46,74,.2);transform:rotate(6deg)}
+.event-scene--studio .event-studio-secondary img{width:100%;height:100%;object-fit:cover;object-position:center 65%}
+.event-scene--studio .event-studio-badge{position:absolute;z-index:4;right:24px;top:28px;background:rgba(255,255,255,.87);color:#875b67;padding:9px 11px;border:1px solid rgba(255,255,255,.75);border-radius:4px;font:650 10px/1.4 Inter,Arial,sans-serif;letter-spacing:.06em}
+.event-scene--studio .event-scene-bottom{left:29px;right:29px;bottom:26px;color:#6d495b}
+.event-scene--studio .event-scene-bottom strong{font-size:35px}
+.event-scene--studio .event-scene-bottom span{color:#906e78}
+/* Networks: logistics image remains relevant, but no oversized box wall. */
+.networks{padding:115px 0 116px}
+.networks-scene{height:545px}
+.networks-scene img{object-position:center 61%}
+.proof{padding:80px 0}
+.closing{padding:108px 0 114px}
+/* Air-inspired discipline: one weight hierarchy across large and small headlines. */
+.story h2{letter-spacing:-.072em}
+.index-item strong{letter-spacing:-.045em}
+@media(max-width:1120px){
+.hero h1{font-size:clamp(59px,7vw,88px)}
+.hotel-scene.hotel-scene--product{grid-template-columns:minmax(0,1.06fr) minmax(255px,.75fr);height:500px}
+.event-scene.event-scene--studio{height:505px}
+}
+@media(max-width:830px){
+.hero h1{font-size:clamp(63px,9vw,83px)}
+.hero-film{height:470px;margin-top:48px}
+.hotel-scene.hotel-scene--product{grid-template-columns:minmax(0,1fr) minmax(245px,.75fr);height:490px}
+.event-scene.event-scene--studio{height:500px}
+}
+@media(max-width:560px){
+.hero h1{font-size:clamp(51px,12vw,69px)}
+.hero-film{height:355px;margin-top:42px}
+.hero-film .hero-feature-note{right:18px;bottom:68px;padding:8px 9px;font-size:8px}
+.index-item{min-height:88px}
+.hotel-scene.hotel-scene--product{grid-template-columns:1fr;grid-template-rows:340px auto;height:auto}
+.hotel-scene--product .hotel-product-window{height:340px}
+.hotel-scene--product .hotel-touchpoints{padding:24px;gap:17px}
+.hotel-touchpoints .h-main{font-size:31px}
+.hotel-touchpoints ul{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;border-top:0}
+.hotel-touchpoints li{padding:11px 2px;border-top:1px solid #cfe0eb;align-items:flex-start;gap:8px;font-size:10px}
+.hotel-touchpoints li span{font-size:8px}
+.event-scene.event-scene--studio{height:380px}
+.event-scene--studio .event-studio-primary{top:65px;bottom:64px;left:19px;right:32%;border-radius:7px}
+.event-scene--studio .event-studio-secondary{right:5%;width:40%;height:49%;bottom:66px;border-width:5px}
+.event-scene--studio .event-studio-label{top:18px;left:20px;font-size:8px}
+.event-scene--studio .event-studio-badge{right:14px;top:16px;font-size:8px;padding:7px}
+.event-scene--studio .event-scene-bottom{left:20px;right:20px;bottom:17px}
+.event-scene--studio .event-scene-bottom strong{font-size:25px}
+}
+@media(prefers-reduced-motion:reduce){
+.event-scene--studio .event-studio-primary,.event-scene--studio .event-studio-secondary{transform:none}
+}
