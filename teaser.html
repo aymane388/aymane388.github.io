@@ -2927,9 +2927,11 @@ html{scroll-snap-type:y proximity}
         <p class="nv-contact-description nv-contact-animate" data-nv-reveal="description"><span class="nv-contact-description-line">Parlons de votre établissement et imaginons ensemble</span> <span class="nv-contact-description-line">des sachets personnalisés qui reflètent votre identité.</span></p>
       </div>
       <div class="nv-contact-card" data-nv-reveal="form">
-        <form id="nv-contact-form" name="nuvia-contact" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field">
-          <input type="hidden" name="form-name" value="nuvia-contact">
-          <p class="nv-contact-sr-only" aria-hidden="true"><label>Ne pas renseigner ce champ : <input type="text" name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+        <form id="nv-contact-form" name="nuvia-contact" method="POST" action="https://formsubmit.co/studio@nuviasolution.com">
+          <input type="hidden" name="_subject" value="NUVIA — Nouvelle demande depuis le teaser">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_url" value="https://nuviasolution.com/teaser.html">
+          <p class="nv-contact-sr-only" aria-hidden="true"><label>Ne pas renseigner ce champ : <input type="text" name="_honey" tabindex="-1" autocomplete="off"></label></p>
           <div class="nv-contact-fields">
             <div class="nv-contact-field nv-contact-field--half">
               <label class="nv-contact-sr-only" for="nv-first-name">Prénom</label>
@@ -3167,12 +3169,51 @@ document.addEventListener('DOMContentLoaded', function(){
   });
   var submit=form.querySelector('button[type="submit"]');
   var status=form.querySelector(".nv-contact-status");
-  form.addEventListener("submit",function(event){
+  var sending=false;
+  var endpoint="https://formsubmit.co/ajax/studio@nuviasolution.com";
+  form.addEventListener("submit",async function(event){
     event.preventDefault();
-    if(!form.reportValidity())return;
-    // Frontend-only prototype: no API, no POST, no misleading confirmation.
+    if(sending||!form.reportValidity())return;
+    // FormSubmit fonctionne sur GitHub Pages sans serveur.
+    // Premier envoi : une confirmation doit être acceptée dans la boîte studio@.
+    if(form.elements.namedItem("_honey").value.trim())return;
+    sending=true;
+    submit.disabled=true;
+    submit.setAttribute("aria-busy","true");
     status.removeAttribute("data-state");
-    status.textContent="Le formulaire est en démonstration. L’envoi sera disponible prochainement.";
+    status.textContent="Envoi en cours…";
+    var controller=new AbortController();
+    var timeout=window.setTimeout(function(){controller.abort();},20000);
+    try {
+      var payload=Object.fromEntries(new FormData(form).entries());
+      var response=await fetch(endpoint,{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Accept":"application/json"},
+        body:JSON.stringify(payload),
+        signal:controller.signal
+      });
+      var data=await response.json();
+      var ok=data&& (data.success===true||data.success==="true");
+      if(!response.ok||!ok)throw new Error("FormSubmit a refusé la demande");
+      var message=String(data.message||"");
+      if(/activat|confirm|vérif|verif/i.test(message)){
+        // Ne pas afficher de fausse réussite tant que la boîte n'est pas validée.
+        status.dataset.state="error";
+        status.textContent="Envoi en attente : l'adresse de réception NUVIA doit être confirmée.";
+      }else{
+        status.removeAttribute("data-state");
+        status.textContent="Votre demande a bien été transmise. Nous vous répondrons prochainement.";
+        form.reset();
+      }
+    }catch(error){
+      status.dataset.state="error";
+      status.textContent="L'envoi n'a pas abouti. Vérifiez votre connexion puis réessayez.";
+    }finally{
+      window.clearTimeout(timeout);
+      sending=false;
+      submit.disabled=false;
+      submit.removeAttribute("aria-busy");
+    }
   });
 })();
 </script>
