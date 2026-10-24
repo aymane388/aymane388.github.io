@@ -2868,7 +2868,11 @@ body{margin:0;background:#387ff0;overflow-x:hidden}
 #nv-contact-sequence{margin:0;background:linear-gradient(180deg,#387ff0 0%,#428df1 19%,#66adf4 55%,#8cc6f5 100%)!important}
 #nv-contact-sequence .nv-contact-space{display:none!important}
 #nv-contact-sequence .nv-contact-stage{min-height:100svh}
-/* L'animation du texte est réutilisée telle quelle ; la section arrive sans écran vide. */
+/* Le fondu vers le chapitre blanc du site complet n'a plus d'utilité : cette page s'arrête au contact. */
+#nv-contact-sequence::after{content:none!important;display:none!important;height:0!important;background:none!important}
+/* Les deux seules sections se rejoignent sans pause ni panneau intermédiaire. */
+#entree,#nv-contact-sequence{scroll-snap-align:start}
+html{scroll-snap-type:y proximity}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style></head>
 <body>
@@ -3169,6 +3173,41 @@ document.addEventListener('DOMContentLoaded', function(){
     // Frontend-only prototype: no API, no POST, no misleading confirmation.
     status.removeAttribute("data-state");
     status.textContent="Le formulaire est en démonstration. L’envoi sera disponible prochainement.";
+  });
+})();
+</script>
+<script id="nv-teaser-direct-scroll">
+/* Navigation directe entre les deux sections existantes, sans toucher au scroll du formulaire. */
+(function(){
+  "use strict";
+  var hero=document.getElementById("entree");
+  var contact=document.getElementById("nv-contact-sequence");
+  if(!hero||!contact)return;
+  var cooldown=0;
+  function prefersReduced(){return window.matchMedia("(prefers-reduced-motion: reduce)").matches;}
+  function targetY(){return Math.max(0,Math.round(contact.getBoundingClientRect().top+window.scrollY));}
+  function go(y){
+    cooldown=performance.now()+(prefersReduced()?260:900);
+    window.scrollTo({top:y,behavior:prefersReduced()?"instant":"smooth"});
+  }
+  window.addEventListener("wheel",function(e){
+    if(e.defaultPrevented||e.ctrlKey||e.metaKey||Math.abs(e.deltaY)<3)return;
+    if(e.target&&e.target.closest&&e.target.closest("input,select,textarea,[contenteditable], [role=dialog]"))return;
+    if(performance.now()<cooldown){e.preventDefault();return;}
+    var boundary=targetY(),y=window.scrollY;
+    if(e.deltaY>0&&y<boundary-3){e.preventDefault();go(boundary);}
+    else if(e.deltaY<0&&y>=boundary-3&&y<=boundary+Math.min(135,window.innerHeight*.22)){
+      e.preventDefault();go(0);
+    }
+  },{passive:false});
+  window.addEventListener("keydown",function(e){
+    if(e.defaultPrevented||e.ctrlKey||e.altKey||e.metaKey||e.target?.closest?.("input,select,textarea,button,[contenteditable]"))return;
+    var boundary=targetY(),y=window.scrollY;
+    if((e.key==="PageDown"||e.key===" "||e.key==="ArrowDown")&&y<boundary-3){
+      e.preventDefault();go(boundary);
+    }else if((e.key==="PageUp"||e.key==="ArrowUp")&&y>=boundary-3&&y<=boundary+Math.min(135,window.innerHeight*.22)){
+      e.preventDefault();go(0);
+    }
   });
 })();
 </script>
