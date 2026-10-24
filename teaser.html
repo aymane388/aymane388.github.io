@@ -1,0 +1,3176 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NUVIA — Aperçu vidéo et contact</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="NUVIA — aperçu vidéo et formulaire de contact.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;900&display=swap">
+<style>
+/* ============================================================
+   Systeme Air, applique depuis leur DESIGN.md.
+   Control -> Inter · Control Compressed -> Anton · Cursive -> Caveat
+   Aucune ombre, aucune elevation. Signal Blue reserve aux liens.
+   Mesures relevees au DOM sur air.inc et vanmoof.com/fr-FR, 23 aout 2026.
+   ============================================================ */
+:root{
+  --whiteout:#ffffff; --haze:#f5f5f5; --ink:#1b1b1b;
+  --black-void:#000000; --twilight-blue:#426188; --signal-blue:#2b7fff;
+
+  --font-control:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-compressed:"Anton","Inter",sans-serif;
+  --font-cursive:"Caveat","Inter",cursive;
+  --font-mark:"Instrument Serif",Georgia,"Times New Roman",serif;
+
+  --text-caption:13px; --text-body:16px; --text-subheading:20px;
+  --text-heading:32px; --text-heading-lg:56px;
+
+  --s4:4px; --s8:8px; --s12:12px; --s16:16px; --s20:20px; --s24:24px;
+  --s32:32px; --s48:48px; --s64:64px; --s80:80px; --s120:120px;
+
+  --page:1150px; --nav-h:72px;
+  --r-inputs:4px; --r-buttons:8px; --r-images:11px; --r-cards:12px; --r-pills:9999px;
+
+  --ease-vm:cubic-bezier(.4,0,.2,1);
+  --ease-io:cubic-bezier(.42,0,.58,1);
+
+  /* barre : 600px a 1920 (leur reference), puis 31,25vw, plafond 760 */
+  --tb-w:600px; --k:1;
+
+  /* la lingette premium : un blanc de fibre, et un or a trois valeurs —
+     un fil brode n'est jamais d'une seule couleur, il accroche la lumiere
+     sur le dessus et reste sombre dans le creux de la torsade */
+  --fibre:#FBF9F5;
+  --fibre-creux:#EFEAE1;
+  --encre:#2A2621;
+  --or-clair:#EAD3A0;
+  --or:#BE9A4A;
+  --or-creux:#8A6A26;
+}
+
+/* rien ne se selectionne : ni glisser-selectionner, ni appui long */
+*{ -webkit-user-select:none; -moz-user-select:none; user-select:none;
+   -webkit-touch-callout:none; }
+input,textarea,select,option{ -webkit-user-select:text; -moz-user-select:text; user-select:text; }
+
+/* la gouttiere de defilement reste reservee : la page ne saute pas
+   quand on bloque le defilement */
+html{scrollbar-gutter:stable}
+body[data-lock="true"]{overflow:hidden}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:#1f6fd0; color:var(--whiteout);
+  font:500 var(--text-body)/1.5 var(--font-control);
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+img{display:block;max-width:100%}
+
+/* le ciel : canvas plein ecran, FIXE — il ne defile jamais */
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+main{position:relative;z-index:2}
+
+/* la lingette : deux plans, un DERRIERE le texte et un DEVANT.
+   Elle bascule de l'un a l'autre selon sa profondeur, comme un objet
+   qui passe reellement devant vous. */
+.cloth{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;display:block}
+#clothBack{z-index:1}
+#clothFront{z-index:4}
+
+/* ============================================================
+   TOPBAR — geometrie relevee au DOM sur vanmoof.com/fr-FR :
+   nav top:16px, padding 0 4px, bulle 600x56 fermee, rayon 4px,
+   fond linear-gradient(135deg, .5 -> .3), backdrop blur(30px),
+   bord en degrade (leur utilitaire gradient-border).
+   Barre : 40px de haut, padding 16px 16px 0.
+   Ouverture : height 500ms, sans delai.
+   Fermeture : height 800ms APRES 500ms (le contenu sort d'abord).
+   Contenu : y -50px + opacite, 500ms, delai 500ms a l'entree, 0 a la sortie.
+   ============================================================ */
+#topbar{
+  position:fixed;top:calc(16px * var(--k));left:50%;transform:translateX(-50%);
+  z-index:60;padding:0 4px;width:min(calc(var(--tb-w) + 8px),100vw);
+}
+.gborder{position:relative}
+.gborder::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;
+  padding:1px;
+  background:linear-gradient(135deg,var(--or) 0%,rgba(190,154,74,.12) 50%,var(--or) 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask-composite:exclude;
+}
+.bubble{
+  display:flex;flex-direction:column;
+  width:100%;min-height:calc(56px * var(--k));height:calc(56px * var(--k));
+  overflow:hidden;border-radius:4px;
+  color:var(--encre);
+  /* le cotele du non-tisse, puis le voile de fibre par-dessus */
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(0,0,0,.030) 0px, rgba(0,0,0,.030) .5px,
+      rgba(255,255,255,0) .5px, rgba(255,255,255,0) 3px),
+    linear-gradient(168deg, var(--fibre) 0%, var(--fibre-creux) 58%, var(--fibre) 100%);
+  transition:height .8s var(--ease-io) .5s;
+}
+.bubble[data-open="true"]{ transition:height .5s var(--ease-io) 0s; }
+
+.bar{
+  display:flex;flex-direction:row;align-items:center;justify-content:center;
+  height:calc(40px * var(--k));flex:0 0 calc(40px * var(--k));
+  padding:calc(16px * var(--k)) calc(16px * var(--k)) 0;position:relative;
+}
+.burger{
+  margin-right:auto;border:0;background:transparent;cursor:pointer;padding:0;
+  width:25px;height:24px;color:var(--whiteout);position:relative;
+  transform:scale(var(--k));transform-origin:left center;
+}
+.burger svg{display:block;width:25px;height:24px;overflow:visible}
+.burger line{
+  /* pas de degrade ici : une ligne horizontale a une boite englobante de
+     hauteur nulle, et un degrade en objectBoundingBox n'y peint rien */
+  stroke:var(--or);stroke-width:1.556;stroke-linecap:round;
+  transform-box:fill-box;transform-origin:50% 50%;
+  transition:transform .3s var(--ease-vm);
+  stroke-dasharray:19;stroke-dashoffset:0;
+}
+.burger[aria-expanded="true"] .b1{transform:translateY(3.111px) rotate(45deg)}
+.burger[aria-expanded="true"] .b2{transform:translateY(-3.111px) rotate(-45deg)}
+/* la broderie : l'aiguille repasse le trait */
+@keyframes brodeTrait{ from{stroke-dashoffset:19} to{stroke-dashoffset:0} }
+.burger.brode .b1{animation:brodeTrait .46s cubic-bezier(.55,0,.25,1) both}
+.burger.brode .b2{animation:brodeTrait .46s cubic-bezier(.55,0,.25,1) .10s both}
+
+.mark-link{position:absolute;left:50%;transform:translateX(-50%);text-decoration:none;padding:2px 6px;display:block}
+.mark-svg{display:block;width:calc(124px * var(--k));height:calc(38px * var(--k));overflow:visible}
+.mark-svg text{
+  font-family:var(--font-mark);font-style:italic;font-weight:400;font-size:30px;
+}
+/*  Deux calques superposes : le fil qui trace le contour, et la matiere de
+    la broderie qui se remplit derriere lui. C'est l'ordre reel — on coud le
+    contour, puis on remplit. */
+.mark-fond{ fill:url(#filOr); opacity:1 }
+.mark-fil{ fill:none; stroke:var(--or-clair); stroke-width:.55; stroke-linejoin:round;
+           stroke-dasharray:640; stroke-dashoffset:0; opacity:.9 }
+@keyframes brodeFil{  from{stroke-dashoffset:640} to{stroke-dashoffset:0} }
+@keyframes brodeFond{ from{opacity:0} to{opacity:1} }
+.mark-link.brode .mark-fil { animation:brodeFil  1.15s cubic-bezier(.5,0,.25,1) both }
+.mark-link.brode .mark-fond{ animation:brodeFond .62s ease .42s both }
+
+.cart{
+  margin-left:auto;border:0;background:transparent;cursor:pointer;padding:0;
+  color:var(--or);display:flex;align-items:center;justify-content:center;
+  transform:scale(var(--k));transform-origin:right center;
+  transition:color .3s var(--ease-vm);
+}
+.cart:hover{color:var(--or-creux)}
+
+/* --- le panneau --- */
+.panel{
+  display:flex;flex-direction:column;justify-content:space-between;gap:calc(32px * var(--k));
+  flex:1 1 auto;min-height:0;
+  margin:calc(24px * var(--k)) 0 calc(32px * var(--k));
+  padding:calc(16px * var(--k)) calc(48px * var(--k)) 0;overflow:hidden;
+  opacity:0;transform:translateY(-50px);pointer-events:none;
+  transition:opacity .5s var(--ease-io) 0s,transform .5s var(--ease-io) 0s;
+}
+.bubble[data-open="true"] .panel{
+  opacity:1;transform:none;pointer-events:auto;
+  transition:opacity .5s var(--ease-io) .5s,transform .5s var(--ease-io) .5s;
+}
+.panel-top{display:flex;flex-direction:column;flex:1 1 auto;gap:calc(48px * var(--k));min-height:0;overflow:hidden}
+.bubble[data-tight="true"] .panel-top{overflow-y:auto;scrollbar-width:none}
+.bubble[data-tight="true"] .panel-top::-webkit-scrollbar{display:none}
+
+/* deux cadres VIDES — exactement le cadre Vanmoof : filet haut, filet bas,
+   filet vertical entre les deux, 140px de haut, la petite fleche au survol.
+   Aucun titre, aucune image : c'est ce qui a ete demande. */
+.pcards{display:flex;flex-direction:row;gap:calc(8px * var(--k))}
+.pcard{
+  position:relative;display:block;flex:1 1 0;height:calc(140px * var(--k));text-decoration:none;
+  border-top:1px solid rgba(190,154,74,.42);
+  border-bottom:1px solid rgba(190,154,74,.42);
+  transition:border-color .3s var(--ease-vm);
+}
+.pcard:hover{border-top-color:var(--or);border-bottom-color:var(--or)}
+.pdiv{padding:4px 0;flex:0 0 auto}
+.pdiv i{display:block;width:1px;height:100%;background:rgba(190,154,74,.42)}
+.parrow{
+  position:absolute;right:calc(8px * var(--k));bottom:calc(11px * var(--k));color:var(--or);
+  opacity:0;transform:translate(-32px,32px);
+  transition:transform .2s ease,opacity .2s ease;
+}
+.pcard:hover .parrow{opacity:1;transform:translate(0,0)}
+
+/* la liste : 32px/35.2px, ecart 16px */
+.menu{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:calc(16px * var(--k))}
+.menu a{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  width:100%;text-decoration:none;color:var(--encre);
+  font:400 calc(32px * var(--k))/calc(35.2px * var(--k)) var(--font-control);
+  transition:all .3s var(--ease-vm);
+}
+.menu a:hover{transform:translateX(6px);color:var(--or-creux)}
+
+.panel-foot{
+  flex:0 0 auto;height:calc(40px * var(--k));padding-top:calc(16px * var(--k));
+  border-top:1px solid rgba(190,154,74,.42);
+  display:flex;flex-direction:row;justify-content:space-between;align-items:flex-start;
+}
+.panel-foot button{
+  background:transparent;border:0;cursor:pointer;color:var(--encre);padding:0;
+  font:400 calc(14px * var(--k))/calc(20px * var(--k)) var(--font-control);
+  display:flex;flex-direction:row;align-items:center;gap:calc(8px * var(--k));
+  transition:opacity .2s var(--ease-vm);
+}
+.panel-foot button:hover{opacity:.72}
+
+/* --- la fenetre des langues, geometrie Vanmoof relevee au DOM :
+   720px de large, hauteur calc(100dvh - 16px), bord HAUT et GAUCHE seulement,
+   padding 64px, titre 48px/52.8px suivi de 48px, zones espacees de 48px. --- */
+.lang{
+  position:fixed;inset:0;z-index:90;display:none;
+  background:linear-gradient(135deg,rgba(24,20,14,.58) 10%,rgba(24,20,14,.42) 100%);
+  backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+}
+.lang[data-open="true"]{display:block;animation:fadeIn .3s var(--ease-io)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.lang-box{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:91;
+  width:min(calc(720px * var(--k)),calc(100vw - 16px));
+  height:calc(100dvh - 16px);max-height:calc(100vh - 16px);
+  border-radius:6px;overflow:hidden;color:var(--encre);
+  border-top:1px solid rgba(190,154,74,.45);
+  border-left:1px solid rgba(190,154,74,.45);
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(0,0,0,.026) 0px, rgba(0,0,0,.026) .5px,
+      rgba(255,255,255,0) .5px, rgba(255,255,255,0) 3px),
+    linear-gradient(168deg, var(--fibre) 0%, var(--fibre-creux) 62%, var(--fibre) 100%);
+}
+.lang-close{
+  position:absolute;top:calc(16px * var(--k));right:calc(16px * var(--k));z-index:10;
+  width:calc(40px * var(--k));height:calc(40px * var(--k));
+  border:0;border-radius:4px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:var(--or-creux);
+  background:linear-gradient(135deg,rgba(190,154,74,.16),rgba(190,154,74,.07));
+  transition:background .2s var(--ease-vm),transform .2s var(--ease-vm);
+}
+.lang-close:hover{background:linear-gradient(135deg,rgba(190,154,74,.32),rgba(190,154,74,.18))}
+.lang-close:active{transform:scale(.94)}
+.lang-close svg{width:calc(14px * var(--k));height:calc(14px * var(--k))}
+.lang-inner{padding:calc(64px * var(--k))}
+.lang-inner h2{font:400 calc(48px * var(--k))/calc(52.8px * var(--k)) var(--font-control);margin:0 0 calc(48px * var(--k))}
+.zones{display:flex;flex-direction:column;gap:calc(48px * var(--k))}
+.zone{display:flex;flex-direction:column;gap:calc(24px * var(--k))}
+.zone h3{font:400 calc(24px * var(--k))/calc(26.4px * var(--k)) var(--font-control);margin:0}
+.zone hr{width:100%;height:1px;background:rgba(190,154,74,.38);border:0;margin:0}
+.zcols{display:flex;flex-direction:row;gap:calc(16px * var(--k))}
+.zcol{display:flex;flex-direction:column;gap:calc(16px * var(--k));width:50%}
+.zrow{display:flex;flex-direction:row;align-items:center}
+.zdot{
+  width:0;opacity:0;height:4px;display:flex;align-items:center;overflow:visible;
+  transition:width .3s var(--ease-vm),opacity .3s var(--ease-vm);
+}
+.zdot span{display:block;width:4px;height:4px;border-radius:50%;background:var(--or)}
+.zrow:hover .zdot{width:12px;opacity:1}
+.zrow button{
+  display:flex;flex-direction:row;align-items:center;gap:4px;
+  background:transparent;border:0;padding:0;cursor:pointer;color:var(--encre);
+  font:400 calc(16px * var(--k))/calc(24px * var(--k)) var(--font-control);text-align:left;
+}
+.zrow button em{font-style:normal;opacity:.45}
+@media(max-width:767px){ .zcols{flex-direction:column} .zcol{width:100%} .lang-inner{padding:24px} }
+
+/* ============================================================
+   SECTIONS — hauteurs relevees sur air.inc (fenetre 1920x777).
+   0 hero mot    897   1.154vh
+   1 hero texte  876   fixe
+   2 logos       518   fixe
+   3 display    1008   1.30vh
+   4 onglets     686   fixe
+   5 bento      1416   fixe
+   6 un format   256   fixe
+   7 secteurs    439   fixe
+   8 sequence   3396   4.37vh
+   9 essai      1162   fixe
+   pied         1166   1.50vh
+   Padding de section : 120px haut et bas. Page : 1150px.
+   ============================================================ */
+.wrap{max-width:var(--page);margin:0 auto;padding:0 var(--s24);width:100%}
+section{position:relative;padding:var(--s120) 0}
+
+/* 0 — l'entree : le mot seul dans la couche de nuages */
+#entree{
+  height:115svh;padding:0;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+}
+#entree .mark{
+  font-family:var(--font-mark);font-style:italic;font-weight:400;
+  font-size:clamp(96px,21vw,400px);line-height:.82;margin:0;
+  color:var(--whiteout);will-change:transform,opacity;
+}
+
+/* 1 — hero : titre 56/56, chapo 16/24 en 500, bouton, puis le media */
+#hero{padding:0;min-height:876px;display:flex;flex-direction:column;justify-content:center;gap:0}
+h1{
+  font:400 clamp(34px,4.4vw,var(--text-heading-lg))/1 var(--font-control);
+  margin:0;letter-spacing:-.01em;max-width:24ch;text-wrap:balance;
+}
+.lede{
+  font:500 var(--text-body)/24px var(--font-control);
+  max-width:450px;margin:var(--s24) auto 0;
+}
+.center{display:flex;flex-direction:column;align-items:center;text-align:center}
+.actions{display:flex;gap:var(--s8);margin-top:var(--s32);flex-wrap:wrap;justify-content:center}
+
+/* Solid Light Button : Haze + Ink, rayon 8 */
+.btn-air{
+  position:relative;overflow:hidden;isolation:isolate;
+  display:inline-flex;align-items:center;justify-content:center;
+  height:38px;padding:0 16px;
+  border:1px solid var(--whiteout);border-radius:var(--r-buttons);
+  background:transparent;color:var(--ink);text-decoration:none;cursor:pointer;
+  font:500 var(--text-body)/24px var(--font-control);
+  transition:color .3s cubic-bezier(.22,1,.36,1);
+}
+.btn-air::before{
+  content:"";position:absolute;z-index:-1;
+  left:-30%;right:-30%;top:-70px;bottom:-70px;
+  background:var(--whiteout);
+  transform:translateY(0) skewX(-14deg);
+  transition:transform 1s cubic-bezier(.22,1,.36,1);
+}
+.btn-air:hover{color:var(--whiteout)}
+.btn-air:hover::before{transform:translateY(-102%) skewX(-14deg)}
+.btn-air:focus-visible{outline:2px solid var(--whiteout);outline-offset:3px}
+
+.btn-haze{
+  background:var(--haze);border:1px solid var(--haze);color:var(--ink);
+  border-radius:var(--r-buttons);padding:9px 17px;
+  font:500 var(--text-body)/20px var(--font-control);text-decoration:none;
+  display:inline-block;cursor:pointer;transition:background .18s ease;
+}
+.btn-haze:hover{background:var(--whiteout)}
+.btn-ghost{
+  background:transparent;border:1px solid rgba(255,255,255,.55);color:var(--whiteout);
+  border-radius:var(--r-buttons);padding:9px 17px;
+  font:500 var(--text-body)/20px var(--font-control);text-decoration:none;
+  display:inline-block;cursor:pointer;transition:background .18s ease,border-color .18s ease;
+}
+.btn-ghost:hover{background:rgba(255,255,255,.12);border-color:#fff}
+a:focus-visible,button:focus-visible{outline:2px solid var(--whiteout);outline-offset:3px}
+
+/* le mot en italique serif au milieu d'un titre, comme chez eux */
+.acc{font-family:var(--font-mark);font-style:italic;font-weight:400}
+
+/* --- la barre d'onglets : la pastille glisse, un trait de progression
+   se remplit dessous, et l'onglet avance tout seul --- */
+.tabbar{
+  position:relative;display:flex;align-items:stretch;
+  width:min(592px,100%);margin:0 auto;
+  border-radius:var(--r-buttons);overflow:hidden;
+  background:rgba(255,255,255,.14);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.tabbar .slider{
+  position:absolute;top:0;bottom:0;left:0;width:33.3333%;
+  background:var(--whiteout);border-radius:var(--r-buttons);
+  transition:transform .45s var(--ease-vm);z-index:0;
+}
+.tabbar .slider::after{
+  content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;
+  background:var(--ink);transform-origin:0 50%;transform:scaleX(var(--prog,0));
+}
+.tabbar button{
+  position:relative;z-index:1;flex:1 1 0;border:0;background:transparent;cursor:pointer;
+  padding:11px 8px;color:var(--whiteout);
+  font:500 13px/16px var(--font-control);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  opacity:.72;transition:color .3s var(--ease-vm),opacity .3s var(--ease-vm);
+}
+.tabbar button[aria-selected="true"]{color:var(--ink);opacity:1}
+.tabbar button svg{width:13px;height:13px;flex:0 0 auto}
+
+/* les emplacements media */
+.media{width:100%;margin:0 auto}
+.stage{position:relative;width:100%;max-width:1100px;margin:0 auto;perspective:1500px}
+.pane{opacity:0;visibility:hidden;transition:opacity .45s var(--ease-vm)}
+.pane[data-on="true"]{opacity:1;visibility:visible}
+.pane:not(:first-child){position:absolute;inset:0}
+.ph{
+  aspect-ratio:695/496;max-width:clamp(600px,36.2vw,1000px);margin:0 auto;border-radius:var(--r-images);
+  transform-style:preserve-3d;will-change:transform;
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.22);
+  display:flex;align-items:center;justify-content:center;
+  font:500 var(--text-caption)/1.5 var(--font-control);
+  letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);
+}
+
+/* 2 — la preuve : deux bandeaux de logos qui glissent en sens inverse */
+#preuve{min-height:518px;padding:var(--s120) 0;display:flex;flex-direction:column;justify-content:center}
+.subheading{font:500 var(--text-subheading)/1.4 var(--font-control);margin:0;text-align:center}
+.marquees{margin-top:var(--s48);display:flex;flex-direction:column;gap:var(--s32)}
+.marquee{
+  overflow:hidden;width:100%;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+}
+.mrow{display:flex;width:max-content;will-change:transform}
+.mrow>span{
+  flex:0 0 auto;padding:0 var(--s32);
+  font:500 var(--text-subheading)/1 var(--font-control);
+  opacity:.62;white-space:nowrap;
+}
+.marquee[data-dir="left"] .mrow{animation:mLeft 42s linear infinite}
+.marquee[data-dir="right"] .mrow{animation:mRight 48s linear infinite}
+@keyframes mLeft{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@keyframes mRight{ from{transform:translateX(-50%)} to{transform:translateX(0)} }
+@media(prefers-reduced-motion:reduce){ .mrow{animation:none!important} }
+
+/* 3 — Compressed Display Headline : bord a bord, 282px a 1920, ligne 0.85,
+   revele ligne par ligne au defilement (masque en degrade) */
+#manifeste{min-height:130svh;display:flex;align-items:center;overflow:visible}
+.bleed{width:100%;padding:0 var(--s24)}
+.display{
+  font-family:var(--font-compressed);font-weight:400;
+  font-size:clamp(48px,14.7vw,320px);line-height:.89;text-transform:uppercase;
+  margin:0;letter-spacing:-.012em;
+}
+.display .ln{
+  white-space:nowrap;width:max-content;max-width:none;
+  /* de l'air autour des glyphes pour que le masque ne les rogne pas,
+     repris en marge negative pour que l'interligne ne bouge pas */
+  padding-block:.14em;margin-block:-.14em;
+}
+.display .ln{
+  display:block;
+  -webkit-mask-image:linear-gradient(to top,#fff 0%,#fff var(--p,0%),transparent calc(var(--p,0%) + 34%));
+  mask-image:linear-gradient(to top,#fff 0%,#fff var(--p,0%),transparent calc(var(--p,0%) + 34%));
+}
+
+/* 4 — onglets + media */
+#produit{min-height:686px;padding:var(--s120) 0}
+#produit .stage{margin-top:var(--s32)}
+#produit .ph{aspect-ratio:695/374}
+
+/* Composants partagés par la grille Nuvia. Les sections supprimées n'ont plus de styles. */
+.h-sec{font:400 clamp(28px,2.9vw,var(--text-heading))/1.15 var(--font-control);margin:0;text-align:center;letter-spacing:-.01em}
+#usage .bcard{display:flex;flex-direction:column;transition:border-color .3s var(--ease-vm),background .3s var(--ease-vm)}
+
+/* le pied de page : sur le ciel, pas de fond, comme chez eux */
+footer{
+  position:relative;z-index:2;height:150svh;
+  display:flex;align-items:flex-end;padding:0 var(--s24) var(--s24);
+}
+.foot-in{
+  max-width:1600px;margin:0 auto;width:100%;
+  display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--s16);
+}
+.foot-links{display:flex;flex-wrap:wrap;gap:var(--s32)}
+.foot-links a{
+  color:var(--whiteout);text-decoration:none;
+  font:500 var(--text-body)/24px var(--font-control);
+  transition:opacity .2s var(--ease-vm);
+}
+.foot-links a:hover{opacity:.7}
+.foot-links .foot-unavailable{display:inline-block;font:500 var(--text-body)/24px var(--font-control);color:rgba(255,255,255,.72);cursor:default}
+.foot-right{display:flex;flex-direction:column;align-items:flex-end;gap:var(--s16)}
+.socials{display:flex;gap:var(--s24)}
+.socials a{color:var(--whiteout);opacity:.9;transition:opacity .2s var(--ease-vm)}
+.socials a:hover{opacity:.6}
+.foot-right p{margin:0;font:500 var(--text-caption)/1.5 var(--font-control)}
+
+@media(max-width:820px){
+  .lang-inner{padding:24px}
+  #hero{min-height:auto;padding:var(--s120) 0}
+  #usage{min-height:auto}
+}
+/* NUVIA / MAKE IT — reference geometry rebuilt from Air.inc V2:
+   958px viewport: x=24px, Control Compressed 172.44px / 146.57px pitch.
+   1906px reference screenshot: x≈178px, line starts y≈91/346/618.
+   Maximum 1600px centered wrapper; one type size for all three rows.
+   Air's original font is proprietary; Anton is retained, without stretching
+   it per row or reducing the third phrase separately. */
+#nuvia-slogan{
+  position:relative;isolation:isolate;
+  height:117.02svh;min-height:690px;
+  margin:clamp(240px,42svh,520px) 0 0;
+  padding:0;background:transparent;overflow:visible;
+}
+#nuvia-slogan .ns-headline{
+  position:relative;box-sizing:border-box;
+  width:100%;max-width:1600px;margin:0 auto;
+  padding:37.9svh 24px 0;
+  color:#fff;font-family:var(--font-compressed);
+  font-weight:400;
+  font-size:clamp(95px,calc(12vw + 57px),285px);
+  line-height:.85;letter-spacing:-.018em;
+  text-transform:uppercase;text-align:left;
+}
+#nuvia-slogan .ns-line{
+  --ns-rise:100%;--ns-reveal:100%;--ns-boundary:112%;
+  display:block;position:relative;width:100%;
+  height:.85em;line-height:.85;white-space:nowrap;
+  transform:translate3d(0,var(--ns-rise),0);
+  will-change:transform;
+}
+#nuvia-slogan .ns-word{
+  --ns-width-scale:1;
+  position:relative;display:grid;grid-template-columns:max-content;
+  width:max-content;max-width:none;height:100%;
+  font:inherit;line-height:inherit;letter-spacing:inherit;
+  transform:scaleX(var(--ns-width-scale));transform-origin:left top;
+}
+#nuvia-slogan .ns-word-ghost,#nuvia-slogan .ns-word-white{
+  display:block;grid-area:1/1;font:inherit;line-height:inherit;
+  white-space:pre;width:max-content;
+}
+#nuvia-slogan .ns-word-ghost{color:rgba(255,255,255,.085)}
+#nuvia-slogan .ns-word-white{
+  color:#fff;pointer-events:none;
+  -webkit-mask-image:linear-gradient(to bottom,
+    transparent calc(var(--ns-boundary) - 9%),
+    #000 calc(var(--ns-boundary) + 9%));
+  mask-image:linear-gradient(to bottom,
+    transparent calc(var(--ns-boundary) - 9%),
+    #000 calc(var(--ns-boundary) + 9%));
+}
+/* Desktop final composition uses Air's much larger glyph height and
+   line pitch. Let the section remain visible beneath the third row. */
+@media(min-width:1400px){
+  #nuvia-slogan{height:145svh;min-height:1280px}
+  /* Move the entrance down by 24px without touching the scroll curves. */
+  #nuvia-slogan .ns-headline{padding-top:calc(37.9svh + 24px);line-height:.92}
+  /* Same ink height and identical font on all 3 lines; add only row pitch. */
+  #nuvia-slogan .ns-line{height:calc(.92em + 16px);line-height:.92}
+}
+/* Maintain the same visual spacing when a desktop window is narrowed.
+   Previously the 16px row breathing-room existed ONLY above 1400px. */
+@media(min-width:701px) and (max-width:1399px){
+  #nuvia-slogan .ns-headline{line-height:.92}
+  #nuvia-slogan .ns-line{height:calc(.92em + 16px);line-height:.92}
+}
+@media(max-width:700px){
+  #nuvia-slogan{height:115svh;min-height:620px;margin-top:clamp(175px,36svh,360px)}
+  #nuvia-slogan .ns-headline{
+    padding-top:38svh;padding-left:16px;padding-right:16px;
+    font-size:clamp(76px,calc(12vw + 40px),150px);line-height:.96
+  }
+  #nuvia-slogan .ns-line{height:calc(.96em + 14px);line-height:.96}
+}
+@media(prefers-reduced-motion:reduce){
+  #nuvia-slogan{height:auto;min-height:0;margin-top:clamp(120px,22svh,280px);padding-bottom:90px}
+  #nuvia-slogan .ns-headline{padding-top:0}
+  #nuvia-slogan .ns-line{
+    --ns-rise:0%!important;--ns-reveal:0%!important;--ns-boundary:-12%!important;
+    transform:none;will-change:auto
+  }
+  #nuvia-slogan .ns-word-white{-webkit-mask-image:none;mask-image:none}
+}
+
+/* NUVIA / CARROUSEL CURVE V3 — trajectoire continue, panneaux incurvés */
+/* Le cadre vitré extérieur reste celui de V2, sans modification. */
+#nuvia-curved-gallery {
+  padding: 36px 22px 74px;
+  min-height: 670px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  isolation: isolate;
+}
+#nuvia-curved-gallery .ncg-shell {
+  width:min(1480px,100%);
+  min-height:600px;
+  padding:62px 0 42px;
+  overflow:hidden;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.22);
+  background:linear-gradient(180deg,rgba(12,53,130,.235),rgba(14,67,151,.125));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-between;
+  position:relative;
+}
+#nuvia-curved-gallery .ncg-heading {
+  font:600 clamp(31px,3.5vw,52px)/1.06 var(--font-control,Inter,sans-serif);
+  letter-spacing:-.045em;
+  text-align:center;
+  margin:0;
+  max-width:730px;
+  padding:0 22px;
+  text-wrap:balance;
+  color:#fff;
+}
+#nuvia-curved-gallery .ncg-viewport {
+  position:relative;
+  width:100%;
+  height:302px;
+  overflow:hidden;
+  cursor:grab;
+  touch-action:pan-y;
+  outline:0;
+  user-select:none;
+  -webkit-user-select:none;
+}
+#nuvia-curved-gallery .ncg-viewport:active { cursor:grabbing; }
+#nuvia-curved-gallery .ncg-viewport:focus-visible {outline:2px solid white; outline-offset:-4px;}
+#nuvia-curved-gallery .ncg-svg {display:block; width:100%;height:100%;overflow:hidden;}
+#nuvia-curved-gallery .ncg-panel {
+  vector-effect:non-scaling-stroke;
+  fill:url(#ncg-panel-gradient);
+  fill-opacity:.20;
+  stroke:rgba(255,255,255,.62);
+  stroke-width:1.25;
+  stroke-linejoin:round;
+}
+#nuvia-curved-gallery .ncg-art {
+  pointer-events:none;
+  opacity:1;
+}
+#nuvia-curved-gallery .ncg-artimage {
+  pointer-events:none;
+}
+#nuvia-curved-gallery .ncg-artshade {
+  pointer-events:none;
+  opacity:.12;
+}
+#nuvia-curved-gallery .ncg-panel-glint {
+  vector-effect:non-scaling-stroke;
+  fill:none;
+  stroke:rgba(255,255,255,.19);
+  stroke-width:.6;
+  pointer-events:none;
+}
+#nuvia-curved-gallery .ncg-vignette {
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(255,255,255,.40) 0%,rgba(255,255,255,.13) 4%,transparent 10.5%,transparent 89.5%,rgba(255,255,255,.13) 96%,rgba(255,255,255,.40) 100%);
+}
+#nuvia-curved-gallery .ncg-caption {
+  margin:0;
+  text-align:center;
+  color:rgba(255,255,255,.77);
+  font:400 13px/1.55 var(--font-control,Inter,sans-serif);
+  padding:0 22px;
+  max-width:430px;
+}
+@media(max-width:700px){
+  #nuvia-curved-gallery{min-height:510px;padding:16px 12px 48px}
+  #nuvia-curved-gallery .ncg-shell{min-height:485px;padding:52px 0 40px;border-radius:14px}
+  #nuvia-curved-gallery .ncg-viewport{height:238px}
+  #nuvia-curved-gallery .ncg-caption{font-size:12px}
+}
+
+
+/* NUVIA — section services revue, grille de référence quatre + trois */
+#usage{min-height:auto;padding:100px 0 116px;background:linear-gradient(180deg,rgba(35,111,236,.17),rgba(48,133,247,.05));}
+#usage .wrap{max-width:1148px}
+#usage .bento.nuvia-feature-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:24px;margin-top:60px}
+#usage .nuvia-feature-grid>.nuvia-feature{min-width:0;overflow:hidden;padding:30px;border:1px solid rgba(255,255,255,.26);border-radius:12px;background:linear-gradient(154deg,rgba(32,111,240,.25),rgba(71,141,229,.17));box-shadow:none;gap:8px;transition:background .25s ease,border-color .25s ease;}
+
+#usage .nuvia-feature h3{font:500 20px/1.35 var(--font-control);letter-spacing:-.03em;color:#fff}
+#usage .nuvia-feature p{font:500 16px/1.5 var(--font-control);color:rgba(235,246,255,.8);opacity:1;max-width:410px}
+#usage .nuvia-feature-grid>.b2{grid-column:span 3;min-height:426px}
+#usage .nuvia-feature-grid>.b3{grid-column:span 2;min-height:196px}
+#usage .nuvia-art{position:relative;isolation:isolate;overflow:hidden;min-height:218px;margin-top:auto;border-radius:10px}
+#usage .nuvia-art-kicker{position:absolute;bottom:13px;left:16px;font:700 11px/1.4 var(--font-control);letter-spacing:.12em;color:rgba(255,255,255,.8);z-index:5}
+#usage .nuvia-art-tag{position:absolute;left:16px;bottom:14px;z-index:5;font-size:12px;font-weight:600;color:rgba(255,255,255,.88)}
+#usage .nuvia-art--fibre{background:radial-gradient(ellipse at 48% 66%,#dcebf3 0,#b9dced 48%,rgba(105,184,226,.4) 100%)}
+#usage .nuvia-fibre-shape{position:absolute;width:290px;height:175px;left:50%;top:10%;transform:translateX(-50%) rotate(-15deg);border-radius:40% 50% 45% 60%;background:repeating-linear-gradient(112deg,rgba(255,255,255,.85) 0 2px,rgba(207,226,237,.92) 3px 5px);filter:drop-shadow(8px 18px 13px rgba(47,98,133,.16))}
+#usage .nuvia-fibre-shape.small{width:220px;height:100px;top:48%;left:65%;transform:translateX(-50%) rotate(20deg);opacity:.87}
+#usage .nuvia-art--formats{background:linear-gradient(125deg,#a8d8f8,#65a9e9);display:flex;align-items:flex-end;justify-content:center;gap:14px;padding:28px 24px 37px}
+#usage .nuvia-pack{display:grid;place-items:center;border:1px solid rgba(66,112,147,.18);background:linear-gradient(140deg,#fff,#e8f0f5);box-shadow:5px 12px 13px rgba(43,107,163,.15);transform:rotate(-7deg);border-radius:4px;color:#5499cf;font-weight:900;letter-spacing:.12em;font-size:13px;flex:none}
+#usage .nuvia-pack.pack-sm{width:75px;height:96px;transform:rotate(-12deg) translateY(-4px)}
+#usage .nuvia-pack.pack-md{width:100px;height:132px;transform:rotate(-1deg);z-index:2}
+#usage .nuvia-pack.pack-lg{width:120px;height:154px;transform:rotate(9deg) translateY(6px)}
+#usage .nuvia-art--impression{display:grid;place-items:center;background:radial-gradient(circle at 70% 45%,#c6e9fa,#78b9ed)}
+#usage .nuvia-print-paper{width:66%;height:168px;background:#f7f6f1;box-shadow:12px 16px 0 rgba(255,255,255,.18),0 18px 30px rgba(31,99,149,.18);transform:rotate(-6deg);border-radius:7px;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#1e7dd8;font:900 38px/1 var(--font-control);letter-spacing:.08em}
+#usage .nuvia-print-paper small{font-size:9px;letter-spacing:.25em;margin-top:16px}
+#usage .nuvia-print-palette{display:flex;position:absolute;right:14px;bottom:15px;gap:6px}
+#usage .nuvia-print-palette i{height:17px;width:17px;border-radius:50%;background:#2b7fff;border:2px solid #fff}
+#usage .nuvia-print-palette i:nth-child(2){background:#bedff4}#usage .nuvia-print-palette i:nth-child(3){background:#eecb95}#usage .nuvia-print-palette i:nth-child(4){background:#343a51}
+#usage .nuvia-art--service{background:linear-gradient(135deg,#9cd3f3,#e2f2f9)}
+#usage .nuvia-service-table{position:absolute;inset:8px;display:grid;place-items:center;transform:rotate(-7deg)}
+#usage .nuvia-service-plate{height:190px;width:190px;border-radius:50%;background:radial-gradient(circle,#f9fafb 0 58%,#d7e2ec 59% 61%,#fff 62% 76%,#d0e1ee 77%);box-shadow:4px 9px 26px rgba(42,105,156,.19)}
+#usage .nuvia-service-pack{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(11deg);padding:17px 30px;background:#fcfcfa;border:1px solid #dae5ec;border-radius:4px;box-shadow:5px 7px 9px rgba(30,88,145,.16);font-weight:900;letter-spacing:.14em;color:#257ce1}
+@media(max-width:850px){#usage{padding:76px 0}#usage .bento.nuvia-feature-grid{gap:16px;margin-top:40px}#usage .nuvia-feature-grid>.b2{grid-column:span 6;min-height:390px}#usage .nuvia-feature-grid>.b3{grid-column:span 6;min-height:145px}#usage .nuvia-feature-grid>.nuvia-feature{padding:22px}}
+@media(min-width:600px) and (max-width:850px){#usage .nuvia-feature-grid>.b2{grid-column:span 3}#usage .nuvia-feature-grid>.b3{grid-column:span 2}}
+
+
+/* NUVIA | Cartes services — fidélité grille/bleu/maquettes, octobre 2026 */
+#usage{position:relative;isolation:isolate;overflow:hidden;min-height:0;padding:104px 0 116px;background:linear-gradient(180deg,rgba(48,119,243,.22) 0%,rgba(48,119,243,.96) 14%,rgba(73,148,248,.96) 49%,rgba(117,183,241,.91) 88%,rgba(117,183,241,.18) 100%)}
+#usage::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.54;filter:blur(13px);background:radial-gradient(ellipse 265px 125px at -5% 5%,rgba(238,250,255,.77),transparent 76%),radial-gradient(ellipse 238px 142px at 103% 20%,rgba(246,251,255,.66),transparent 77%),radial-gradient(ellipse 280px 155px at -8% 69%,rgba(250,252,255,.70),transparent 77%),radial-gradient(ellipse 310px 135px at 105% 95%,rgba(235,250,255,.66),transparent 77%)}
+#usage>.wrap{position:relative;z-index:1}
+#usage>.wrap{width:calc(100% - 48px);max-width:1100px}
+#usage .bento.nuvia-feature-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;margin-top:64px}
+#usage .nuvia-feature-grid>.bcard{min-width:0;overflow:hidden;gap:5px;padding:30px;border:1px solid rgba(255,255,255,.30);border-radius:12px;background:linear-gradient(150deg,rgba(42,104,207,.21),rgba(133,190,237,.15));box-shadow:none;backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}
+
+#usage .nuvia-feature-grid>.bcard h3{font:500 20px/1.35 var(--font-control);letter-spacing:-.035em;color:#fff}
+#usage .nuvia-feature-grid>.bcard p{font:500 16px/1.47 var(--font-control);color:rgba(234,245,255,.80);opacity:1;max-width:440px}
+#usage .nuvia-feature-grid>.b2{height:416px;min-height:416px;grid-column:span 6}
+#usage .nuvia-feature-grid>.b2:nth-child(1),#usage .nuvia-feature-grid>.b2:nth-child(4){grid-column:span 7}
+#usage .nuvia-feature-grid>.b2:nth-child(2),#usage .nuvia-feature-grid>.b2:nth-child(3){grid-column:span 5}
+#usage .nuvia-feature-grid>.b3{height:190px;min-height:190px;grid-column:span 4}
+#usage .nv-shot{position:relative;isolation:isolate;overflow:hidden;flex:0 0 238px;height:238px;min-height:0;margin:auto -30px -30px;color:#fff;font-family:var(--font-control)}
+#usage .nv-dotfield{position:absolute;inset:0 36px;background:radial-gradient(circle,rgba(231,245,255,.45) 1.2px,transparent 1.8px) 0 0/20px 20px}
+#usage .nv-toolbar{position:absolute;left:12%;right:7%;top:10px;height:40px;display:flex;align-items:center;justify-content:space-around;gap:3px;border:1px solid rgba(235,248,255,.45);border-radius:11px;background:rgba(72,146,240,.65);backdrop-filter:blur(9px);white-space:nowrap;font-size:11px;font-weight:650;z-index:3}
+#usage .nv-toolbar span{padding:6px 8px}#usage .nv-toolactive{background:rgba(255,255,255,.18);border-radius:7px}
+#usage .nv-editor-board{position:absolute;left:39%;right:6%;top:72px;height:203px;padding:15px;background:#eae6da;border-radius:6px 6px 0 0;transform:rotate(-2deg);box-shadow:0 10px 22px rgba(31,78,117,.17)}
+#usage .nv-editor-packet{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(125deg,#fffdf7,#e4e9df);border:1px dashed #abb9a9;color:#3e6258;box-shadow:3px 3px 0 rgba(255,255,255,.6)}
+#usage .nv-editor-packet strong{font:900 34px/1 var(--font-control);letter-spacing:.06em}
+#usage .nv-editor-packet small{font-size:8px;letter-spacing:.13em;font-weight:700;margin-top:7px}
+#usage .nv-packet-plant{position:absolute;width:115px;right:-15px;bottom:-25px;transform:rotate(26deg);opacity:.83}
+#usage .nv-leaf{display:block;width:100%;height:100%}
+#usage .nv-toolpanel{position:absolute;left:11%;top:62px;width:208px;padding:9px;border-radius:10px;background:rgba(101,163,240,.80);border:1px solid rgba(237,249,255,.46);box-shadow:2px 7px 15px rgba(38,104,165,.12);backdrop-filter:blur(11px);z-index:5}
+#usage .nv-toolpanel>b{display:block;font-size:11px;margin:4px 8px 9px}
+#usage .nv-toolpanel>span{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 8px;font-size:11px}
+#usage .nv-toolpanel i{flex:0 0 16px;height:16px;display:grid;place-items:center;font-style:normal;color:#fff;border-radius:4px;background:#2379ef;font-size:11px}
+#usage .nv-bcols{position:absolute;left:8%;right:8%;bottom:13px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px;align-items:end}
+#usage .nv-bcol{display:flex;flex-direction:column;align-items:center;gap:9px;min-width:0}
+#usage .nv-bbar{width:100%;max-width:42px;border-radius:10px 10px 8px 8px;border:1px solid rgba(225,241,255,.62);background:linear-gradient(165deg,rgba(202,238,255,.09),rgba(188,227,255,.18));text-align:center;padding:9px 0}
+#usage .nv-bbar small{font:500 9px/1 var(--font-control);opacity:.83}
+#usage .nv-bthumb{display:grid;place-items:center;width:100%;max-width:44px;height:31px;border-radius:4px;background:linear-gradient(135deg,#e6e3d5,#9abcbc);color:#4b8470;font:900 21px/1 Georgia,serif}
+#usage .nv-bcol:nth-child(2n) .nv-bthumb{background:linear-gradient(135deg,#dcecb3,#8cadd5)}
+#usage .nv-bcol:nth-child(3n) .nv-bthumb{background:linear-gradient(135deg,#f0dcaa,#b8b1c9)}
+#usage .nv-bthumb{position:relative;isolation:isolate;overflow:hidden;border:1px solid rgba(244,249,255,.6);box-shadow:0 2px 5px rgba(20,65,111,.12)}
+#usage .nv-bthumb::before{content:"";position:absolute;width:61%;height:95%;top:5%;left:18%;transform:rotate(-13deg);background:linear-gradient(135deg,#fffef6,#e3e9de);border:1px solid rgba(103,131,128,.38);border-radius:3px;box-shadow:2px 2px 3px rgba(27,50,51,.17)}
+#usage .nv-bthumb::after{content:"";position:absolute;left:38%;top:19%;width:24%;height:43%;border:2px solid #4c8364;border-radius:50% 50% 4px 50%;transform:rotate(30deg);background:linear-gradient(120deg,rgba(160,211,115,.7),rgba(255,255,255,.1))}
+#usage .nv-bthumb b{position:relative;z-index:2;font:800 6px/1 var(--font-control);letter-spacing:-.07em;color:#3c7159;text-shadow:0 1px #fff}
+#usage .nv-bcol:nth-child(2) .nv-bthumb::after,#usage .nv-bcol:nth-child(5) .nv-bthumb::after{border-color:#396fad;background:rgba(116,171,211,.67)}
+#usage .nv-bcol:nth-child(3) .nv-bthumb::after,#usage .nv-bcol:nth-child(6) .nv-bthumb::after{border-color:#a27945;background:rgba(225,179,112,.63)}
+#usage .nv-bcol:nth-child(4) .nv-bthumb::before{transform:rotate(12deg)}
+#usage .nv-bcol:nth-child(7) .nv-bthumb::before{transform:rotate(5deg)}
+
+#usage .nv-barline{position:absolute;left:8%;right:8%;bottom:54px;border-bottom:1px solid rgba(255,255,255,.18)}
+#usage .nv-shot-library{padding:8px 25px}
+#usage .nv-libsearch{display:flex;gap:15px;align-items:center;height:35px}
+#usage .nv-libicon{width:30px;height:30px;display:grid;place-items:center;background:#cfe484;color:#4b714c;font-size:17px;border-radius:5px}
+#usage .nv-libinput{padding:6px 14px;border-radius:19px;border:1px solid rgba(242,249,255,.50);font-size:10px;color:rgba(250,251,255,.8)}
+#usage .nv-libmain{position:relative;margin:7px 0 8px;height:109px;background:linear-gradient(100deg,#eaf0e1,#f2f0e4);border-radius:7px;overflow:hidden}
+#usage .nv-libbrand{position:absolute;left:14px;top:25px;color:#476951;display:flex;flex-direction:column}
+#usage .nv-libbrand strong{font:900 25px/1 var(--font-control);letter-spacing:-.04em}
+#usage .nv-libbrand small{font:600 10px/1.3 var(--font-control);margin-top:7px}
+#usage .nv-libplant{position:absolute;right:6px;top:-14px;height:143px;width:140px;transform:rotate(22deg)}
+#usage .nv-libtiles{height:79px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#usage .nv-libtiles>div{overflow:hidden;border-radius:6px;background:#add4e0;display:grid;place-items:center}
+#usage .nv-libtiles>div:nth-child(2){background:#c4e080}
+#usage .nv-libtiles>div:nth-child(3){background:#cee4bd}
+#usage .nv-libtiles .nv-leaf{width:115%;height:140%;transform:rotate(-22deg)}
+#usage .nv-libtiles>div:nth-child(2) .nv-leaf{transform:rotate(32deg)}
+#usage .nv-shot-lifestyle{background:linear-gradient(120deg,#abd7bb,#d8dcb4)}
+#usage .nv-checks{position:absolute;inset:-60px;background-color:#f4eddb;background-image:linear-gradient(45deg,rgba(78,122,99,.28) 25%,transparent 25%),linear-gradient(-45deg,rgba(78,122,99,.28) 25%,transparent 25%),linear-gradient(45deg,transparent 75%,rgba(78,122,99,.28) 75%),linear-gradient(-45deg,transparent 75%,rgba(78,122,99,.28) 75%);background-size:62px 62px;background-position:0 0,0 31px,31px -31px,-31px 0;transform:rotate(-9deg)}
+#usage .nv-plate{position:absolute;left:-56px;top:22px;width:238px;height:238px;border-radius:50%;background:radial-gradient(circle,#f8f9ee 0 52%,#d7ded2 53% 56%,#fbfdf2 57% 72%,#c8d0c1 73%);box-shadow:6px 12px 23px rgba(53,83,57,.24)}
+#usage .nv-greens{position:absolute;right:-37px;top:-25px;width:177px;height:153px;transform:rotate(42deg);filter:drop-shadow(4px 6px 5px rgba(50,70,34,.25))}
+#usage .nv-sachet{position:absolute;display:flex;align-items:center;justify-content:center;flex-direction:column;width:194px;height:97px;background:linear-gradient(135deg,#fffcf3,#e6e6d5);border:1px solid rgba(148,150,128,.5);border-radius:5px;box-shadow:6px 10px 18px rgba(39,70,47,.22);color:#3b7057}
+#usage .nv-sachet b{font:900 31px/1 var(--font-control);letter-spacing:.09em}
+#usage .nv-sachet small{font:600 7px/1 var(--font-control);letter-spacing:.14em;margin-top:9px}
+#usage .nv-sachet-one{left:25%;bottom:4px;transform:rotate(-14deg)}
+#usage .nv-sachet-two{right:11%;top:35px;transform:rotate(13deg);color:#5384a8}
+#usage .nv-sachet-three{right:-6%;bottom:-53px;transform:rotate(-9deg);color:#916f55}
+/* Responsive vérifié en 3 paliers : asymétrie maintenue sur les grands écrans. */
+@media(min-width:981px){#usage .nuvia-feature-grid>.b2:nth-child(1),#usage .nuvia-feature-grid>.b2:nth-child(4){grid-column:span 7}#usage .nuvia-feature-grid>.b2:nth-child(2),#usage .nuvia-feature-grid>.b2:nth-child(3){grid-column:span 5}}
+@media(min-width:821px) and (max-width:980px){#usage .nuvia-feature-grid>.b2:nth-child(-n+4){grid-column:span 6;min-height:440px;height:440px}#usage .nuvia-feature-grid>.b3{min-height:210px;height:auto}#usage .nv-toolbar{left:4%;right:4%;font-size:10px}#usage .nv-toolpanel{left:4%}}
+@media(max-width:820px){#usage{padding:72px 0 78px}#usage>.wrap{width:calc(100% - 28px)}#usage .bento.nuvia-feature-grid{gap:14px;margin-top:36px}#usage .nuvia-feature-grid>.b2:nth-child(-n+4){grid-column:span 12;min-height:420px;height:auto}#usage .nuvia-feature-grid>.b3{grid-column:span 12;min-height:148px;height:auto}#usage .nuvia-feature-grid>.bcard{padding:22px}#usage .nv-shot{height:232px;flex-basis:232px;margin:16px -22px -22px}#usage .nv-toolbar{left:6%;right:6%}}
+@media(max-width:470px){#usage .nv-toolbar{font-size:9px}#usage .nv-toolbar span{padding:5px 3px}#usage .nv-toolpanel{left:6%;width:181px}#usage .nv-sachet{width:155px;height:82px}#usage .nv-sachet b{font-size:24px}}
+
+@media(max-width:390px){#usage .nv-toolbar span:last-child{display:none}#usage .nv-toolpanel{left:6%;width:181px}#usage .nv-sachet{width:155px;height:82px}#usage .nv-sachet b{font-size:24px}}
+
+
+/* Les cartes ne doivent pas prendre une hauteur fixe si la copie se replie. */
+@media(min-width:981px){#usage .nuvia-feature-grid>.b2{height:auto;min-height:416px}#usage .nv-shot{margin-top:auto}}
+@media(max-width:980px){#usage .nuvia-feature-grid>.b2{height:auto!important}#usage .nv-shot{min-height:225px}}
+@media(prefers-reduced-transparency:reduce){#usage .nuvia-feature-grid>.bcard{backdrop-filter:none;-webkit-backdrop-filter:none}}
+
+/* Finitions des sachets NUVIA : fibre, scellage et reflets subtils */
+#usage .nv-editor-packet{
+ background:repeating-linear-gradient(176deg,rgba(116,129,119,.045) 0 1px,transparent 1px 5px),linear-gradient(110deg,#faf9f4 0%,#f2f2e9 55%,#e4eade 100%);
+ border:1px solid rgba(134,153,143,.52);
+ box-shadow:inset 0 0 0 5px rgba(251,251,245,.8),inset 0 0 0 6px rgba(140,160,148,.3),2px 6px 12px rgba(34,72,71,.15)
+}
+#usage .nv-editor-packet::after{
+ content:"";position:absolute;inset:9px;pointer-events:none;
+ border:1px dashed rgba(121,147,131,.45);border-radius:2px
+}
+#usage .nv-editor-packet strong,#usage .nv-editor-packet small{position:relative;z-index:2}
+#usage .nv-sachet{
+ background:repeating-linear-gradient(179deg,rgba(97,107,98,.045) 0 1px,transparent 1px 5px),linear-gradient(115deg,#fffdf6,#eae9db 65%,#dddaca);
+ border:1px solid rgba(132,145,125,.6);
+ box-shadow:inset 0 0 0 5px rgba(255,255,249,.56),inset 0 0 0 6px rgba(113,130,117,.18),6px 10px 18px rgba(39,70,47,.23)
+}
+#usage .nv-sachet::before{
+ content:"";position:absolute;inset:8px;border:1px dashed rgba(125,143,119,.52);
+ border-radius:2px;pointer-events:none
+}
+#usage .nv-sachet::after{
+ content:"";position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(103deg,transparent 12%,rgba(255,255,255,.37) 31%,transparent 42%,rgba(96,102,90,.045) 77%,transparent 90%)
+}
+#usage .nv-sachet b,#usage .nv-sachet small{position:relative;z-index:1;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+#usage .nv-plate{box-shadow:inset -7px -6px 14px rgba(117,139,122,.13),6px 12px 23px rgba(53,83,57,.24)}
+#usage .nv-bbar{background:linear-gradient(145deg,rgba(236,247,255,.15),rgba(151,213,255,.075) 58%,rgba(246,249,255,.22));box-shadow:inset 1px 1px 0 rgba(255,255,255,.11)}
+#usage .nv-libmain{box-shadow:0 5px 16px rgba(47,87,73,.09)}
+@media(prefers-reduced-motion:reduce){#usage .nuvia-feature-grid>.bcard{transition:none}}
+
+
+/* NUVIA — contour natif de la carte, sans SVG superposé.
+   La surface intérieure est opaque pour que le dégradé conique de la
+   bordure ne transparaisse JAMAIS dans le corps de la carte. */
+@property --nv-edge-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+#usage .nuvia-feature-grid>.bcard {
+  --nv-edge-angle: 0deg;
+  position: relative;
+  isolation: isolate;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  background:
+    radial-gradient(125% 120% at 3% 0%,
+      rgba(176,219,255,.18) 0%,
+      rgba(132,199,255,.06) 39%,
+      transparent 72%) padding-box,
+    linear-gradient(150deg,
+      rgb(53,121,225) 0%,
+      rgb(68,139,231) 49%,
+      rgb(89,158,233) 100%) padding-box,
+    conic-gradient(from var(--nv-edge-angle),
+      rgba(241,250,255,.42) 0deg,
+      rgba(241,250,255,.42) 112deg,
+      rgba(255,255,255,.66) 124deg,
+      rgba(255,255,255,.90) 129deg,
+      rgba(241,250,255,.42) 143deg,
+      rgba(241,250,255,.42) 294deg,
+      rgba(255,255,255,.68) 309deg,
+      rgba(255,255,255,1) 322deg,
+      rgba(255,255,255,.95) 331deg,
+      rgba(241,250,255,.42) 350deg,
+      rgba(241,250,255,.42) 360deg) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.065),
+    inset 0 -1px 0 rgba(12,64,153,.06),
+    0 13px 30px rgba(12,55,122,.085);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  animation: nv-edge-circuit 8s linear infinite;
+  transition: box-shadow .3s ease;
+}
+#usage .nuvia-feature-grid>.bcard:nth-child(2n) { animation-delay: -2.25s; }
+#usage .nuvia-feature-grid>.bcard:nth-child(3n) { animation-delay: -4.5s; }
+#usage .nuvia-feature-grid>.bcard:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.105),
+    inset 0 -1px 0 rgba(12,64,153,.05),
+    0 17px 34px rgba(12,55,122,.13);
+}
+@keyframes nv-edge-circuit {
+  to { --nv-edge-angle: 360deg; }
+}
+/* Aucune couche SVG, aucun pseudo-élément flottant sur la carte. */
+@media (prefers-reduced-motion: reduce) {
+  #usage .nuvia-feature-grid>.bcard {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* NUVIA / Cumulus proceduraux — unique couche en ouverture,
+   aucune vidéo, aucune ressource distante, boucle continue en Canvas. */
+#entree{
+  position:relative;isolation:isolate;overflow:hidden;
+  height:100svh;min-height:0;padding:0;
+  background:linear-gradient(180deg,#2875e6 0%,#3787f0 43%,#7cbaf3 78%,rgba(169,218,249,0) 100%);
+}
+#entree .nv-cumulus-scene{
+  position:absolute;inset:0;z-index:0;overflow:hidden;
+  pointer-events:none;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 77%,rgba(0,0,0,.88) 87%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 0%,#000 77%,rgba(0,0,0,.88) 87%,transparent 100%);
+}
+#entree .nv-cumulus-scene::before{
+  content:"";position:absolute;inset:0;z-index:0;
+  background:radial-gradient(ellipse 55% 42% at 51% 27%,rgba(219,244,255,.14),transparent 90%),
+             linear-gradient(to bottom,rgba(22,97,217,.07),transparent 44%,rgba(197,235,254,.12));
+}
+#entree #nv-cumulus-canvas{
+  position:absolute;inset:0;z-index:1;display:block;
+  width:100%;height:100%;max-width:none;max-height:none;
+  opacity:.99;pointer-events:none;
+}
+#entree .mark{position:relative;z-index:2}
+@media(max-width:820px){
+  #entree{height:100svh;min-height:0}
+  #entree .nv-cumulus-scene{
+    -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 73%,transparent 100%);
+    mask-image:linear-gradient(to bottom,#000 0%,#000 73%,transparent 100%);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #entree #nv-cumulus-canvas{animation:none!important}
+}
+/* NUVIA STORY / Nouveau shader autonome en fin de page. */
+#nv-journey{display:flow-root;position:relative;isolation:isolate;height:430.3svh;min-height:2150px;padding:0;margin:0;width:100%;background:#387ff0;overflow:clip}
+#nv-journey .nvj-sticky{position:sticky;top:0;margin-top:-32.32svh;height:calc(100svh + 120px);min-height:610px;width:100%;isolation:isolate;overflow:hidden;background:linear-gradient(180deg,#246cdb,#498ff5 50%,#a7d5ff)}
+/* Ciel de secours : nuages doux en mouvement si WebGL est indisponible.
+   La toile WebGL opaque recouvre ces nuages lorsqu'elle fonctionne. */
+#nv-journey .nvj-sticky::before{
+  content:"";position:absolute;inset:-18%;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 28% 24% at 10% 28%,rgba(255,255,255,.63) 0%,rgba(238,248,255,.31) 51%,transparent 83%),
+    radial-gradient(ellipse 32% 20% at 93% 22%,rgba(255,255,255,.55) 0%,rgba(242,249,255,.27) 51%,transparent 83%),
+    radial-gradient(ellipse 31% 22% at 23% 87%,rgba(255,255,255,.48) 0%,rgba(234,249,255,.18) 52%,transparent 83%);
+  filter:blur(14px);opacity:.78;
+  animation:nvj-soft-cloud-drift 28s ease-in-out infinite alternate;
+}
+@keyframes nvj-soft-cloud-drift{
+  from{transform:translate3d(-2%,0,0) scale(1.04)}
+  to{transform:translate3d(2%,-3%,0) scale(1.08)}
+}
+@media(prefers-reduced-motion:reduce){
+  #nv-journey .nvj-sticky::before{animation:none}
+}
+#nv-journey .nvj-canvas{display:block;position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#nv-journey .nvj-light{position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse 75% 56% at 50% 58%,rgba(198,234,255,.16),transparent 78%),linear-gradient(180deg,rgba(17,56,141,.1),transparent 30%,transparent 88%,rgba(168,214,253,.1))}
+/* AIR.INC V2: triptych, measured sticky plane + individual word trajectories. */
+#nv-journey .nvj-frames{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+}
+#nv-journey .nvj-frame{
+  --nvj-group-shift:100px;--nvj-title-shift:50%;
+  --nvj-title-opacity:0;--nvj-caption-opacity:0;
+  position:absolute;left:0;right:0;top:calc(50% - 155px);
+  display:flex;align-items:center;flex-direction:column;
+  width:100%;padding:0 clamp(16px,6vw,112px);
+  min-width:0;text-align:center;
+  opacity:1;
+  transform:translate3d(0,var(--nvj-group-shift),0);
+  will-change:transform;
+}
+#nv-journey .nvj-word{
+  display:grid;grid-template-columns:max-content;position:relative;
+  width:max-content;max-width:none;margin:0;
+  font:400 clamp(90px,20vw,250px)/.85 var(--font-compressed);
+  letter-spacing:-.017em;white-space:nowrap;text-transform:uppercase;
+  opacity:var(--nvj-title-opacity);
+  transform:translate3d(0,var(--nvj-title-shift),0);
+  will-change:transform,opacity;
+}
+#nv-journey .nvj-word-ghost,
+#nv-journey .nvj-word-white{
+  grid-area:1/1;display:block;width:max-content;
+  font:inherit;line-height:inherit;letter-spacing:inherit;white-space:nowrap;
+}
+#nv-journey .nvj-word-ghost{visibility:hidden}
+#nv-journey .nvj-word-white{
+  color:#fff;pointer-events:none;
+  -webkit-mask-image:none;mask-image:none;
+}
+#nv-journey .nvj-caption{
+  max-width:560px;margin:27px auto 0;
+  font:500 clamp(16px,1.4vw,20px)/1.42 var(--font-control);
+  letter-spacing:-.025em;color:#fff;text-wrap:balance;
+  opacity:var(--nvj-caption-opacity);
+  transform:translate3d(0,var(--nvj-caption-shift,0px),0);
+  will-change:opacity,transform;
+}
+#nv-journey .nvj-index{
+  position:absolute;left:50%;
+  bottom:calc(var(--nv-announcement-space,50px) + 25px);
+  transform:translateX(-50%);
+  display:flex;gap:10px;align-items:center;z-index:4;pointer-events:none;
+}
+#nv-journey .nvj-index i{
+  display:block;width:29px;height:2px;background:rgba(255,255,255,.3);
+  border-radius:3px;
+}
+#nv-journey .nvj-index i[data-active="true"]{background:#fff}
+@media(max-width:700px){
+  #nv-journey{height:430.3svh;min-height:1950px}
+  #nv-journey .nvj-sticky{height:calc(100svh + 80px);min-height:490px}
+  #nv-journey .nvj-frame{
+    top:calc(50% - 125px);padding:0 16px;
+  }
+  #nv-journey .nvj-word{
+    font-size:clamp(78px,20vw,160px);line-height:.9
+  }
+  #nv-journey .nvj-caption{
+    margin-top:24px;max-width:335px;font-size:16px;line-height:1.47
+  }
+  #nv-journey .nvj-index{
+    bottom:calc(var(--nv-announcement-space,50px) + 20px)
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #nv-journey{height:auto;min-height:0;padding:70px 0}
+  #nv-journey .nvj-sticky{
+    margin-top:0;position:relative;height:auto;min-height:0;overflow:visible
+  }
+  #nv-journey .nvj-frames{
+    position:relative;display:flex;flex-direction:column;gap:90px;padding:50px 0
+  }
+  #nv-journey .nvj-frame{
+    position:relative;top:auto;
+    --nvj-group-shift:0px!important;--nvj-title-shift:0%!important;
+    --nvj-title-opacity:1!important;--nvj-caption-opacity:1!important;
+    transform:none;will-change:auto
+  }
+  #nv-journey .nvj-word{transform:none;opacity:1;will-change:auto}
+  #nv-journey .nvj-caption{transform:none;opacity:1;will-change:auto}
+  #nv-journey .nvj-index{display:none}
+}
+
+</style>
+
+<style id="nav-preview-style">
+
+/* Soleil/Lune : animation locale uniquement, sans thème sombre/clair */
+#nuvia-react-navigation .nv-nav{display:flex;align-items:center;gap:12px}
+#nuvia-react-navigation .nv-links{flex:0 1 auto;min-width:0}
+#nuvia-react-navigation .nv-sunmoon-toggle{
+  position:relative;isolation:isolate;flex:0 0 40px;width:40px;height:40px;
+  margin:0;padding:0;border:1px solid rgba(255,255,255,.74);
+  border-radius:50%;overflow:hidden;touch-action:manipulation;
+  background:rgba(255,255,255,.85);color:#e99e27;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.84),0 1px 8px rgba(48,84,117,.12);
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+#nuvia-react-navigation .nv-sunmoon-toggle:hover{background:rgba(255,255,255,.95);border-color:#fff}
+#nuvia-react-navigation .nv-sunmoon-toggle:focus-visible{outline:2px solid #287fff;outline-offset:3px}
+#nuvia-react-navigation .nv-sunmoon-toggle .nv-sm-body{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;will-change:transform,opacity;
+}
+#nuvia-react-navigation .nv-sunmoon-toggle .nv-sm-body svg{display:block;width:20px;height:20px}
+#nuvia-react-navigation .nv-sunmoon-toggle .nv-sm-sun{opacity:1;transform:none;color:#ed9a28}
+#nuvia-react-navigation .nv-sunmoon-toggle .nv-sm-moon{opacity:0;transform:translate(-115%,115%) rotate(-25deg) scale(.72);color:#c48d36}
+#nuvia-react-navigation .nv-sunmoon-toggle[data-state="moon"] .nv-sm-sun{opacity:0;transform:translate(115%,115%) rotate(120deg) scale(.72)}
+#nuvia-react-navigation .nv-sunmoon-toggle[data-state="moon"] .nv-sm-moon{opacity:1;transform:none}
+@media(max-width:820px){
+  #nuvia-react-navigation{overflow:visible}
+  #nuvia-react-navigation .nv-nav{width:100%;gap:8px}
+  #nuvia-react-navigation .nv-links{
+    flex:1 1 auto;width:auto;max-width:calc(100% - 50px);
+    overflow-x:auto;overscroll-behavior-x:contain;
+    scrollbar-width:none;-ms-overflow-style:none
+  }
+  #nuvia-react-navigation .nv-links::-webkit-scrollbar{display:none}
+  #nuvia-react-navigation .nv-navitem{flex:0 0 auto}
+  #nuvia-react-navigation .nv-sunmoon-toggle{margin-left:auto;flex:0 0 40px}
+}
+@media(prefers-reduced-motion:reduce){
+  #nuvia-react-navigation .nv-sunmoon-toggle{transition:none}
+  #nuvia-react-navigation .nv-sm-body{will-change:auto}
+}
+
+#nuvia-react-navigation{position:fixed;z-index:90;top:24px;left:50%;transform:translateX(-50%);width:min(1164px,calc(100vw - 48px));pointer-events:none;font:400 14px/1.5 Inter,ui-sans-serif,system-ui,sans-serif;color:#09090b;}
+#nuvia-react-navigation *{box-sizing:border-box;}
+#nuvia-react-navigation .nv-nav{pointer-events:auto;width:100%;}
+#nuvia-react-navigation ul{margin:0;padding:0;list-style:none;}
+#nuvia-react-navigation .nv-links{display:flex;align-items:center;gap:0;}
+#nuvia-react-navigation button{font:inherit;white-space:nowrap;border:0;background:none;cursor:pointer;color:#71717a;padding:6px 16px;display:flex;align-items:center;justify-content:center;gap:4px;position:relative;transition:color .3s ease;border-radius:999px;}
+#nuvia-react-navigation .nv-chevron{width:16px;height:16px;display:block;transition:transform .3s ease}
+#nuvia-react-navigation .nv-chevron svg{display:block;width:100%;height:100%}
+#nuvia-react-navigation .nv-navitem{position:relative}
+#nuvia-react-navigation .nv-navitem:hover button,#nuvia-react-navigation .nv-navitem[data-open=true]>button{background:rgba(24,24,27,.10);color:#09090b}
+#nuvia-react-navigation .nv-navitem[data-open=true] .nv-chevron{transform:rotate(180deg)}
+#nuvia-react-navigation .nv-menu{position:absolute;top:100%;left:0;padding-top:8px;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .22s ease,transform .26s cubic-bezier(.2,.7,.2,1),visibility .22s;}
+#nuvia-react-navigation .nv-navitem[data-open=true] .nv-menu{opacity:1;visibility:visible;transform:translateY(0)}
+#nuvia-react-navigation .nv-columns{display:flex;gap:36px;width:max-content;padding:16px;background:#fff;border:1px solid #e4e4e7;border-radius:16px;}
+#nuvia-react-navigation .nv-col{flex:1 0 auto;min-width:260px;}
+#nuvia-react-navigation .nv-col h3{color:#71717a;font-size:14px;line-height:20px;font-weight:500;margin:0 0 16px;text-transform:capitalize;}
+#nuvia-react-navigation .nv-col ul{display:flex;flex-direction:column;gap:24px;}
+#nuvia-react-navigation .nv-item{display:flex;align-items:flex-start;gap:12px;text-decoration:none;color:#09090b;white-space:nowrap;}
+#nuvia-react-navigation .nv-icon{width:36px;height:36px;flex:0 0 36px;display:flex;align-items:center;justify-content:center;border:1px solid #e4e4e7;border-radius:6px;color:#09090b;transition:background .3s,color .3s;}
+#nuvia-react-navigation .nv-item:hover .nv-icon{background:#f4f4f5}
+#nuvia-react-navigation .nv-item strong{display:block;font-size:14px;line-height:20px;font-weight:500;}
+#nuvia-react-navigation .nv-item small{display:block;font-size:12px;line-height:20px;color:#71717a;font-weight:400;}
+@media(max-width:820px){#nuvia-react-navigation{top:10px;width:calc(100vw - 16px);left:8px;transform:none;overflow-x:auto;}#nuvia-react-navigation .nv-links{width:max-content}#nuvia-react-navigation .nv-menu{position:fixed;top:46px;left:8px;max-width:calc(100vw - 16px);overflow-x:auto}#nuvia-react-navigation .nv-columns{gap:16px}#nuvia-react-navigation .nv-col{min-width:210px}}
+/* NUVIA — voile vitré fixe derrière la navigation.
+   Flou bord à bord, sommet assombri et disparition progressive vers le ciel.
+   Couche indépendante : aucun impact sur les menus et les clics. */
+#nv-nav-frost{
+  position:fixed;top:0;left:0;right:0;height:100px;z-index:89;
+  pointer-events:none;
+  background:transparent;
+  -webkit-backdrop-filter:blur(16px) saturate(1.12);
+  backdrop-filter:blur(16px) saturate(1.12);
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 47%,rgba(0,0,0,.74) 69%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 0%,#000 47%,rgba(0,0,0,.74) 69%,transparent 100%);
+}
+@media(max-width:820px){
+  #nv-nav-frost{height:135px;}
+}
+
+/* NUVIA — navigation anglaise épurée, inspirée des alignements Air.
+   Les panneaux déroulants et leurs interactions d'origine sont conservés. */
+#nuvia-react-navigation{
+  top:22px;
+  width:min(1550px,calc(100vw - 10vw));
+  font:500 14px/1.35 Inter,ui-sans-serif,system-ui,sans-serif;
+  color:#fff;
+}
+#nuvia-react-navigation .nv-nav{
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+}
+#nuvia-react-navigation .nv-links{
+  display:flex;align-items:center;gap:26px;flex:0 1 auto;min-width:0;
+}
+#nuvia-react-navigation .nv-navitem{flex:0 0 auto}
+#nuvia-react-navigation .nv-navitem>button{
+  min-height:40px;padding:4px 0;background:transparent;border-radius:0;
+  color:rgba(255,255,255,.96);font-weight:600;
+  transition:opacity .2s ease,color .2s ease;
+}
+#nuvia-react-navigation .nv-navitem:hover>button,
+#nuvia-react-navigation .nv-navitem[data-open=true]>button{
+  background:transparent;color:#fff;opacity:.85;
+}
+#nuvia-react-navigation .nv-chevron{width:13px;height:13px;margin-left:3px}
+/* NUVIA - filet sous le seul libellé, sans décaler bouton ni chevron.
+   Le trait naît au centre au survol et repart en douceur à la sortie. */
+#nuvia-react-navigation .nv-navitem>button .nv-nav-label{
+  display:inline-block;
+  position:relative;
+  white-space:nowrap;
+}
+#nuvia-react-navigation .nv-navitem>button .nv-nav-label::after{
+  content:"";
+  position:absolute;
+  left:0;right:0;bottom:-10px;
+  height:1px;
+  background:rgba(255,255,255,.96);
+  pointer-events:none;
+  opacity:0;
+  transform:scaleX(0);
+  transform-origin:center;
+  transition:transform .32s cubic-bezier(.22,1,.36,1),opacity .2s ease;
+}
+#nuvia-react-navigation .nv-navitem:hover>button .nv-nav-label::after,
+#nuvia-react-navigation .nv-navitem[data-open="true"]>button .nv-nav-label::after,
+#nuvia-react-navigation .nv-navitem>button:focus-visible .nv-nav-label::after{
+  opacity:1;
+  transform:scaleX(1);
+}
+#nuvia-react-navigation .nv-navitem>button:focus-visible,
+#nuvia-react-navigation .nv-action:focus-visible{
+  outline:2px solid #fff;outline-offset:3px;
+}
+#nuvia-react-navigation .nv-actions{
+  display:flex;align-items:center;gap:8px;margin-left:auto;flex:0 0 auto;
+}
+/* Deux hover specifiques Nuvia : halo orbital / ouverture radiale.
+   Ni dimensions ni position ne changent durant l'animation. */
+@property --nv-action-orbit{
+  syntax:"<angle>";inherits:false;initial-value:0deg;
+}
+@property --nv-action-erase{
+  syntax:"<length>";inherits:true;initial-value:-12px;
+}
+#nuvia-react-navigation .nv-actions .nv-action{
+  position:relative;isolation:isolate;overflow:hidden;
+  min-height:40px;padding:0 17px;
+  border:1px solid rgba(255,255,255,.98);border-radius:8px;
+  background:transparent;
+  font:500 14px/1 Inter,ui-sans-serif,system-ui,sans-serif;
+  white-space:nowrap;
+  transition:color .24s ease .08s,border-color .25s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+#nuvia-react-navigation .nv-action-label{
+  position:relative;z-index:3;pointer-events:none;
+}
+/* Let’s Talk : passage de lumiere sur tout le pourtour,
+   suivi d'un remplissage translucide legerement satine. */
+#nuvia-react-navigation .nv-action--outline{
+  background:transparent;color:#fff;
+}
+#nuvia-react-navigation .nv-action--outline::before{
+  --nv-action-orbit:0deg;
+  content:"";position:absolute;inset:-1px;z-index:2;
+  padding:1.5px;border-radius:inherit;pointer-events:none;
+  background:conic-gradient(from var(--nv-action-orbit),
+    transparent 0deg 190deg,
+    rgba(255,255,255,.12) 222deg,
+    #fff 273deg,
+    rgba(255,255,255,.24) 318deg,
+    transparent 353deg 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  opacity:0;
+  transition:--nv-action-orbit .84s cubic-bezier(.4,0,.2,1),opacity .2s ease;
+}
+#nuvia-react-navigation .nv-action--outline::after{
+  content:"";position:absolute;inset:0;z-index:1;
+  border-radius:inherit;pointer-events:none;
+  background:linear-gradient(128deg,rgba(255,255,255,.39),rgba(255,255,255,.21));
+  opacity:0;transition:opacity .44s ease .12s;
+}
+#nuvia-react-navigation .nv-action--outline:hover::before,
+#nuvia-react-navigation .nv-action--outline:focus-visible::before{
+  --nv-action-orbit:360deg;opacity:1;
+}
+#nuvia-react-navigation .nv-action--outline:hover::after,
+#nuvia-react-navigation .nv-action--outline:focus-visible::after{
+  opacity:1;
+}
+/* Sample Kit : le blanc est une couche et non le fond du bouton.
+   Un trou radial nait au centre, s'elargit et fait apparaitre le ciel. */
+#nuvia-react-navigation .nv-action--solid{
+  /* Typed, inherited radius controls background and all letters together. */
+  --nv-action-erase:-12px;
+  --nv-label-base:#202126;
+  --nv-label-reveal:#fff;
+  background:transparent;color:#202126;
+  transition:--nv-action-erase .78s cubic-bezier(.42,0,.58,1);
+}
+#nuvia-react-navigation .nv-action--solid .nv-action-label{
+  /* Keep the original text fully painted at every animation frame. */
+  position:relative;display:block;
+  background:none;
+  color:var(--nv-label-base);
+  -webkit-text-fill-color:var(--nv-label-base);
+}
+#nuvia-react-navigation .nv-action--solid .nv-action-label::after{
+  /* Second layer, character-for-character identical and perfectly
+     aligned. Revealed by EXACTLY the same expanding radial mask as the
+     background. The growing circle crosses p/l/e, then its outer letters. */
+  content:attr(data-nv-text);
+  position:absolute;inset:0;display:block;
+  color:var(--nv-label-reveal);
+  -webkit-text-fill-color:var(--nv-label-reveal);
+  font:inherit;letter-spacing:inherit;line-height:inherit;
+  white-space:nowrap;text-align:inherit;
+  pointer-events:none;
+  -webkit-mask-image:radial-gradient(circle at center,
+    #000 calc(var(--nv-action-erase) - 6px),
+    transparent calc(var(--nv-action-erase) + 6px));
+  mask-image:radial-gradient(circle at center,
+    #000 calc(var(--nv-action-erase) - 6px),
+    transparent calc(var(--nv-action-erase) + 6px));
+}
+#nuvia-react-navigation .nv-action--solid::before{
+  content:"";position:absolute;inset:-1px;z-index:1;
+  border-radius:inherit;pointer-events:none;background:#fff;
+  -webkit-mask-image:radial-gradient(circle at center,
+    transparent calc(var(--nv-action-erase) - 6px),
+    #000 calc(var(--nv-action-erase) + 6px));
+  mask-image:radial-gradient(circle at center,
+    transparent calc(var(--nv-action-erase) - 6px),
+    #000 calc(var(--nv-action-erase) + 6px));
+}
+#nuvia-react-navigation .nv-action--solid:hover,
+#nuvia-react-navigation .nv-action--solid:focus-visible{
+  /* Keep the original radial wipe and 780 ms easing.
+     Use the button's useful radius instead of overshooting to 160px:
+     glyphs reveal gradually, from the central letters to the edges. */
+  --nv-action-erase:96px;
+}
+@media(max-width:820px){
+  #nuvia-react-navigation{
+    top:10px;left:8px;transform:none;width:calc(100vw - 16px);
+    overflow:visible;
+  }
+  #nuvia-react-navigation .nv-nav{
+    display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;
+  }
+  #nuvia-react-navigation .nv-links{
+    flex:1 1 100%;width:100%;max-width:100%;min-width:0;
+    overflow-x:auto;gap:18px;scrollbar-width:none;
+  }
+  #nuvia-react-navigation .nv-links::-webkit-scrollbar{display:none}
+  #nuvia-react-navigation .nv-navitem>button{min-height:32px;font-size:13px}
+  #nuvia-react-navigation .nv-actions{
+    margin-left:auto;gap:7px;padding-top:2px;
+  }
+  #nuvia-react-navigation .nv-actions .nv-action{
+    min-height:34px;padding:0 12px;font-size:12px;
+  }
+  #nuvia-react-navigation .nv-menu{
+    position:fixed;top:91px;left:8px;max-width:calc(100vw - 16px);
+    overflow-x:auto;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #nuvia-react-navigation .nv-navitem>button .nv-nav-label::after{transition:none}
+  #nuvia-react-navigation .nv-navitem>button,
+  #nuvia-react-navigation .nv-actions .nv-action{transition:none}
+  #nuvia-react-navigation .nv-actions .nv-action::before,
+  #nuvia-react-navigation .nv-actions .nv-action::after{transition:none}
+}
+
+/* NAVBAR NUVIA | inversion du contraste sur les surfaces claires.
+   Même alignement et mêmes animations; seules les couleurs s'inversent.
+   Deux voiles se croisent en fondu au lieu de faire apparaître un fond brutal. */
+#nv-nav-frost::before,
+#nv-nav-frost::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  transition:opacity .42s cubic-bezier(.22,1,.36,1);
+}
+#nv-nav-frost::before{
+  background:linear-gradient(180deg,
+    rgba(11,24,42,.64) 0%,
+    rgba(19,40,69,.40) 38%,
+    rgba(25,50,81,.14) 72%,
+    rgba(25,50,81,0) 100%);
+  opacity:1;
+}
+#nv-nav-frost::after{
+  /* Glass remains blurred on white. Neutral-gray tint restores a
+     perceptible frosted edge without introducing a solid header bar. */
+  background:linear-gradient(180deg,
+    rgba(43,49,59,.34) 0%,
+    rgba(57,63,74,.20) 38%,
+    rgba(82,90,104,.055) 72%,
+    rgba(82,90,104,0) 100%);
+  opacity:0;
+}
+#nv-nav-frost[data-nv-contrast="ink"]::before{opacity:0}
+#nv-nav-frost[data-nv-contrast="ink"]::after{opacity:1}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem>button{
+  color:#161616;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem:hover>button,
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem[data-open=true]>button{
+  color:#000;opacity:.77;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem>button .nv-nav-label::after{
+  background:#161616;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem>button:focus-visible,
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action:focus-visible{
+  outline-color:#171717;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-actions .nv-action{
+  border-color:#202020;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action--outline{
+  color:#161616;background:transparent;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action--outline::before{
+  background:conic-gradient(from var(--nv-action-orbit),
+    transparent 0deg 190deg,
+    rgba(0,0,0,.13) 222deg,
+    #090909 273deg,
+    rgba(0,0,0,.25) 318deg,
+    transparent 353deg 360deg);
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action--outline::after{
+  background:linear-gradient(128deg,rgba(0,0,0,.12),rgba(0,0,0,.045));
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action--solid{
+  --nv-label-base:#fff;
+  --nv-label-reveal:#171717;
+  background:transparent;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-action--solid::before{
+  background:#171717;
+}
+/* Label and its backing fill are driven by one animation on the parent. */
+@media(prefers-reduced-motion:reduce){
+  #nv-nav-frost::before,#nv-nav-frost::after{transition:none}
+}
+
+/* NUVIA — bandeau d'annonce bleu inspiré de la référence Air, sans effets de carte. */
+#nv-announcement{position:fixed;left:0;right:0;bottom:0;z-index:95;display:block;width:100%;min-height:50px;padding-bottom:env(safe-area-inset-bottom,0px);background:#3296ed;color:#fff;border:0;box-shadow:none}
+/* La barre reste dans la fenêtre sans masquer les derniers éléments. */
+body{padding-bottom:var(--nv-announcement-space,50px)}
+#nv-announcement[hidden]{display:none!important}
+#nv-announcement .nv-announcement-inner{position:relative;min-height:50px;display:flex;align-items:center;justify-content:center;padding:8px 54px;text-align:center}
+#nv-announcement .nv-announcement-text{margin:0;max-width:calc(100% - 10px);color:#fff;font:500 14px/1.48 Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:-.012em}
+#nv-announcement .nv-announcement-text strong{font-weight:700}
+/* Même dessin typographique que « unique. » (Caveat), limité au bandeau bleu. */
+#nv-announcement .nv-announcement-script{
+  display:inline-block;margin-left:.04em;
+  font:500 1.36em/.76 var(--font-cursive);
+  letter-spacing:-.068em;white-space:nowrap;vertical-align:-.035em;
+}
+#nv-announcement .nv-announcement-cta{display:inline-block;margin-left:28px;color:#fff;font-weight:700;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:5px;text-decoration-skip-ink:auto;white-space:nowrap;cursor:pointer}
+#nv-announcement .nv-announcement-cta:hover{opacity:.85}
+#nv-announcement .nv-announcement-cta:focus-visible,#nv-announcement .nv-announcement-close:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:2px}
+#nv-announcement .nv-announcement-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:30px;height:30px;display:grid;place-items:center;cursor:pointer;border:0;background:transparent;color:#fff;opacity:.98;padding:4px}
+#nv-announcement .nv-announcement-close:hover{opacity:.7}
+#nv-announcement .nv-announcement-close svg{width:20px;height:20px;display:block}
+#nv-announcement .nv-announcement-status{position:absolute;z-index:2;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);margin:0;padding:9px 14px;color:#165384;background:#fff;border-radius:7px;box-shadow:0 7px 20px rgba(17,67,120,.17);font:600 12px/1.4 Inter,ui-sans-serif,system-ui,sans-serif;white-space:nowrap}
+#nv-announcement .nv-announcement-status[hidden]{display:none}
+@media(max-width:820px){
+  #nv-announcement .nv-announcement-inner{padding:8px 40px 8px 14px;text-align:left;justify-content:flex-start}
+  #nv-announcement .nv-announcement-text{font-size:12px;line-height:1.5}
+  #nv-announcement .nv-announcement-cta{margin-left:14px}
+  #nv-announcement .nv-announcement-close{right:5px}
+}
+/* NUVIA · vidéo panoramique au footer ; la barre bleue fixe est indépendante. */
+div#nv-video-footer{
+  display:block;position:relative;isolation:isolate;z-index:1;
+  width:100%;height:auto;min-height:0;aspect-ratio:1440 / 248;
+  margin:0;padding:0;overflow:hidden;background:#102a22;
+}
+#nv-video-footer video{
+  position:absolute;inset:0;display:block;width:100%;height:100%;
+  object-fit:cover;object-position:center center;pointer-events:none;
+}
+@media(max-width:600px){
+  div#nv-video-footer{aspect-ratio:auto;height:clamp(130px,25vw,190px)}
+}
+
+/* NUVIA — double fondu de raccord, sans coupure entre ciel et video.
+   Fondu 1 : le bleu existant du contact passe progressivement au blanc.
+   La transparence initiale suit EXACTEMENT le fond du contact, sans
+   introduire de nouvelle teinte qui creerait une ligne de separation. */
+#nv-contact-sequence::after{
+  content:"";position:relative;z-index:2;display:block;width:100%;
+  height:clamp(170px,19vw,330px);pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,.12) 16%,
+    rgba(255,255,255,.42) 42%,
+    rgba(255,255,255,.77) 66%,
+    rgba(255,255,255,.97) 84%,
+    #fff 94%,#fff 100%);
+}
+
+/* Section blanche pleine hauteur : separation visible entre les deux fondus.
+   Elle n'interrompt pas le raccord : blanc en haut ET en bas. */
+#nv-white-interlude{
+  display:flex;align-items:flex-end;justify-content:center;
+  position:relative;z-index:2;
+  /* Réduit de moitié le vide au-dessus, sans changer l'écart bas.
+     Le carrousel mesure 710px desktop / 549px mobile. */
+  width:100%;
+  height:calc(90vh + 355px + clamp(6px,1vh,15px));
+  height:calc(90svh + 355px + clamp(6px,1svh,15px));
+  margin:0;padding:0 0 clamp(12px,2svh,30px);background:#fff;
+}
+@media(max-width:700px){
+  #nv-white-interlude{
+    height:calc(90vh + 274.5px + clamp(6px,1vh,15px));
+    height:calc(90svh + 274.5px + clamp(6px,1svh,15px));
+  }
+}
+/* Galerie originale deplacee au centre de la zone blanche :
+   seuls le cadre vitre et les couleurs typographiques changent.
+   Le SVG, les medias, la courbure et la logique d'animation restent intacts. */
+#nv-white-interlude #nuvia-curved-gallery{
+  width:100%;max-width:1600px;flex:0 1 auto;
+}
+#nv-white-interlude #nuvia-curved-gallery .ncg-shell{
+  border:0;border-radius:0;background:transparent;box-shadow:none;
+}
+#nv-white-interlude #nuvia-curved-gallery .ncg-heading{
+  color:#161616;
+}
+#nv-white-interlude #nuvia-curved-gallery .ncg-caption{
+  color:#252525;
+}
+#nv-white-interlude #nuvia-curved-gallery .ncg-viewport:focus-visible{
+  outline-color:#161616;
+}
+
+/* NUVIA carousel — edge safety for any desktop/windowed width.
+   The large-screen geometry stays EXACTLY as approved. The same subtle
+   SVG transparency mask now also protects 701–1524px windows, without
+   changing panel count, curvature, speed, media, or gallery dimensions. */
+@media(min-width:701px){
+  #nv-white-interlude #nuvia-curved-gallery .ncg-svg{
+    -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 clamp(16px,1.5vw,34px),#000 calc(100% - clamp(16px,1.5vw,34px)),transparent 100%);
+    mask-image:linear-gradient(90deg,transparent 0%,#000 clamp(16px,1.5vw,34px),#000 calc(100% - clamp(16px,1.5vw,34px)),transparent 100%);
+  }
+  /* Avoid stacking the former white vignette on top of the SVG mask. */
+  #nv-white-interlude #nuvia-curved-gallery .ncg-vignette{
+    display:none;
+  }
+}
+/* Fenêtre desktop réduite : masquer uniquement les tout derniers pixels
+   des cartes qui traversent le bord. La profondeur du masque rejoint
+   continûment celle du plein écran à 1525px (aucun saut visuel).
+   Aucun autre fondu ni opacité par carte n'est ajouté. */
+@media(min-width:701px) and (max-width:1524px){
+  #nv-white-interlude #nuvia-curved-gallery .ncg-svg{
+    --ncg-edge-depth:clamp(22px,calc(74px - 3.35vw),51px);
+    -webkit-mask-image:linear-gradient(90deg,
+      transparent 0%,#000 var(--ncg-edge-depth),
+      #000 calc(100% - var(--ncg-edge-depth)),transparent 100%);
+    mask-image:linear-gradient(90deg,
+      transparent 0%,#000 var(--ncg-edge-depth),
+      #000 calc(100% - var(--ncg-edge-depth)),transparent 100%);
+  }
+}
+/* Keep the previously approved full-width layout on large screens only. */
+@media(min-width:1525px){
+  #nv-white-interlude #nuvia-curved-gallery{
+    width:100%;
+    max-width:none;
+    min-width:0;
+    margin-inline:auto;
+  }
+  #nv-white-interlude #nuvia-curved-gallery .ncg-shell{
+    width:100%;
+    max-width:none;
+    margin-inline:auto;
+  }
+}
+
+/* Fondu 2 : le blanc se dissout directement DANS les images de la video.
+   La teinte de raccord suit donc chaque image du film (pas de couleur
+   moyenne figee ni de ligne visible quand la lumiere de la video change). */
+div#nv-video-footer::before{
+  content:"";position:absolute;top:0;left:0;right:0;
+  /* Ciel: raccord blanc legerement plus couvrant sur les premiers pixels,
+     toujours concentre en haut, avant les herbes du paysage. */
+  height:clamp(42px,5vw,96px);z-index:2;pointer-events:none;
+  background:linear-gradient(180deg,
+    #fff 0%,
+    rgba(255,255,255,.98) 15%,
+    rgba(255,255,255,.82) 34%,
+    rgba(255,255,255,.42) 57%,
+    rgba(255,255,255,.10) 80%,
+    rgba(255,255,255,0) 100%);
+}
+@media(max-width:600px){
+  #nv-contact-sequence::after{height:clamp(155px,35vw,200px)}
+}
+
+/* Aucun voile sur le bas du film : les images restent visibles jusqu'à leur bord.
+   Le fondu supérieur (::before) est maintenu pour le raccord avec le blanc. */
+#nv-video-footer .nvf-inner{
+  position:absolute;inset:0;z-index:4;
+  display:flex;align-items:flex-end;box-sizing:border-box;
+  padding:0 clamp(24px,8.8vw,176px) 23px;
+  pointer-events:none;color:#17211b;
+}
+#nv-video-footer .nvf-stack{
+  width:100%;max-width:1600px;margin:0 auto;
+  display:flex;flex-direction:column;gap:24px;
+}
+#nv-video-footer .nvf-socials{
+  align-self:flex-end;display:flex;align-items:center;
+  gap:clamp(18px,1.8vw,31px);
+}
+#nv-video-footer .nvf-social-icon{
+  display:flex;align-items:center;justify-content:center;
+  width:23px;height:23px;color:#142019;
+  flex:0 0 auto;cursor:default;
+  filter:drop-shadow(0 1px 2px rgba(255,255,255,.5));
+}
+#nv-video-footer .nvf-social-icon svg{
+  width:100%;height:100%;display:block;
+  fill:none;stroke:currentColor;
+  stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;
+}
+#nv-video-footer .nvf-bottom{
+  display:flex;justify-content:space-between;align-items:baseline;
+  gap:22px;min-width:0;
+}
+#nv-video-footer .nvf-links{
+  display:flex;flex-wrap:wrap;align-items:center;
+  gap:10px clamp(16px,1.8vw,31px);
+}
+#nv-video-footer .nvf-links a,
+#nv-video-footer .nvf-copyright{
+  font:600 13px/1.45 var(--font-control,Inter,Arial,sans-serif);
+  letter-spacing:-.02em;color:#142019;
+  text-shadow:0 1px 2px rgba(255,255,255,.68);
+}
+#nv-video-footer .nvf-links a{
+  text-decoration:none;white-space:nowrap;pointer-events:auto;
+  transition:opacity .2s ease;
+}
+#nv-video-footer .nvf-links a:hover{opacity:.62}
+#nv-video-footer .nvf-links a:focus-visible{
+  outline:2px solid #142019;outline-offset:5px;border-radius:2px;
+}
+#nv-video-footer .nvf-copyright{
+  margin:0;text-align:right;font-weight:500;
+  font-size:12px;white-space:nowrap;
+}
+#nv-video-footer.nvf-video-fallback{background:#d8e6d1}
+@media(max-width:1100px){
+  div#nv-video-footer{min-height:215px}
+  #nv-video-footer .nvf-inner{padding:0 clamp(22px,5vw,58px) 23px}
+  #nv-video-footer .nvf-stack{gap:23px}
+  #nv-video-footer .nvf-links{column-gap:18px}
+}
+@media(max-width:700px){
+  div#nv-video-footer{height:clamp(270px,60vw,340px);min-height:270px;aspect-ratio:auto}
+  #nv-video-footer .nvf-inner{padding:0 22px 29px}
+  #nv-video-footer .nvf-stack{gap:27px;align-items:center}
+  #nv-video-footer .nvf-socials{align-self:center;gap:25px}
+  #nv-video-footer .nvf-bottom{flex-direction:column;align-items:center;gap:21px}
+  #nv-video-footer .nvf-links{justify-content:center;column-gap:20px;row-gap:14px}
+  #nv-video-footer .nvf-links a{font-size:12px}
+  #nv-video-footer .nvf-copyright{text-align:center;font-size:11px;white-space:normal}
+}
+
+/* NUVIA / Contact Air-inspired — one full sky viewport after IMPRESS.
+   All styles scoped: existing journey, animated footer and fixed CTA stay intact. */
+#nv-contact-sequence {
+  position:relative;isolation:isolate;overflow:clip;
+  width:100%;margin:0;padding:0;
+  background:linear-gradient(180deg,#387ff0 0%,#428df1 19%,#66adf4 55%,#8cc6f5 100%);
+  color:#fff;
+}
+#nv-contact-sequence .nv-contact-space {height:100svh;min-height:480px;pointer-events:none}
+#nv-contact-sequence .nv-contact-stage {
+  position:relative;z-index:1;min-height:100svh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:clamp(148px,22svh,255px) 24px clamp(110px,14svh,195px);
+  text-align:center;
+}
+#nv-contact-sequence .nv-contact-cloud {
+  position:absolute;z-index:0;pointer-events:none;
+  width:clamp(270px,38vw,600px);aspect-ratio:1.24;
+  filter:blur(17px);opacity:.46;
+  background:
+    radial-gradient(ellipse 34% 30% at 22% 55%,rgba(255,255,255,.87),transparent 100%),
+    radial-gradient(ellipse 39% 38% at 47% 36%,rgba(255,255,255,.9),transparent 100%),
+    radial-gradient(ellipse 30% 30% at 70% 55%,rgba(235,248,255,.76),transparent 100%),
+    radial-gradient(ellipse 41% 30% at 51% 71%,rgba(225,244,255,.58),transparent 100%);
+  animation:nv-contact-cloud-drift 25s ease-in-out infinite alternate;
+}
+#nv-contact-sequence .nv-contact-cloud--left {top:56svh;left:-19%;transform:rotate(-16deg)}
+#nv-contact-sequence .nv-contact-cloud--right {bottom:5%;right:-20%;opacity:.54;transform:rotate(12deg);animation-delay:-12s}
+@keyframes nv-contact-cloud-drift {
+  from { translate:-1.8% 0;scale:1 }
+  to { translate:2% -2%;scale:1.055 }
+}
+#nv-contact-sequence .nv-contact-intro {
+  position:relative;z-index:1;width:100%;max-width:860px;margin:0 auto;
+}
+#nv-contact-sequence .nv-contact-heading {
+  font:400 clamp(39px,5.6vw,64px)/.98 var(--font-control);
+  letter-spacing:-.067em;color:#fff;margin:0;
+  text-wrap:balance;
+}
+#nv-contact-sequence .nv-contact-line {
+  display:block;margin-inline:auto;width:fit-content;max-width:100%;
+  padding-block:.13em;margin-block:-.13em;
+}
+#nv-contact-sequence .nv-contact-line--second {margin-top:.08em}
+#nv-contact-sequence .nv-contact-script {
+  display:inline-block;margin-left:.04em;
+  font:500 1.23em/.76 var(--font-cursive);
+  letter-spacing:-.068em;white-space:nowrap;vertical-align:-.035em;
+}
+#nv-contact-sequence .nv-contact-description {
+  max-width:540px;margin:24px auto 0;
+  font:500 clamp(14px,1.45vw,16px)/1.6 var(--font-control);
+  letter-spacing:-.025em;color:#f7fbff;text-wrap:balance;
+}
+/* Both subtitle lines share exactly the same reveal variables, as do
+   the two headline lines — there is no line-by-line staggering. */
+#nv-contact-sequence .nv-contact-description-line {display:block}
+html.nv-contact-motion #nv-contact-sequence .nv-contact-description-line {
+  -webkit-mask-image:linear-gradient(to top,#000 0%,#000 var(--nv-contact-reveal,0%),transparent calc(var(--nv-contact-reveal,0%) + 32%));
+  mask-image:linear-gradient(to top,#000 0%,#000 var(--nv-contact-reveal,0%),transparent calc(var(--nv-contact-reveal,0%) + 32%));
+}
+#nv-contact-sequence .nv-contact-card {
+  position:relative;z-index:1;
+  width:min(100%,590px);margin:45px auto 0;
+  padding:58px 64px 56px;
+  border:1px solid rgba(255,255,255,.85);border-radius:13px;
+  background:#fff;color:#1b1b1b;
+  text-align:left;box-shadow:none;
+}
+#nv-contact-sequence .nv-contact-fields {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 16px;
+}
+#nv-contact-sequence .nv-contact-field {grid-column:1/-1;min-width:0}
+#nv-contact-sequence .nv-contact-field--half {grid-column:auto}
+#nv-contact-sequence .nv-contact-field label:not(.nv-contact-sr-only) {
+  display:block;margin-bottom:7px;
+}
+#nv-contact-sequence .nv-contact-sr-only {
+  position:absolute!important;width:1px!important;height:1px!important;
+  padding:0!important;margin:-1px!important;overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+#nv-contact-sequence .nv-contact-field input,
+#nv-contact-sequence .nv-contact-field select,
+#nv-contact-sequence .nv-contact-field textarea {
+  display:block;width:100%;min-width:0;box-sizing:border-box;
+  min-height:49px;margin:0;padding:12px 13px;
+  border:1px solid #d9d9da;border-radius:5px;
+  color:#242424;background:#f5f5f5;
+  font:400 15px/1.35 var(--font-control);
+  letter-spacing:-.025em;
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease;
+  appearance:none;-webkit-appearance:none;
+}
+#nv-contact-sequence .nv-contact-field input::placeholder,
+#nv-contact-sequence .nv-contact-field textarea::placeholder {color:#898989;opacity:1}
+#nv-contact-sequence .nv-contact-field select {
+  padding-right:42px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23252525' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position:right 13px center;background-repeat:no-repeat;
+}
+#nv-contact-sequence .nv-contact-field select:invalid {color:#626262}
+#nv-contact-sequence .nv-contact-field textarea {min-height:76px;resize:vertical;max-height:240px}
+#nv-contact-sequence .nv-contact-field :is(input,select,textarea):focus {
+  outline:none;border-color:#2b7fff;background:#fff;
+  box-shadow:0 0 0 3px rgba(43,127,255,.14);
+}
+#nv-contact-sequence .nv-contact-actions {text-align:center;margin-top:26px}
+#nv-contact-sequence .nv-contact-submit {
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-width:132px;min-height:41px;padding:10px 20px;
+  border:1px solid #242424;border-radius:8px;background:#242424;color:#fff;
+  font:500 13px/1.2 var(--font-control);
+  cursor:pointer;transition:background .2s ease,transform .2s ease;
+}
+#nv-contact-sequence .nv-contact-submit:hover {background:#111;transform:translateY(-1px)}
+#nv-contact-sequence .nv-contact-submit:focus-visible {outline:3px solid #2b7fff;outline-offset:3px}
+#nv-contact-sequence .nv-contact-submit:disabled {opacity:.6;cursor:wait;transform:none}
+#nv-contact-sequence .nv-contact-privacy {
+  max-width:440px;margin:21px auto 0;text-align:center;
+  color:#858585;font:400 11px/1.55 var(--font-control);
+}
+#nv-contact-sequence .nv-contact-status {
+  margin:15px auto 0;max-width:430px;min-height:0;
+  color:#2a6755;text-align:center;font:500 13px/1.5 var(--font-control);
+}
+#nv-contact-sequence .nv-contact-status[data-state="error"]{color:#a63838}
+#nv-contact-sequence .nv-contact-status:empty{display:none}
+/* Progressive inverse bottom-up dissolve follows scrolling, not page-load time. */
+html.nv-contact-motion #nv-contact-sequence .nv-contact-animate {
+  opacity:var(--nv-contact-opacity,0);
+  transform:translate3d(0,var(--nv-contact-translate,26px),0);
+  will-change:opacity,transform;
+}
+/* NUVIA contact: unhurried, progressive full-word reveals.
+   Line two starts 620ms after line one; each word overlaps the preceding fade.
+   Reset must instantly remove the reveal so it can replay on re-entry. */
+#nv-contact-sequence .nv-contact-word {display:inline-block}
+html.nv-contact-motion #nv-contact-sequence .nv-contact-word {
+  opacity:0;transform:translate3d(0,5px,0);transition:none;
+}
+html.nv-contact-motion #nv-contact-sequence .nv-contact-heading[data-nv-active="true"] .nv-contact-word {
+  opacity:1;transform:translate3d(0,0,0);
+  transition:opacity 780ms cubic-bezier(.22,.7,.2,1),transform 850ms cubic-bezier(.22,1,.36,1);
+  transition-delay:calc(var(--nv-line-delay,0ms) + var(--nv-word-delay,0ms));
+}
+html.nv-contact-motion #nv-contact-sequence .nv-contact-heading[data-nv-active="false"] .nv-contact-word {
+  opacity:0;transform:translate3d(0,5px,0);transition:none;
+}
+@media(max-width:650px){
+  #nv-contact-sequence .nv-contact-space {height:100svh;min-height:0}
+  #nv-contact-sequence .nv-contact-stage {padding:clamp(115px,19svh,190px) 16px 90px}
+  #nv-contact-sequence .nv-contact-heading {font-size:clamp(30px,7.4vw,47px);line-height:1.02;letter-spacing:-.055em}
+  #nv-contact-sequence .nv-contact-script {font-size:1.2em}
+  #nv-contact-sequence .nv-contact-description {margin-top:22px;max-width:355px;font-size:14px}
+  #nv-contact-sequence .nv-contact-description-line {display:inline}
+  html.nv-contact-motion #nv-contact-sequence .nv-contact-description {
+    -webkit-mask-image:linear-gradient(to top,#000 0%,#000 var(--nv-contact-reveal,0%),transparent calc(var(--nv-contact-reveal,0%) + 32%));
+    mask-image:linear-gradient(to top,#000 0%,#000 var(--nv-contact-reveal,0%),transparent calc(var(--nv-contact-reveal,0%) + 32%));
+  }
+  html.nv-contact-motion #nv-contact-sequence .nv-contact-description-line {-webkit-mask-image:none;mask-image:none}
+  #nv-contact-sequence .nv-contact-card {margin-top:35px;padding:30px 20px 34px;border-radius:12px}
+  #nv-contact-sequence .nv-contact-fields {gap:13px}
+  #nv-contact-sequence .nv-contact-field input,
+  #nv-contact-sequence .nv-contact-field select,
+  #nv-contact-sequence .nv-contact-field textarea {font-size:16px;min-height:48px}
+  #nv-contact-sequence .nv-contact-cloud--left {left:-50%}
+  #nv-contact-sequence .nv-contact-cloud--right {right:-43%}
+}
+@media(max-width:400px){
+  #nv-contact-sequence .nv-contact-heading{font-size:clamp(27px,7.25vw,30px)}
+  #nv-contact-sequence .nv-contact-field--half {grid-column:1/-1}
+}
+@media(prefers-reduced-motion:reduce){
+  #nv-contact-sequence .nv-contact-cloud {animation:none}
+  html.nv-contact-motion #nv-contact-sequence .nv-contact-animate {
+    opacity:1!important;transform:none!important;will-change:auto!important;
+  }
+  html.nv-contact-motion #nv-contact-sequence .nv-contact-line {
+    -webkit-mask-image:none!important;mask-image:none!important;
+  }
+}
+
+
+/* NUVIA FOOTER / restauration du lecteur panoramique 821af749 :
+   uniquement une superposition; aucun changement de la vidéo, des dimensions,
+   du fond, des fondus, du cadrage ou du rythme de lecture. */
+#nv-video-footer .nvsf-card{
+  position:absolute;inset:0;z-index:4;box-sizing:border-box;
+  width:100%;max-width:1600px;margin:0 auto;
+  padding:clamp(11px,1.4vw,20px) clamp(22px,8.8vw,176px) clamp(8px,.7vw,11px);
+  display:flex;flex-direction:column;
+  background:transparent;border:0;border-radius:0;box-shadow:none;
+  pointer-events:none;font-family:var(--font-control,Inter,Arial,sans-serif);
+}
+#nv-video-footer .nvsf-card *{box-sizing:border-box}
+#nv-video-footer .nvsf-top-rule{flex:0 0 1px;height:1px;width:100%;background:rgba(20,28,21,.15)}
+#nv-video-footer .nvsf-intro{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:25px;margin-top:clamp(10px,1.4vw,20px);
+}
+#nv-video-footer .nvsf-identity{min-width:0}
+#nv-video-footer .nvsf-wordmark{
+  display:inline-block;width:max-content;
+  font:800 20px/1.1 var(--font-control,Inter,Arial,sans-serif);
+  letter-spacing:-.075em;color:#172119;text-decoration:none;pointer-events:auto;
+}
+#nv-video-footer .nvsf-wordmark span{letter-spacing:0;color:inherit}
+#nv-video-footer .nvsf-description{
+  max-width:280px;margin:6px 0 0;color:#152314;
+  font:500 11px/1.34 var(--font-control,Inter,Arial,sans-serif);
+  letter-spacing:-.01em;
+}
+#nv-video-footer .nvsf-socials{
+  align-self:flex-start;display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-top:2px;
+}
+#nv-video-footer .nvsf-social-icon{
+  width:19px;height:19px;flex:0 0 19px;display:block;color:#162216;filter:none;
+}
+#nv-video-footer .nvsf-social-icon svg{
+  display:block;width:100%;height:100%;fill:none;
+  stroke:currentColor;stroke-width:1.85;
+  stroke-linecap:round;stroke-linejoin:round;filter:none;
+}
+#nv-video-footer .nvsf-navigation{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  column-gap:clamp(14px,2.4vw,33px);width:100%;margin-top:auto;
+}
+#nv-video-footer .nvsf-column{
+  display:flex;flex-direction:column;align-items:flex-start;min-width:0;
+}
+#nv-video-footer .nvsf-column h2{
+  margin:0 0 9px;color:#fff;
+  font:650 12.5px/1.2 var(--font-control,Inter,Arial,sans-serif);
+  letter-spacing:-.025em;
+}
+#nv-video-footer .nvsf-column>a{
+  display:block;max-width:100%;margin-bottom:5px;
+  font:500 11px/1.3 var(--font-control,Inter,Arial,sans-serif);
+  color:rgba(255,255,255,.97);letter-spacing:-.006em;
+  text-decoration:none;overflow-wrap:break-word;pointer-events:auto;
+  transition:color .22s ease,transform .22s cubic-bezier(.22,.61,.36,1);
+}
+#nv-video-footer .nvsf-column>a:last-child{margin-bottom:0}
+#nv-video-footer .nvsf-column>a:hover{color:#fff;transform:translateX(2px)}
+#nv-video-footer .nvsf-column>a:focus-visible,
+#nv-video-footer .nvsf-wordmark:focus-visible{
+  outline:2px solid currentColor;outline-offset:3px;border-radius:2px;
+}
+#nv-video-footer .nvsf-bottom{text-align:center;margin-top:12px}
+#nv-video-footer .nvsf-bottom p{
+  margin:0;color:rgba(255,255,255,.95);
+  font:500 10px/1.2 var(--font-control,Inter,Arial,sans-serif);
+  letter-spacing:-.01em;
+}
+@media(min-width:701px) and (max-width:1400px){
+  #nv-video-footer .nvsf-card{padding-top:9px;padding-bottom:8px}
+  #nv-video-footer .nvsf-intro{margin-top:9px}
+  #nv-video-footer .nvsf-description{font-size:10px;line-height:1.2;margin-top:4px}
+  #nv-video-footer .nvsf-navigation{column-gap:18px}
+  #nv-video-footer .nvsf-column h2{font-size:11.5px;margin-bottom:5px}
+  #nv-video-footer .nvsf-column>a{font-size:10.5px;line-height:1.17;margin-bottom:3px}
+  #nv-video-footer .nvsf-bottom{margin-top:8px}
+}
+@media(max-width:500px){
+  #nv-video-footer .nvsf-card{padding:8px 15px}
+  #nv-video-footer .nvsf-intro{margin-top:7px;gap:8px}
+  #nv-video-footer .nvsf-wordmark{font-size:17px}
+  #nv-video-footer .nvsf-description{
+    max-width:185px;font-size:9.5px;line-height:1.2;margin-top:3px;
+  }
+  #nv-video-footer .nvsf-socials{gap:7px}
+  #nv-video-footer .nvsf-social-icon{width:14px;height:14px;flex-basis:14px}
+  #nv-video-footer .nvsf-navigation{
+    grid-template-columns:repeat(2,minmax(0,1fr));column-gap:13px;row-gap:7px;
+  }
+  #nv-video-footer .nvsf-column h2{font-size:10px;margin-bottom:4px}
+  #nv-video-footer .nvsf-column>a{font-size:10px;line-height:1.14;margin-bottom:2px}
+  #nv-video-footer .nvsf-bottom{margin-top:8px}
+  #nv-video-footer .nvsf-bottom p{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  #nv-video-footer .nvsf-column>a{transition:none}
+  #nv-video-footer .nvsf-column>a:hover{transform:none}
+}
+#nv-video-footer.nvf-video-fallback .nvsf-column h2,
+#nv-video-footer.nvf-video-fallback .nvsf-column>a,
+#nv-video-footer.nvf-video-fallback .nvsf-bottom p{color:#152314}
+
+
+/* NUVIA / Footer breathing room 2026-10-17
+   The filmed panorama, source, crop, playback and original responsive aspect
+   ratio are NOT scaled or changed. Only editorial content can extend upwards,
+   occupying the newly reserved white transition below the carousel. */
+div#nv-video-footer{
+  overflow:visible;
+  z-index:3;
+}
+#nv-video-footer .nvsf-card{
+  inset:auto 0 0;
+  height:clamp(630px,49vw,760px);
+  max-width:1560px;
+  padding:30px clamp(32px,5.4vw,100px) 24px;
+  pointer-events:none;
+}
+#nv-video-footer .nvsf-top-rule{
+  background:rgba(18,26,23,.11);
+}
+#nv-video-footer .nvsf-intro{
+  gap:32px;margin-top:clamp(45px,4.3vw,65px);
+}
+#nv-video-footer .nvsf-wordmark{
+  font-size:28px;letter-spacing:-.075em;color:#171c17;
+}
+#nv-video-footer .nvsf-description{
+  max-width:290px;margin-top:15px;
+  font-size:13px;line-height:1.55;font-weight:450;color:#343d34;
+}
+#nv-video-footer .nvsf-socials{gap:21px;margin-top:3px}
+#nv-video-footer .nvsf-social-icon{
+  width:22px;height:22px;flex-basis:22px;color:#171c17;
+}
+#nv-video-footer .nvsf-navigation{
+  column-gap:clamp(22px,4vw,70px);
+  margin-top:clamp(52px,5vw,70px);
+}
+#nv-video-footer .nvsf-column h2{
+  margin-bottom:18px;
+  color:#171c17;font-size:15px;line-height:1.35;font-weight:650;
+}
+#nv-video-footer .nvsf-column>a{
+  margin-bottom:14px;
+  font-size:13px;line-height:1.45;font-weight:450;
+  color:#575e57;
+}
+#nv-video-footer .nvsf-column>a:hover{color:#111911}
+#nv-video-footer .nvsf-bottom{
+  margin-top:auto;
+  padding-top:20px;
+}
+#nv-video-footer .nvsf-bottom p{font-size:12px;line-height:1.4;color:#fff}
+/* Add breathing room before the footer without moving or resizing carousel
+   SVG, cards, speed or internal transforms. The bottom padding raises the
+   complete gallery relative to its old location. */
+#nv-white-interlude{
+  --nv-footer-clearance:clamp(590px,44vw,675px);
+  height:calc(90vh + 355px + clamp(6px,1vh,15px) + 440px);
+  height:calc(90svh + 355px + clamp(6px,1svh,15px) + 440px);
+  min-height:calc(710px + var(--nv-footer-clearance) + 75px);
+  padding-bottom:var(--nv-footer-clearance);
+}
+@media(min-width:701px) and (max-width:1100px){
+  #nv-video-footer .nvsf-card{
+    height:630px;padding:25px clamp(32px,5.5vw,62px) 22px;
+  }
+  #nv-video-footer .nvsf-intro{margin-top:48px}
+  #nv-video-footer .nvsf-navigation{column-gap:26px;margin-top:56px}
+  #nv-video-footer .nvsf-column h2{font-size:14px;margin-bottom:13px}
+  #nv-video-footer .nvsf-column>a{font-size:12px;margin-bottom:11px}
+}
+@media(min-width:701px) and (max-width:800px){
+  #nv-video-footer .nvsf-card{height:790px}
+  #nv-video-footer .nvsf-navigation{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    row-gap:27px;margin-top:48px;
+  }
+  #nv-white-interlude{--nv-footer-clearance:690px}
+}
+@media(max-width:700px){
+  /* The native mobile film remains 270–340px, not 850px: this height
+     belongs to the transparent editorial overlay ONLY. */
+  #nv-video-footer .nvsf-card{
+    height:850px;
+    padding:24px 27px 23px;
+  }
+  #nv-video-footer .nvsf-intro{
+    margin-top:45px;flex-direction:column;gap:18px;
+  }
+  #nv-video-footer .nvsf-wordmark{font-size:27px}
+  #nv-video-footer .nvsf-description{
+    margin-top:12px;max-width:290px;font-size:12px;line-height:1.45;
+  }
+  #nv-video-footer .nvsf-socials{gap:16px}
+  #nv-video-footer .nvsf-social-icon{width:20px;height:20px;flex-basis:20px}
+  #nv-video-footer .nvsf-navigation{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    column-gap:27px;row-gap:32px;margin-top:48px;
+  }
+  #nv-video-footer .nvsf-column h2{font-size:14px;margin-bottom:12px}
+  #nv-video-footer .nvsf-column>a{
+    font-size:12px;line-height:1.4;margin-bottom:9px;
+  }
+  #nv-video-footer .nvsf-bottom{margin-top:auto;padding-top:22px}
+  #nv-video-footer .nvsf-bottom p{font-size:11px}
+  #nv-white-interlude{
+    --nv-footer-clearance:710px;
+    height:calc(90vh + 274.5px + clamp(6px,1vh,15px) + 500px);
+    height:calc(90svh + 274.5px + clamp(6px,1svh,15px) + 500px);
+    min-height:calc(549px + var(--nv-footer-clearance) + 75px);
+    padding-bottom:var(--nv-footer-clearance);
+  }
+}
+@media(max-width:500px){
+  #nv-video-footer .nvsf-card{padding:20px 22px 22px}
+  #nv-video-footer .nvsf-intro{margin-top:36px;gap:13px}
+  #nv-video-footer .nvsf-wordmark{font-size:25px}
+  #nv-video-footer .nvsf-description{font-size:11px;max-width:260px}
+  #nv-video-footer .nvsf-socials{gap:16px}
+  #nv-video-footer .nvsf-social-icon{width:18px;height:18px;flex-basis:18px}
+  #nv-video-footer .nvsf-navigation{
+    column-gap:20px;row-gap:28px;margin-top:44px;
+  }
+  #nv-video-footer .nvsf-column h2{font-size:13px;margin-bottom:10px}
+  #nv-video-footer .nvsf-column>a{font-size:11px;margin-bottom:9px;line-height:1.35}
+  #nv-video-footer .nvsf-bottom p{font-size:10px}
+}
+
+
+/* NUVIA footer — conserve l'espacement validé avant la suppression du
+   paragraphe. Seule la hauteur de mise en page est réservée ; aucun texte,
+   pseudo-élément, fond ou contenu invisible n'est recréé. */
+#nv-video-footer .nvsf-identity{min-height:106.25px}
+@media(max-width:700px){
+  #nv-video-footer .nvsf-identity{min-height:93.9px}
+}
+@media(max-width:500px){
+  #nv-video-footer .nvsf-identity{min-height:87.35px}
+}
+
+/* NUVIA | Signature d'or sous le mot-symbole du footer.
+   Véritable pinceau issu de la référence, transparence préservée.
+   Le trait se positionne hors flux pour ne modifier aucun espacement validé. */
+#nv-video-footer .nvsf-wordmark{position:relative}
+#nv-video-footer .nvsf-wordmark::after{
+  content:"";position:absolute;display:block;
+  /* Trait ancré sur les limites du mot, centré sans débordement asymétrique. */
+  left:0;right:0;top:calc(100% + 11px);
+  width:100%;height:11px;pointer-events:none;
+  transform:translateX(-2px) scaleX(1.22);
+  transform-origin:center center;
+  background:url("./assets/nuvia-gold-brush-underline.webp") center / 100% 100% no-repeat;
+}
+@media(max-width:700px){
+  #nv-video-footer .nvsf-wordmark::after{
+    top:calc(100% + 10px);height:9px;
+    transform:translateX(-1px) scaleX(1.18);
+  }
+}
+
+/* NUVIA / Hero gallery (reference: larger video stage, tabs below).
+   The existing .ph 3D tilt is owned by the original cursor script and
+   is intentionally not transformed by these reveal animations. */
+#hero .nv-hero-media{
+  width:100%;
+  position:relative;
+}
+#hero .nv-hero-media .stage[data-stage="hero"]{
+  width:min(100%,clamp(680px,44vw,875px));
+  max-width:none;
+  margin:0 auto;
+}
+#hero .nv-hero-media .stage[data-stage="hero"] .ph{
+  width:100%;
+  max-width:none;
+  aspect-ratio:695/496;
+  border-radius:12px;
+}
+#hero .nv-hero-media .tabbar[data-tabs="hero"]{
+  width:min(100%,clamp(680px,44vw,875px));
+  max-width:none;
+  margin:28px auto 0;
+  min-height:40px;
+  border-radius:8px;
+  background:rgba(255,255,255,.14);
+}
+#hero .nv-hero-media .tabbar[data-tabs="hero"] .slider{
+  border-radius:8px;
+}
+#hero .nv-hero-media .tabbar[data-tabs="hero"] button{
+  min-height:40px;
+  padding:9px 8px;
+  font-size:12px;
+  line-height:18px;
+}
+#hero .nv-hero-media .tabbar[data-tabs="hero"] button svg{
+  width:12px;height:12px;
+}
+
+/* NUVIA — progression bleue synchronisée avec le fondu inversé du média. */
+#hero .nv-hero-media .tabbar[data-tabs="hero"] .slider::after{
+  background:var(--signal-blue,#2b7fff);
+  height:3px;
+}
+/* La transformation 3D appartient uniquement à .ph (suivi du curseur).
+   Le fondu et les légers mouvements touchent .pane, son parent. */
+#hero .nv-hero-media .stage[data-stage="hero"] .pane{
+  opacity:0;
+  visibility:hidden;
+  transform:translate3d(0,12px,0);
+  transition:opacity .45s cubic-bezier(.22,.61,.36,1),
+             transform .56s cubic-bezier(.22,.61,.36,1),
+             visibility 0s linear .56s;
+}
+#hero .nv-hero-media .stage[data-stage="hero"] .pane[data-on="true"]{
+  opacity:1;
+  visibility:visible;
+  transform:translate3d(0,0,0);
+  transition-delay:0s,0s,0s;
+}
+/* La vidéo sort en se dissipant vers le haut dans les dernières 340 ms
+   du cycle, puis la suivante apparaît en sens inverse depuis le bas. */
+#hero .nv-hero-media .stage[data-stage="hero"].nv-hero-swap-out .pane[data-on="true"]{
+  opacity:0;
+  visibility:visible;
+  transform:translate3d(0,-12px,0);
+  transition-duration:.34s,.34s,0s;
+}
+#hero .nv-hero-media .stage[data-stage="hero"].nv-hero-swap-in .pane[data-on="true"]{
+  opacity:0;
+  visibility:visible;
+  transform:translate3d(0,12px,0);
+  transition:none;
+}
+
+/* Enter-on-scroll transition belongs to the wrapper, NOT to .ph.
+   The latter keeps the precise inline transform assigned by tiltMedia(). */
+#hero .nv-hero-media.nv-hero-pending{
+  opacity:0;
+  transform:translate3d(0,46px,0);
+}
+#hero .nv-hero-media{
+  transition:opacity .85s cubic-bezier(.22,.61,.36,1) .18s,
+             transform .95s cubic-bezier(.22,.61,.36,1) .18s;
+}
+#hero .nv-hero-media.nv-hero-visible{
+  opacity:1;
+  transform:translate3d(0,0,0);
+}
+@media(max-width:820px){
+  #hero .nv-hero-media .stage[data-stage="hero"],
+  #hero .nv-hero-media .tabbar[data-tabs="hero"]{
+    width:min(100%,690px);
+  }
+  #hero .nv-hero-media .tabbar[data-tabs="hero"]{margin-top:24px}
+}
+@media(max-width:500px){
+  #hero .nv-hero-media .stage[data-stage="hero"],
+  #hero .nv-hero-media .tabbar[data-tabs="hero"]{
+    width:100%;
+  }
+  #hero .nv-hero-media .tabbar[data-tabs="hero"] button{
+    padding:8px 5px;
+    min-height:39px;
+    font-size:11.5px;
+    line-height:18px;
+    gap:4px;
+  }
+  #hero .nv-hero-media .tabbar[data-tabs="hero"] button svg{width:12px;height:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  #hero .nv-hero-media{
+    transition:none!important;
+    opacity:1!important;
+    transform:none!important;
+  }
+  #hero .nv-hero-media .stage[data-stage="hero"] .pane{
+    transition:none!important;
+    transform:none!important;
+  }
+}
+</style>
+
+
+
+<style id="nv-launch-hero-styles">
+/* Isolated first-section implementation of the supplied rotating-word Hero. */
+#entree{height:auto;min-height:100svh;}
+#entree .nv-launch-hero{
+  position:relative;z-index:2;width:100%;max-width:1152px;
+  margin:0 auto;padding:clamp(96px,12svh,160px) 24px clamp(80px,12svh,160px);
+  min-height:100svh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:32px;text-align:center;
+  font-family:var(--font-control);color:#fff;
+}
+#entree .nv-launch-copy{
+  display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;
+}
+#entree .nv-launch-heading{
+  display:block;margin:0 auto;width:100%;max-width:672px;
+  font-family:var(--font-control);font-size:clamp(48px,5.8vw,72px);
+  font-weight:400;line-height:1.06;letter-spacing:-.045em;text-align:center;
+}
+#entree .nv-launch-heading-intro{
+  display:block;color:#e8faff;font-weight:400;
+}
+#entree .nv-launch-rotator{
+  display:block;position:relative;width:100%;height:1.18em;
+  overflow:hidden;text-align:center;isolation:isolate;
+}
+#entree .nv-launch-word{
+  position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;font-weight:600;color:#fff;
+  opacity:0;transform:translate3d(0,150px,0);
+  transition:transform .8s cubic-bezier(.22,1.12,.36,1),opacity .48s ease;
+  will-change:transform,opacity;
+}
+#entree .nv-launch-word[data-state="active"]{
+  opacity:1;transform:translate3d(0,0,0);
+}
+#entree .nv-launch-word[data-state="previous"]{
+  opacity:0;transform:translate3d(0,-150px,0);
+}
+#entree .nv-launch-word[data-state="next"]{
+  opacity:0;transform:translate3d(0,150px,0);
+}
+#entree .nv-launch-description{
+  margin:0;max-width:672px;color:rgba(235,247,255,.95);
+  font-size:clamp(18px,1.6vw,20px);font-weight:400;
+  line-height:1.62;letter-spacing:-.025em;text-align:center;
+}
+#entree .nv-launch-actions{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:12px;
+}
+#entree .nv-launch-btn{
+  appearance:none;border:1px solid transparent;border-radius:8px;
+  display:inline-flex;align-items:center;justify-content:center;gap:16px;
+  min-height:44px;padding:10px 19px;font:500 14px/1.4 var(--font-control);
+  letter-spacing:0;white-space:nowrap;cursor:pointer;text-decoration:none;
+  transition:background-color .2s ease,border-color .2s ease,color .2s ease;
+}
+#entree .nv-launch-btn svg{width:16px;height:16px;flex:none}
+#entree .nv-launch-btn--sm{min-height:36px;padding:7px 12px;font-size:13px}
+#entree .nv-launch-btn--secondary{
+  color:#153f71;background:rgba(255,255,255,.91);border-color:rgba(255,255,255,.3);
+}
+#entree .nv-launch-btn--outline{
+  background:rgba(15,72,143,.13);border-color:rgba(255,255,255,.76);color:#fff;
+}
+#entree .nv-launch-btn--primary{
+  background:#fff;color:#16477f;border-color:#fff;
+}
+#entree .nv-launch-btn--secondary:hover,
+#entree .nv-launch-btn--primary:hover{background:#e8faff}
+#entree .nv-launch-btn--outline:hover{background:rgba(255,255,255,.18)}
+#entree .nv-launch-btn:focus-visible{
+  outline:3px solid #fff;outline-offset:4px;
+}
+@media(max-width:640px){
+  #entree .nv-launch-hero{padding:100px 18px 72px;gap:25px}
+  #entree .nv-launch-heading{font-size:clamp(41px,9.1vw,52px);letter-spacing:-.043em}
+  #entree .nv-launch-rotator{height:1.19em}
+  #entree .nv-launch-description{font-size:16px;line-height:1.55;letter-spacing:-.018em}
+  #entree .nv-launch-copy{gap:16px}
+  #entree .nv-launch-actions{gap:10px}
+  #entree .nv-launch-btn{min-height:42px;padding:9px 13px;font-size:13px;gap:9px}
+  #entree .nv-launch-btn--sm{min-height:36px}
+}
+@media(max-width:360px){
+  #entree .nv-launch-hero{padding:86px 12px 58px;gap:20px}
+  #entree .nv-launch-heading{font-size:39px}
+  #entree .nv-launch-description{font-size:15px}
+  #entree .nv-launch-btn{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  #entree .nv-launch-word{transition:none;will-change:auto}
+  #entree .nv-launch-btn{transition:none}
+}
+
+/* NUVIA 2026-10-18 — paysage AVANT le menu final.
+   Le media, son object-fit, son gradient superieur et son controleur ne changent pas.
+   La navigation ne chevauche plus la video. */
+#nv-video-footer { overflow:hidden; }
+
+/* Supprime la reservation anciennement indispensable au footer superpose.
+   La geometrie interne du carrousel et sa vitesse restent inchangées. */
+#nv-white-interlude {
+  --nv-footer-clearance:0px;
+  height:calc(90vh + 355px + clamp(6px,1vh,15px));
+  height:calc(90svh + 355px + clamp(6px,1svh,15px));
+  min-height:710px;
+  padding-bottom:clamp(12px,2svh,30px);
+}
+
+footer#nv-site-footer {
+  position:relative;z-index:5;isolation:isolate;
+  display:block;width:100%;height:auto;min-height:0;
+  margin:0;padding:0;overflow:hidden;
+  background:#fff;color:#171c17;
+  font-family:var(--font-control,Inter,Arial,sans-serif);
+}
+#nv-site-footer .nvsf-card {
+  position:relative;inset:auto;display:flex;flex-direction:column;
+  width:100%;max-width:1560px;min-height:550px;height:auto;
+  margin:0 auto;padding:0 clamp(32px,5.4vw,100px) 27px;
+  box-sizing:border-box;background:#fff;
+}
+#nv-site-footer .nvsf-card * {box-sizing:border-box}
+#nv-site-footer .nvsf-top-rule {
+  width:100%;height:1px;flex:0 0 1px;background:rgba(18,26,23,.11);
+}
+#nv-site-footer .nvsf-intro {
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:32px;margin-top:clamp(45px,4.3vw,65px);
+}
+#nv-site-footer .nvsf-identity{min-width:0;min-height:106.25px}
+#nv-site-footer .nvsf-wordmark {
+  position:relative;display:inline-block;width:max-content;
+  color:#171c17;text-decoration:none;
+  font:800 28px/1.1 var(--font-control,Inter,Arial,sans-serif);
+  letter-spacing:-.075em;
+}
+#nv-site-footer .nvsf-wordmark span{letter-spacing:0;color:inherit}
+#nv-site-footer .nvsf-wordmark::after {
+  content:"";position:absolute;display:block;
+  /* Le footer final est independant du film : centrage sur la largeur du texte. */
+  left:50%;top:calc(100% + 11px);
+  width:132%;height:11px;pointer-events:none;
+  transform:translateX(-50%);
+  background:url("./assets/nuvia-gold-brush-underline.webp") center / 100% 100% no-repeat;
+}
+#nv-site-footer .nvsf-socials{
+  align-self:flex-start;display:flex;align-items:center;flex-wrap:wrap;
+  gap:21px;margin-top:3px;
+}
+#nv-site-footer .nvsf-social-icon{
+  width:22px;height:22px;flex:0 0 22px;
+  display:block;color:#171c17;filter:none;
+}
+#nv-site-footer .nvsf-social-icon svg{
+  display:block;width:100%;height:100%;fill:none;
+  stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round;
+}
+#nv-site-footer .nvsf-navigation {
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  column-gap:clamp(22px,4vw,70px);
+  width:100%;margin-top:clamp(56px,5vw,72px);
+}
+#nv-site-footer .nvsf-column{
+  display:flex;flex-direction:column;align-items:flex-start;min-width:0;
+}
+#nv-site-footer .nvsf-column h2 {
+  margin:0 0 18px;color:#171c17;
+  font:650 15px/1.35 var(--font-control,Inter,Arial,sans-serif);
+}
+#nv-site-footer .nvsf-column>a{
+  display:block;max-width:100%;margin-bottom:14px;
+  font:450 13px/1.45 var(--font-control,Inter,Arial,sans-serif);
+  color:#575e57;text-decoration:none;overflow-wrap:break-word;
+  transition:color .22s ease,transform .22s cubic-bezier(.22,.61,.36,1);
+}
+#nv-site-footer .nvsf-column>a:last-child{margin-bottom:0}
+#nv-site-footer .nvsf-column>a:hover{color:#111911;transform:translateX(2px)}
+#nv-site-footer .nvsf-column>a:focus-visible,
+#nv-site-footer .nvsf-wordmark:focus-visible {
+  outline:2px solid currentColor;outline-offset:3px;border-radius:2px;
+}
+#nv-site-footer .nvsf-bottom{
+  margin-top:auto;padding-top:clamp(68px,7vw,105px);
+  text-align:center;
+}
+#nv-site-footer .nvsf-bottom p{
+  margin:0;color:#667065;
+  font:500 12px/1.4 var(--font-control,Inter,Arial,sans-serif);
+}
+@media(min-width:701px) and (max-width:1100px){
+  #nv-site-footer .nvsf-card{min-height:560px;padding-inline:clamp(32px,5.5vw,62px)}
+  #nv-site-footer .nvsf-navigation{column-gap:26px}
+  #nv-site-footer .nvsf-column h2{font-size:14px;margin-bottom:13px}
+  #nv-site-footer .nvsf-column>a{font-size:12px;margin-bottom:11px}
+}
+@media(min-width:701px) and (max-width:800px){
+  #nv-site-footer .nvsf-navigation{
+    grid-template-columns:repeat(2,minmax(0,1fr));row-gap:27px;
+  }
+}
+@media(max-width:700px){
+  #nv-white-interlude {
+    height:calc(90vh + 274.5px + clamp(6px,1vh,15px));
+    height:calc(90svh + 274.5px + clamp(6px,1svh,15px));
+    min-height:549px;
+    padding-bottom:clamp(12px,2svh,30px);
+  }
+  #nv-site-footer .nvsf-card{
+    min-height:0;height:auto;padding:0 27px 35px;
+  }
+  #nv-site-footer .nvsf-intro{
+    margin-top:45px;flex-direction:column;gap:18px;
+  }
+  #nv-site-footer .nvsf-identity{min-height:93.9px}
+  #nv-site-footer .nvsf-wordmark{font-size:27px}
+  #nv-site-footer .nvsf-wordmark::after{
+    top:calc(100% + 10px);width:126%;height:9px;
+  }
+  #nv-site-footer .nvsf-socials{gap:16px}
+  #nv-site-footer .nvsf-social-icon{width:20px;height:20px;flex-basis:20px}
+  #nv-site-footer .nvsf-navigation{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    column-gap:27px;row-gap:32px;margin-top:48px;
+  }
+  #nv-site-footer .nvsf-column h2{font-size:14px;margin-bottom:12px}
+  #nv-site-footer .nvsf-column>a{font-size:12px;line-height:1.4;margin-bottom:9px}
+  #nv-site-footer .nvsf-bottom{padding-top:64px}
+  #nv-site-footer .nvsf-bottom p{font-size:11px}
+}
+@media(max-width:500px){
+  #nv-site-footer .nvsf-card{padding:0 22px 30px}
+  #nv-site-footer .nvsf-intro{margin-top:36px;gap:13px}
+  #nv-site-footer .nvsf-identity{min-height:87.35px}
+  #nv-site-footer .nvsf-wordmark{font-size:25px}
+  #nv-site-footer .nvsf-socials{gap:16px}
+  #nv-site-footer .nvsf-social-icon{width:18px;height:18px;flex-basis:18px}
+  #nv-site-footer .nvsf-navigation{column-gap:20px;row-gap:28px;margin-top:44px}
+  #nv-site-footer .nvsf-column h2{font-size:13px;margin-bottom:10px}
+  #nv-site-footer .nvsf-column>a{font-size:11px;line-height:1.35;margin-bottom:9px}
+  #nv-site-footer .nvsf-bottom{padding-top:54px}
+  #nv-site-footer .nvsf-bottom p{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  #nv-site-footer .nvsf-column>a{transition:none}
+  #nv-site-footer .nvsf-column>a:hover{transform:none}
+}
+
+
+/* NUVIA — chute d'un ecran vers le dernier chapitre blanc.
+   La video et son fondu de raccord restent strictement inchanges. */
+#nv-footer-drop-gap{
+  display:block;position:relative;z-index:2;
+  width:100%;height:100vh;height:100svh;min-height:0;
+  margin:0;padding:0;background:#fff;pointer-events:none;
+}
+/* Le dernier chapitre peut s'aligner exactement en haut de la fenetre,
+   meme quand son menu est plus court que le viewport. */
+#nv-site-footer{min-height:100vh;min-height:100svh}
+html.nv-footer-drop-running{scroll-behavior:auto!important}
+
+
+/* NUVIA / INTO THE WHITE — la video, son fichier et son lecteur restent intacts.
+   Le voile est separe du media et n'existe visuellement que pendant la chute. */
+#nv-footer-fall-veil{
+  position:fixed;inset:0;z-index:9;pointer-events:none;
+  background:linear-gradient(to top,
+    #fff 0%,rgba(255,255,255,.99) 22%,
+    rgba(255,255,255,.88) 46%,rgba(255,255,255,.45) 71%,
+    rgba(255,255,255,0) 100%);
+  opacity:var(--nv-footer-veil,0);
+  visibility:hidden;
+  will-change:opacity;
+}
+html.nv-footer-dissolving #nv-footer-fall-veil{visibility:visible}
+/* Espace vide preserve : exactement une hauteur d'ecran. */
+#nv-footer-drop-gap{height:100vh;height:100svh;background:#fff}
+
+/* Un seul footer blanc : logo 3D reel a la position du mot-symbole
+   precedent, sans grande section 3D supplementaire. */
+#nv-site-footer{background:#fff;min-height:100vh;min-height:100svh}
+#nv-site-footer .nvsf-card{position:relative;z-index:2;background:#fff;min-height:550px}
+#nv-site-footer .nvsf-top-rule{background:rgba(18,26,23,.11)}
+
+/* L'emprise visuelle du logo + trait d'or original : 132 x 54 px.
+   Pas de redimensionnement d'une grande section : le moteur GL recompose
+   directement ses particules dans ce petit viewport. */
+#nv-site-footer .nvsf-logo3d-link{
+  display:inline-flex;position:relative;align-items:center;justify-content:center;
+  flex:none;width:132px;height:54px;
+  padding:0;margin:0;border:0;text-decoration:none;
+  background:transparent;color:#171c17;
+}
+#nv-site-footer .nvsf-logo3d-link:focus-visible{
+  outline:2px solid #171c17;outline-offset:4px;border-radius:2px;
+}
+#nv-footer-logo3d{
+  position:relative;display:block;
+  width:100%;height:100%;
+  overflow:visible;isolation:isolate;
+  background:transparent;
+}
+#nv-footer-logo3d>.sh-art-only{
+  position:relative!important;display:block!important;
+  width:100%!important;height:100%!important;
+  padding:0!important;margin:0!important;
+  background:transparent!important;overflow:visible!important;
+  border:none!important;box-shadow:none!important;
+}
+#nv-footer-logo3d .sh-stage{
+  inset:0;overflow:visible;
+  background:transparent!important;
+  /* Feathery particle falloff prevents any visible rectangular clipping
+     during pointer motion, without cropping a full-size hero. */
+  -webkit-mask-image:radial-gradient(ellipse 74% 78% at 50% 50%,
+    #000 58%,rgba(0,0,0,.85) 72%,transparent 100%);
+  mask-image:radial-gradient(ellipse 74% 78% at 50% 50%,
+    #000 58%,rgba(0,0,0,.85) 72%,transparent 100%);
+}
+#nv-footer-logo3d .sh-canvas{
+  width:100%;height:100%;background:transparent!important;
+}
+#nv-footer-logo3d .sh-fallback{
+  background:transparent!important;
+  mix-blend-mode:multiply;
+}
+#nv-footer-logo3d .sh-backdrop{
+  color:rgba(23,28,23,.18);
+  font-weight:700;letter-spacing:-.065em;
+}
+@media(max-width:700px){
+  #nv-site-footer .nvsf-logo3d-link{width:120px;height:49px}
+}
+/* Apparition du menu a la fin de la chute, sans cacher le menu en navigation directe. */
+@keyframes nv-footer-menu-appear{
+  from{opacity:.05;transform:translate3d(0,22px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+#nv-site-footer.nv-footer-arrival .nvsf-card{
+  animation:nv-footer-menu-appear 720ms cubic-bezier(.2,.8,.2,1) both;
+}
+@media(max-width:700px){
+  #nv-site-footer .nvsf-card{min-height:0}
+}
+@media(prefers-reduced-motion:reduce){
+  #nv-footer-fall-veil{display:none!important}
+  #nv-site-footer.nv-footer-arrival .nvsf-card{animation:none}
+}
+
+
+/* Suspension reversible du pied de page (2026-10-20).
+   La video panoramique demeure une section autonome, visible et intacte.
+   Le menu et ses transitions sont encore presents dans le code source. */
+#nv-site-footer[hidden],
+#nv-footer-drop-gap[hidden],
+#nv-footer-fall-veil[hidden]{display:none!important}
+
+
+/* V204 replaces the old bitmap wipe ONLY when the actual GLB is loaded.
+   The cloud scene, site content, forms, video and hidden footer are unaffected. */
+/* La version Blender amorce la sortie du cadre, puis passe au moteur 3D.
+   Ne cacher le secours 2D qu'une fois le fondu 3D entièrement achevé. */
+html.nv-v204-model-ready.nv-wipe-v204-full #clothBack,
+html.nv-v204-model-ready.nv-wipe-v204-full #clothFront{display:none!important}
+
+</style>
+
+<style>.np-section{padding:90px 0 110px}.np-section .wrap{max-width:1400px;width:calc(100% - 60px)}.np-heading{text-align:center;margin-bottom:42px}.np-heading span{border:1px solid #ffffffa8;border-radius:40px;padding:10px 22px;letter-spacing:.15em;font-size:12px}.np-heading h2{font:400 clamp(42px,5vw,75px)/1.1 "Instrument Serif",Georgia,serif;color:#09254c;margin:23px 0 12px}.np-heading p{color:#e7f1ff}.np-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}.np-card{min-height:460px;position:relative;padding:20px 14px;text-align:center;border:1px solid #ffffffa8;border-radius:24px;background:#ffffff18;backdrop-filter:blur(12px);transition:transform .3s}.np-card:hover{transform:translateY(-5px)}.np-card:not(:last-child):after{content:'→';position:absolute;right:-27px;top:50%;font-size:30px;z-index:3}.np-number{width:55px;height:55px;border:1px solid white;border-radius:50%;display:grid;place-items:center;margin:auto auto 18px;font-size:22px}.np-card h3{font-size:20px;margin:0 0 10px}.np-card p{font-size:13px;color:#e5f1ff;min-height:65px}.np-art{position:relative;height:230px;margin-top:20px}.np-cloth{position:absolute;top:35px;left:17%;width:66%;height:130px;border-radius:18px 28px 20px 26px;transform:rotate(-13deg);background:repeating-linear-gradient(35deg,#c1cbd433 0 1px,transparent 1px 5px),linear-gradient(125deg,#fff,#dbe6e9,#fff);box-shadow:8px 15px 25px #175c9b88}.np-fruit{position:absolute;top:155px;left:20%;font-size:40px}.np-format,.np-colors,.np-styles,.np-confirm{position:absolute;background:#c5e0f5dd;border:1px solid white;border-radius:10px;color:#285478;padding:10px;box-shadow:4px 9px 15px #1854a255}.np-format{top:0;left:0;font-size:27px}.np-format small{display:block;font-size:9px}.np-pack{position:absolute;top:90px;left:16%;width:68%;height:95px;border:7px ridge #f6f4e9;border-radius:13px;background:linear-gradient(140deg,#fff,#e6e2d7,#fff);transform:rotate(-10deg);display:grid;place-items:center;color:#2d654d;font:700 27px Georgia;box-shadow:9px 16px 18px #17549b66}.np-colors{top:18px;right:0;color:#4b8868}.np-styles{bottom:0;left:8%;width:84%}.np-check{position:absolute;right:5%;top:35px;background:#398161;border:2px solid white;border-radius:50%;padding:9px 16px;font-size:26px}.np-confirm{top:160px;left:25%;text-align:left;line-height:1.5}.np-boxes{position:absolute;top:65px;left:8%;right:8%;font-size:65px;line-height:1.2;letter-spacing:-10px;color:#d7a46b;text-shadow:3px 5px #9e6a3d}.np-pallet{position:absolute;top:205px;left:10%;width:80%;height:15px;background:linear-gradient(#c08d56 50%,#714627 50%)}@media(max-width:1000px){.np-grid{grid-template-columns:repeat(2,1fr)}.np-card:nth-child(2):after{display:none}}@media(max-width:600px){.np-grid{grid-template-columns:1fr}.np-card:after{display:none!important}.np-section .wrap{width:calc(100% - 32px)}}@media(prefers-reduced-motion:reduce){.np-card{transition:none}}</style><style id="np-image-integration">
+/* NUVIA process — reference-led editorial layout */
+.np-section{padding:90px 0 110px}
+.np-section .wrap{max-width:1660px;width:calc(100% - 64px)}
+.np-section .np-heading{margin-bottom:38px}
+.np-section .np-heading span{display:inline-block;color:#173d66;background:#ffffff1c;border-color:#447eaf70;font-weight:500}
+.np-section .np-heading h2{color:#071d36;font-size:clamp(44px,5.2vw,82px);line-height:1.04;letter-spacing:-.035em}
+.np-section .np-heading p{color:#285e8e;font-size:16px;font-weight:400;line-height:1.45}
+.np-section .np-grid{display:grid;grid-template-columns:1fr 1.6fr 1fr 1fr;gap:20px;align-items:stretch}
+.np-section .np-card{box-sizing:border-box;display:flex;flex-direction:column;position:relative;min-width:0;min-height:548px;padding:17px 12px 0;border:1px solid rgba(255,255,255,.78);border-radius:29px;background:rgba(255,255,255,.075);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);overflow:visible;isolation:isolate;box-shadow:inset 0 1px 0 #ffffff24;transition:background .3s}
+.np-section .np-card:hover{transform:none;background:rgba(255,255,255,.10)}
+.np-section .np-card:not(:last-child):after{content:'→';position:absolute;right:-30px;top:49%;z-index:5;color:#fff;font-size:32px;font-weight:200;text-shadow:0 1px 5px #2477b850;pointer-events:none}
+.np-section .np-number{flex:none;width:58px;height:58px;margin:0 auto 16px;border:1px solid #fff;color:#fff;font-size:22px;font-weight:400}
+.np-section .np-card h3{min-height:0;margin:0 auto 12px;color:#fff;font-size:clamp(16px,1.55vw,22px);font-weight:450;line-height:1.2;letter-spacing:-.015em;white-space:normal}
+.np-section .np-card>p{flex:none;min-height:0;max-width:270px;margin:0 auto;color:#285e8e;font-size:clamp(12px,1.05vw,15px);font-weight:400;line-height:1.4}
+.np-section .np-art{position:relative;display:flex;align-items:flex-end;justify-content:center;flex:1 1 auto;min-height:0;width:100%;height:auto;margin-top:0;overflow:visible;pointer-events:none}
+.np-section .np-art img{position:absolute;display:block;bottom:0;left:50%;width:115%;max-width:none;height:auto;max-height:340px;object-fit:contain;object-position:center bottom;transform:translateX(-50%);filter:drop-shadow(0 12px 14px rgba(17,79,119,.10));transition:transform .5s ease}
+.np-section .np-card:hover .np-art img{transform:translateX(-50%) translateY(-5px)}
+.np-section .np-card:nth-child(2) .np-art img{width:110%;max-height:375px}
+.np-section .np-card:nth-child(3) .np-art img{width:124%;max-height:340px}
+.np-section .np-card:nth-child(4) .np-art img{width:117%;max-height:345px}
+@media(max-width:1050px){.np-section .np-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.np-section .np-card{min-height:530px}.np-section .np-card:not(:last-child):after{display:none}.np-section .np-card h3{font-size:20px}.np-section .np-card>p{font-size:14px}.np-section .np-art img{max-height:335px}}
+@media(max-width:600px){.np-section{padding:65px 0 75px}.np-section .wrap{width:calc(100% - 32px)}.np-section .np-grid{grid-template-columns:minmax(0,1fr);gap:22px}.np-section .np-card{min-height:510px;padding:18px 14px 0}.np-section .np-art img{width:105%;max-height:320px}.np-section .np-card:nth-child(2) .np-art img{width:110%}.np-section .np-heading h2{font-size:clamp(39px,10vw,55px)}.np-section .np-heading p{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.np-section .np-art img{transition:none!important}}
+</style><style id="np-reference-polish">
+/* Full-width reference composition; individual imagery remains independent. */
+.np-section{position:relative;isolation:isolate;overflow:hidden;padding:80px 0 115px}
+.np-section:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 50% 2%,rgba(225,247,255,.40),transparent 54%)}
+.np-section .wrap{max-width:1660px;width:calc(100% - 58px)}
+.np-section .np-heading{margin-bottom:30px}
+.np-section .np-heading h2{margin:25px 0 8px}
+.np-section .np-grid{grid-template-columns:1fr 1.58fr 1fr 1fr;gap:20px}
+.np-section .np-card{min-height:555px;overflow:hidden;padding:17px 9px 0;background:rgba(255,255,255,.065)}
+.np-section .np-card>p{max-width:265px;color:#285982}
+.np-section .np-card:nth-child(2)>p{max-width:320px}
+.np-section .np-art{margin-top:5px;min-height:300px}
+.np-section .np-art img{width:128%;max-height:360px;filter:drop-shadow(0 9px 14px rgba(35,88,120,.08))}
+.np-section .np-card:nth-child(1) .np-art img{width:132%;max-height:360px}
+.np-section .np-card:nth-child(2) .np-art img{width:118%;max-height:375px}
+.np-section .np-card:nth-child(3) .np-art img{width:125%;max-height:355px}
+.np-section .np-card:nth-child(4) .np-art img{width:128%;max-height:345px}
+.np-section .np-card:nth-child(-n+2) .np-art img{mix-blend-mode:screen}
+@media(max-width:1050px){.np-section .np-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.np-section .np-card{min-height:550px}.np-section .np-art img{width:100%;max-height:365px}.np-section .np-card:nth-child(2) .np-art img{width:115%}}
+@media(max-width:600px){.np-section .wrap{width:calc(100% - 30px)}.np-section .np-grid{grid-template-columns:minmax(0,1fr);gap:22px}.np-section .np-card{min-height:515px}.np-section .np-art{min-height:290px}.np-section .np-art img,.np-section .np-card:nth-child(1) .np-art img,.np-section .np-card:nth-child(3) .np-art img,.np-section .np-card:nth-child(4) .np-art img{width:108%;max-height:325px}.np-section .np-card:nth-child(2) .np-art img{width:113%;max-height:330px}}
+
+/* Shader de nuages Aceternity (fourni par l'utilisateur) : premiere section
+   uniquement. Ne touche pas aux nuages globaux, a la lingette V204, ni
+   aux contenus/animations qui apparaissent au-dessus du ciel. */
+#entree #nv-cloudshader-canvas{
+  position:absolute;inset:0;z-index:2;
+  display:none;width:100%;height:100%;
+  max-width:none;max-height:none;pointer-events:none;
+}
+html.nv-cloudshader-active #entree #nv-cloudshader-canvas{display:block}
+html.nv-cloudshader-active #entree #nv-cumulus-canvas{display:none}
+/* La typographie, les CTA et les animations de lancement restent prioritaires. */
+#entree .nv-launch-hero{position:relative;z-index:3}
+
+</style><style id="np-cards-spacing-v2">
+/* Reference first: four generously proportioned panels, no cramped 1050px inner container. */
+#usage.np-section{width:100%;padding:96px 0 118px;box-sizing:border-box}
+#usage.np-section>.wrap{width:calc(100% - 64px)!important;max-width:1680px!important;margin-left:auto!important;margin-right:auto!important;padding:0!important;box-sizing:border-box}
+#usage.np-section .np-grid{width:100%;max-width:none;grid-template-columns:minmax(0,1fr) minmax(0,1.58fr) minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:stretch}
+#usage.np-section .np-card{min-width:0;min-height:550px;padding:18px 16px 0;box-sizing:border-box}
+#usage.np-section .np-number{margin-bottom:20px}
+#usage.np-section .np-card h3{font-weight:400;font-size:clamp(17px,1.5vw,23px);line-height:1.25;min-height:0;margin:0 0 13px}
+#usage.np-section .np-card>p{font-size:clamp(13px,1vw,15px);line-height:1.42;max-width:275px}
+#usage.np-section .np-card:nth-child(2)>p{max-width:340px}
+#usage.np-section .np-art{min-height:270px}
+@media(min-width:1700px){#usage.np-section>.wrap{width:calc(100% - 100px)!important}}
+@media(max-width:1150px){#usage.np-section>.wrap{width:calc(100% - 44px)!important}#usage.np-section .np-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}#usage.np-section .np-card{min-height:530px}#usage.np-section .np-card h3{font-size:21px}#usage.np-section .np-card>p{font-size:14px}}
+@media(max-width:650px){#usage.np-section{padding:70px 0 80px}#usage.np-section>.wrap{width:calc(100% - 30px)!important}#usage.np-section .np-grid{grid-template-columns:minmax(0,1fr);gap:20px}#usage.np-section .np-card{min-height:505px}}
+</style><style id="nv-hero-cloud-video-styles">
+/* 2026-10-22: cloud video background. Original hero backed up in backups/hero-before-cloud-video-2026-10-22.html */
+#hero.nv-hero-cloud-video{position:relative;isolation:isolate;overflow:hidden;background:transparent}
+#hero.nv-hero-cloud-video .nv-hero-cloud-backdrop{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:transparent}
+#hero.nv-hero-cloud-video .nv-hero-cloud-film{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;display:block;opacity:1;transition:opacity .7s ease}
+#hero.nv-hero-cloud-video .nv-hero-cloud-film.nv-film-ready{opacity:1}
+#hero.nv-hero-cloud-video .nv-hero-cloud-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,41,88,.12) 0%,rgba(27,80,139,.06) 42%,rgba(47,122,194,.18) 100%)}
+#hero.nv-hero-cloud-video>.wrap{position:relative;z-index:1}
+@media(max-width:650px){#hero.nv-hero-cloud-video .nv-hero-cloud-film{object-position:center center}}
+@media(prefers-reduced-motion:reduce){#hero.nv-hero-cloud-video .nv-hero-cloud-film{display:none!important}}
+</style>
+<style id="nv-cloud-first-section-fix">
+/* The first animated hero is #entree, not the later #hero section. */
+#entree.nv-hero-cloud-video{position:relative;isolation:isolate;overflow:hidden}
+#entree.nv-hero-cloud-video>.nv-hero-cloud-backdrop{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none}
+#entree.nv-hero-cloud-video .nv-hero-cloud-film{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:1;display:block}
+#entree.nv-hero-cloud-video .nv-hero-cloud-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,36,81,.19),rgba(24,83,145,.07) 50%,rgba(28,92,150,.20))}
+#entree.nv-hero-cloud-video>.nv-cumulus-scene{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+#entree.nv-hero-cloud-video>.nv-launch-hero{position:relative;z-index:2}
+@media(prefers-reduced-motion:reduce){#entree.nv-hero-cloud-video .nv-hero-cloud-film{display:none}#entree.nv-hero-cloud-video>.nv-cumulus-scene{opacity:1!important;visibility:visible!important}}
+</style><style id="nv-section-order-spacing-20261022">
+/* First: cloud video; second: editorial hero; third: MAKE IT YOURS. */
+#entree.nv-hero-cloud-video{margin-bottom:clamp(160px,25vh,320px)}
+#hero{margin-top:0;margin-bottom:clamp(180px,28vh,360px)}
+#nuvia-slogan{margin-top:0!important}
+@media(max-width:700px){#entree.nv-hero-cloud-video{margin-bottom:120px}#hero{margin-bottom:140px}}
+</style>
+<style id="nv-universe-menu-film-style">
+.nuvi-explore-picture .nuvi-panel-picture-surface{position:relative;overflow:hidden}
+.nuvi-universe-menu-film{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:3;opacity:0;pointer-events:none;transition:opacity .35s ease}
+.nuvi-universe-menu-film.is-visible{opacity:1}
+.nuvi-explore-photo-caption{position:relative;z-index:4;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.nuvi-universe-menu-film{display:none!important}}
+</style>
+<style id="nv-hero-video-smooth-playback">
+/* Reduce video compositing and GPU contention while the first hero is on screen. */
+#entree .nv-hero-cloud-film{transform:translate3d(0,0,0);backface-visibility:hidden;will-change:auto;transition:none!important}
+#entree .nv-hero-cloud-shade{pointer-events:none}
+html.nv-video-in-viewport #nv-nav-frost{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+/* Keep the underlying sky and wipe composited across the boundary; hiding them created a hard seam. */
+</style><style id="nv-cloud-sky-brightness-v2">
+/* Brighter daylight treatment for the first-section sky video; original MP4 untouched. */
+#entree.nv-hero-cloud-video .nv-hero-cloud-film{
+  filter:brightness(1.13) saturate(1.09);
+}
+</style>
+
+<style id="nv-cloud-boundary-feather-v3">
+/* Fade only the video layer into the existing animated sky underneath.
+   Do not overlay or recolor the editorial section. */
+#entree.nv-hero-cloud-video>.nv-hero-cloud-backdrop{
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 68%,rgba(0,0,0,.88) 78%,rgba(0,0,0,.42) 92%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 0%,#000 68%,rgba(0,0,0,.88) 78%,rgba(0,0,0,.42) 92%,transparent 100%);
+}
+@media(max-width:700px){
+  #entree.nv-hero-cloud-video>.nv-hero-cloud-backdrop{
+    -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 72%,rgba(0,0,0,.6) 90%,transparent 100%);
+    mask-image:linear-gradient(to bottom,#000 0%,#000 72%,rgba(0,0,0,.6) 90%,transparent 100%);
+  }
+}
+</style>
+<style id="nv-editorial-section-spacing-alignment">
+/* Deliberate breathing room between the cloud film, editorial hero and slogan. */
+#entree.nv-hero-cloud-video{margin-bottom:clamp(260px,38vh,470px)!important}
+#hero{margin-top:0!important;margin-bottom:clamp(280px,42vh,520px)!important;padding-top:clamp(72px,12vh,140px)!important;padding-bottom:clamp(72px,12vh,140px)!important}
+#nuvia-slogan{margin-top:0!important}
+@media(max-width:700px){
+ #entree.nv-hero-cloud-video{margin-bottom:clamp(145px,25vh,250px)!important}
+ #hero{margin-bottom:clamp(160px,28vh,280px)!important;padding-top:64px!important;padding-bottom:64px!important}
+}
+</style>
+<style id="nv-hero-position-tune-20261022">
+/* Raise editorial content slightly after cloud-to-hero jump. */
+#hero{padding-top:clamp(32px,6vh,70px)!important}
+@media(max-width:700px){#hero{padding-top:32px!important}}
+</style>
+<style id="nv-studio-gold-navigation">
+/* Studio — corail premium, teinte unie, sans effet metallique.
+   Conserve la typographie, les dimensions et les animations du menu. */
+#nuvia-react-navigation .nv-navitem.nv-navitem--studio>button,
+#nuvia-react-navigation .nv-navitem.nv-navitem--studio>button .nv-nav-label{
+  color:#FF9A80;
+  -webkit-text-fill-color:#FF9A80;
+  background-image:none;
+  opacity:1;
+  filter:none;
+  text-shadow:none;
+}
+#nuvia-react-navigation .nv-navitem.nv-navitem--studio:is(:hover,:focus-within)>button,
+#nuvia-react-navigation .nv-navitem.nv-navitem--studio:is(:hover,:focus-within)>button .nv-nav-label{
+  color:#FFB09A;
+  -webkit-text-fill-color:#FFB09A;
+  opacity:1;
+}
+#nuvia-react-navigation .nv-navitem.nv-navitem--studio>button .nv-nav-label::after{
+  background:#FF9A80;
+}
+#nuvia-react-navigation .nv-navitem.nv-navitem--studio:is(:hover,:focus-within)>button .nv-nav-label::after{
+  background:#FFB09A;
+}
+/* Variante plus foncee sur fond blanc. */
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem.nv-navitem--studio>button,
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem.nv-navitem--studio>button .nv-nav-label{
+  color:#C85F4A;
+  -webkit-text-fill-color:#C85F4A;
+  text-shadow:none;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem.nv-navitem--studio:is(:hover,:focus-within)>button,
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem.nv-navitem--studio:is(:hover,:focus-within)>button .nv-nav-label{
+  color:#AE4D3A;
+  -webkit-text-fill-color:#AE4D3A;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem.nv-navitem--studio>button .nv-nav-label::after{
+  background:#C85F4A;
+}
+#nuvia-react-navigation[data-nv-contrast="ink"] .nv-navitem.nv-navitem--studio:is(:hover,:focus-within)>button .nv-nav-label::after{
+  background:#AE4D3A;
+}
+</style>
+
+<style id="nv-sky-unified-daylight-20261023">
+/* Le fond WebGL de jour traverse toutes les sections du contenu,
+   sans redemarrer ni recréer un ciel à chaque section.
+   Hero vidéo #entree et chapitre blanc #nv-white-interlude inchangés. */
+#usage,
+#usage.np-section,
+#nv-journey,
+#nv-journey .nvj-sticky,
+#nv-contact-sequence {
+  background: transparent !important;
+}
+/* Supprime les couches décoratives par section qui rompent l'uniformité
+   visuelle du ciel continu ; les cartes et illustrations sont préservées. */
+#usage::before,
+#usage.np-section::before,
+#nv-journey .nvj-sticky::before,
+#nv-journey .nvj-light {
+  background: none !important;
+}
+#nv-contact-sequence .nv-contact-cloud {
+  display: none !important;
+}
+/* Le fondu naturel vers la zone blanche existante est conservé. */
+</style>
+<style id="nv-contact-cloudbank-transition-20261023">
+/* Nuage de raccord : le blanc de la section suivante remonte dans le ciel
+   par des contours atmosphériques irréguliers, sans image ni vidéo supplémentaire. */
+#nv-white-interlude{position:relative;isolation:isolate}
+#nv-white-interlude::before{
+  content:"";position:absolute;left:0;right:0;top:-430px;height:440px;
+  z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 32% 26% at 8% 96%,rgba(255,255,255,.99) 0%,rgba(255,255,255,.88) 46%,transparent 100%),
+    radial-gradient(ellipse 37% 37% at 30% 101%,#fff 0%,rgba(255,255,255,.93) 49%,transparent 100%),
+    radial-gradient(ellipse 35% 30% at 56% 94%,#fff 0%,rgba(255,255,255,.88) 52%,transparent 100%),
+    radial-gradient(ellipse 38% 35% at 83% 103%,#fff 0%,rgba(255,255,255,.9) 53%,transparent 100%),
+    radial-gradient(ellipse 28% 25% at 102% 92%,#fff 0%,rgba(255,255,255,.85) 48%,transparent 100%),
+    linear-gradient(to bottom,transparent 0%,rgba(242,249,255,.06) 16%,rgba(246,251,255,.22) 37%,rgba(255,255,255,.68) 66%,#fff 100%);
+}
+#nv-white-interlude::after{
+  content:"";position:absolute;left:0;right:0;top:-230px;height:240px;
+  z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 22% 33% at 17% 68%,rgba(255,255,255,.74),transparent 100%),
+    radial-gradient(ellipse 28% 40% at 47% 84%,rgba(255,255,255,.82),transparent 100%),
+    radial-gradient(ellipse 24% 32% at 75% 72%,rgba(255,255,255,.75),transparent 100%);
+  filter:blur(25px);
+}
+#nv-white-interlude>*{position:relative;z-index:1}
+@media(max-width:700px){
+  #nv-white-interlude::before{top:-300px;height:310px}
+  #nv-white-interlude::after{top:-170px;height:180px;filter:blur(17px)}
+}
+</style>
+<style id="nv-restored-side-clouds-20261023">
+/* Nuages latéraux volumineux, sans couvrir le contenu central. */
+#nv-contact-sequence .nv-contact-cloud,
+.nv-site-side-cloud{
+ position:absolute;pointer-events:none;z-index:0;
+ width:clamp(360px,47vw,790px);height:clamp(280px,37vw,620px);
+ aspect-ratio:auto;opacity:.88;filter:none;background:none;
+ isolation:isolate;animation:nv-site-cloud-float 32s ease-in-out infinite alternate;
+}
+#nv-contact-sequence .nv-contact-cloud::before,
+#nv-contact-sequence .nv-contact-cloud::after,
+.nv-site-side-cloud::before,.nv-site-side-cloud::after{
+ content:"";position:absolute;inset:0;pointer-events:none;
+ background:
+ radial-gradient(ellipse 18% 26% at 18% 55%,#fff 12%,rgba(240,247,252,.94) 58%,transparent 100%),
+ radial-gradient(ellipse 23% 34% at 35% 41%,#fff 15%,rgba(230,241,250,.94) 65%,transparent 100%),
+ radial-gradient(ellipse 26% 36% at 55% 36%,#fff 17%,rgba(224,237,247,.91) 65%,transparent 100%),
+ radial-gradient(ellipse 26% 32% at 76% 48%,#fff 12%,rgba(218,233,245,.88) 65%,transparent 100%),
+ radial-gradient(ellipse 38% 29% at 49% 68%,rgba(240,247,252,.96) 18%,rgba(206,226,243,.84) 65%,transparent 100%);
+ mask-image:radial-gradient(ellipse 76% 75% at 48% 50%,#000 54%,transparent 98%);
+ -webkit-mask-image:radial-gradient(ellipse 76% 75% at 48% 50%,#000 54%,transparent 98%);
+}
+#nv-contact-sequence .nv-contact-cloud::before,.nv-site-side-cloud::before{filter:blur(11px) url(#nv-side-cloud-distort)}
+#nv-contact-sequence .nv-contact-cloud::after,.nv-site-side-cloud::after{inset:9% 5% 14%;opacity:.55;filter:blur(27px)}
+#nv-contact-sequence .nv-contact-cloud--left{left:-24%;top:53svh}
+#nv-contact-sequence .nv-contact-cloud--right{right:-25%;top:95svh;bottom:auto;animation-delay:-15s}
+.nv-site-side-cloud--left{left:-26%}
+.nv-site-side-cloud--right{right:-26%;animation-delay:-13s}
+@keyframes nv-site-cloud-float{from{translate:-1% 0;scale:1}to{translate:2% -2%;scale:1.035}}
+@media(max-width:700px){#nv-contact-sequence .nv-contact-cloud,.nv-site-side-cloud{width:80vw;height:58vw;opacity:.72}.nv-site-side-cloud--left{left:-47%}.nv-site-side-cloud--right{right:-47%}}
+@media(prefers-reduced-motion:reduce){#nv-contact-sequence .nv-contact-cloud,.nv-site-side-cloud{animation:none!important}}
+</style>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute;overflow:hidden;pointer-events:none"><defs><filter id="nv-side-cloud-distort" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".013 .021" numOctaves="3" seed="7" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="23" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>
+<style id="nv-side-clouds-distribution-v2">
+/* Variations de silhouette, tailles et mouvements ; nuages cantonnés aux bords. */
+#hero,#nuvia-slogan,#nv-contact-sequence{isolation:isolate;overflow:hidden}
+#hero>.nv-site-side-cloud,#nuvia-slogan>.nv-site-side-cloud,#nv-contact-sequence>.nv-site-side-cloud{z-index:0}
+#hero>.wrap,#nuvia-slogan>.ns-headline,#nv-contact-sequence>.nv-contact-stage{position:relative;z-index:1}
+.nv-side-cloud-variant-b{width:clamp(310px,38vw,650px);height:clamp(230px,29vw,480px);rotate:-12deg;opacity:.74;animation-duration:39s}
+.nv-side-cloud-variant-b::before{transform:scaleX(.83) scaleY(1.17) rotate(-13deg);filter:blur(17px) url(#nv-side-cloud-distort)}
+.nv-side-cloud-variant-c{width:clamp(420px,53vw,890px);height:clamp(250px,31vw,520px);rotate:11deg;opacity:.76;animation-duration:45s;animation-delay:-19s}
+.nv-side-cloud-variant-c::before{transform:scaleX(1.1) scaleY(.83) rotate(8deg)}
+@media(max-width:700px){.nv-side-cloud-variant-b,.nv-side-cloud-variant-c{width:76vw;height:55vw}}
+</style>
+<style id="nv-side-cloud-edge-artifact-fix-20261023">
+/* Élimine les découpes rectangulaires visibles autour des volumes latéraux :
+   fondu appliqué au conteneur entier, y compris aux filtres SVG. */
+.nv-site-side-cloud,
+#nv-contact-sequence .nv-contact-cloud{
+  -webkit-mask-image:radial-gradient(ellipse 65% 66% at 50% 50%,#000 22%,rgba(0,0,0,.96) 38%,rgba(0,0,0,.65) 58%,rgba(0,0,0,.18) 76%,transparent 96%)!important;
+  mask-image:radial-gradient(ellipse 65% 66% at 50% 50%,#000 22%,rgba(0,0,0,.96) 38%,rgba(0,0,0,.65) 58%,rgba(0,0,0,.18) 76%,transparent 96%)!important;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-size:100% 100%;mask-size:100% 100%;
+}
+.nv-site-side-cloud::before,
+#nv-contact-sequence .nv-contact-cloud::before{
+  filter:blur(17px)!important;
+}
+</style>
+<style id="nuvia-teaser-only">
+/* Page courte : seules les deux sections originales subsistent. */
+/* Le ciel coloré remplace la toile WebGL du site complet, inutile ici. */
+html{scrollbar-gutter:auto;scroll-behavior:smooth}
+body{margin:0;background:#387ff0;overflow-x:hidden}
+#entree{margin:0}
+#nv-contact-sequence{margin:0;background:linear-gradient(180deg,#387ff0 0%,#428df1 19%,#66adf4 55%,#8cc6f5 100%)!important}
+#nv-contact-sequence .nv-contact-space{display:none!important}
+#nv-contact-sequence .nv-contact-stage{min-height:100svh}
+/* L'animation du texte est réutilisée telle quelle ; la section arrive sans écran vide. */
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style></head>
+<body>
+<main>
+<section id="entree" class="nv-hero-cloud-video">
+  <div class="nv-hero-cloud-backdrop" aria-hidden="true"><video class="nv-hero-cloud-film" autoplay muted loop playsinline webkit-playsinline preload="metadata" poster="" disablepictureinpicture><source src="assets/video/NUVIA_NUAGES_CIEL_CLAIR_V1.mp4" type="video/mp4"></video><div class="nv-hero-cloud-shade"></div></div>
+  <div class="nv-cumulus-scene" aria-hidden="true">
+    <canvas id="nv-cumulus-canvas"></canvas>
+    <!-- Shader de nuages Aceternity ; l'ancien Canvas reste en secours. -->
+    <canvas id="nv-cloudshader-canvas"></canvas>
+  </div>
+
+  <!-- Launch hero: native implementation of the supplied React/Framer Motion layout.
+       The existing NUVIA navigation, sky, clouds and scroll sections are untouched. -->
+  <div class="nv-launch-hero">
+    <div class="nv-launch-copy">
+      <h1 class="nv-launch-heading">
+        <span class="nv-launch-heading-intro">This is something</span>
+        <span class="nv-launch-rotator" aria-label="amazing new wonderful beautiful smart">
+          <span class="nv-launch-word" data-state="active">amazing</span>
+          <span class="nv-launch-word" data-state="next" aria-hidden="true">new</span>
+          <span class="nv-launch-word" data-state="next" aria-hidden="true">wonderful</span>
+          <span class="nv-launch-word" data-state="next" aria-hidden="true">beautiful</span>
+          <span class="nv-launch-word" data-state="next" aria-hidden="true">smart</span>
+        </span>
+      </h1>
+      <p class="nv-launch-description">Great experiences are built on the smallest details. NUVIA transforms the individually wrapped wipe into a refined expression of your brand — thoughtfully designed, personalized, and made to elevate the final gesture of every guest experience.</p>
+    </div>
+
+    <div class="nv-launch-actions">
+      <a href="#nv-contact-sequence" class="nv-launch-btn nv-launch-btn--primary">
+        Start a project
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+      </a>
+      <a href="#nv-contact-form" class="nv-launch-btn nv-launch-btn--outline nv-launch-sample-kit">
+        Sample Kit
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+<section id="nv-contact-sequence" aria-label="Parler de votre projet à NUVIA">
+    <div class="nv-contact-space" aria-hidden="true"></div><div class="nv-site-side-cloud nv-site-side-cloud--right nv-side-cloud-variant-c" aria-hidden="true" style="top:17%"></div><div class="nv-site-side-cloud nv-site-side-cloud--left nv-side-cloud-variant-b" aria-hidden="true" style="top:74%"></div>
+    <div class="nv-contact-cloud nv-contact-cloud--left" aria-hidden="true"></div>
+    <div class="nv-contact-cloud nv-contact-cloud--right" aria-hidden="true"></div>
+    <div class="nv-contact-stage">
+      <div class="nv-contact-intro">
+        <h2 class="nv-contact-heading" data-nv-reveal="headline" data-nv-active="false">
+          <span class="nv-contact-line"><span class="nv-contact-word" style="--nv-word-delay:0ms">Donnez</span> <span class="nv-contact-word" style="--nv-word-delay:145ms">à</span> <span class="nv-contact-word" style="--nv-word-delay:290ms">chaque</span> <span class="nv-contact-word" style="--nv-word-delay:435ms">geste</span></span>
+          <span class="nv-contact-line nv-contact-line--second" style="--nv-line-delay:620ms"><span class="nv-contact-word" style="--nv-word-delay:0ms">une</span> <span class="nv-contact-word" style="--nv-word-delay:145ms">signature</span> <em class="nv-contact-script nv-contact-word" style="--nv-word-delay:290ms">unique.</em></span>
+        </h2>
+        <p class="nv-contact-description nv-contact-animate" data-nv-reveal="description"><span class="nv-contact-description-line">Parlons de votre établissement et imaginons ensemble</span> <span class="nv-contact-description-line">des sachets personnalisés qui reflètent votre identité.</span></p>
+      </div>
+      <div class="nv-contact-card" data-nv-reveal="form">
+        <form id="nv-contact-form" name="nuvia-contact" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="nuvia-contact">
+          <p class="nv-contact-sr-only" aria-hidden="true"><label>Ne pas renseigner ce champ : <input type="text" name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+          <div class="nv-contact-fields">
+            <div class="nv-contact-field nv-contact-field--half">
+              <label class="nv-contact-sr-only" for="nv-first-name">Prénom</label>
+              <input id="nv-first-name" name="first-name" type="text" placeholder="Prénom*" autocomplete="given-name" required maxlength="100">
+            </div>
+            <div class="nv-contact-field nv-contact-field--half">
+              <label class="nv-contact-sr-only" for="nv-last-name">Nom</label>
+              <input id="nv-last-name" name="last-name" type="text" placeholder="Nom*" autocomplete="family-name" required maxlength="100">
+            </div>
+            <div class="nv-contact-field">
+              <label class="nv-contact-sr-only" for="nv-email">Adresse e-mail</label>
+              <input id="nv-email" name="email" type="email" placeholder="Adresse e-mail*" autocomplete="email" required maxlength="254">
+            </div>
+            <div class="nv-contact-field">
+              <label class="nv-contact-sr-only" for="nv-phone">Téléphone</label>
+              <input id="nv-phone" name="phone" type="tel" placeholder="Téléphone" autocomplete="tel" maxlength="40">
+            </div>
+            <div class="nv-contact-field">
+              <label class="nv-contact-sr-only" for="nv-business-type">Type d’établissement</label>
+              <select id="nv-business-type" name="business-type" required>
+                <option value="" disabled selected>Type d’établissement*</option>
+                <option value="Restaurant">Restaurant</option>
+                <option value="Hôtel">Hôtel</option>
+                <option value="Café / bar">Café / bar</option>
+                <option value="Traiteur / événementiel">Traiteur / événementiel</option>
+                <option value="Distribution">Distribution</option>
+                <option value="Autre">Autre</option>
+              </select>
+            </div>
+            <div class="nv-contact-field">
+              <label class="nv-contact-sr-only" for="nv-quantity">Quantité estimée</label>
+              <select id="nv-quantity" name="quantity">
+                <option value="" selected>Quantité estimée (facultatif)</option>
+                <option value="Moins de 1 000">Moins de 1 000 sachets</option>
+                <option value="1 000 à 5 000">1 000 à 5 000 sachets</option>
+                <option value="5 000 à 20 000">5 000 à 20 000 sachets</option>
+                <option value="Plus de 20 000">Plus de 20 000 sachets</option>
+                <option value="À définir">À définir</option>
+              </select>
+            </div>
+            <div class="nv-contact-field">
+              <label class="nv-contact-sr-only" for="nv-contact-message">Votre projet</label>
+              <textarea id="nv-contact-message" name="message" rows="2" placeholder="Parlez-nous de votre projet…" maxlength="3000"></textarea>
+            </div>
+          </div>
+          <div class="nv-contact-actions">
+            <button class="nv-contact-submit" type="submit">Envoyer ma demande <span aria-hidden="true">→</span></button>
+            <p class="nv-contact-privacy">Vos informations sont utilisées pour répondre à votre demande. Aucun abonnement à une newsletter.</p>
+            <p class="nv-contact-status" role="status" aria-live="polite" aria-atomic="true"></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+<script id="nv-hero-cloud-video-control">
+document.addEventListener('DOMContentLoaded',function(){
+  const film=document.querySelector('#entree .nv-hero-cloud-film');
+  if(film){film.defaultPlaybackRate=1;film.playbackRate=1;film.addEventListener('loadedmetadata',()=>{film.playbackRate=1;},{once:true});}
+  if(!film)return;
+  const show=()=>{if(film.videoWidth>0)film.classList.add('nv-film-ready')};
+  film.addEventListener('loadeddata',show,{once:true});
+  film.addEventListener('canplay',show,{once:true});
+  if(film.readyState>=2)show();
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
+  if(reduce.matches){film.pause();return}
+  const tryPlay=()=>{const p=film.play();if(p&&p.catch)p.catch(()=>{})};
+  if(document.visibilityState==='visible')tryPlay();
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)film.pause();else tryPlay()});
+});
+</script>
+<script id="nv-hero-video-performance-gate">
+/* Pause legacy full-screen WebGL sky and animated cloth while video is visible. */
+window.__nvHeroVideoVisible = true;
+document.addEventListener('DOMContentLoaded', function(){
+  const hero=document.querySelector('#entree.nv-hero-cloud-video');
+  if(!hero)return;
+  const update=()=>{
+    const r=hero.getBoundingClientRect();
+    window.__nvHeroVideoVisible=r.bottom>0&&r.top<window.innerHeight;
+    document.documentElement.classList.toggle("nv-video-in-viewport",window.__nvHeroVideoVisible);
+  };
+  update();
+  window.addEventListener('scroll',update,{passive:true});
+  window.addEventListener('resize',update,{passive:true});
+});
+</script>
+<script id="nv-launch-sample-kit-script">
+(function(){
+  "use strict";
+  var sampleKit=document.querySelector("#entree .nv-launch-sample-kit");
+  if(!sampleKit)return;
+  sampleKit.addEventListener("click",function(){
+    var message=document.getElementById("nv-contact-message");
+    if(message&&!message.value.trim()){
+      message.value="Bonjour, je souhaite recevoir un Sample Kit NUVIA. Pouvez-vous me préciser les options disponibles et les modalités ?";
+    }
+  });
+})();
+</script>
+<script id="nv-launch-rotator-script">
+(function(){
+  "use strict";
+  var root=document.querySelector("#entree .nv-launch-rotator");
+  if(!root) return;
+  var words=Array.prototype.slice.call(root.querySelectorAll(".nv-launch-word"));
+  if(!words.length)return;
+  var current=0,timer=0;
+  function show(next){
+    current=next;
+    words.forEach(function(word,i){
+      word.dataset.state=i===current?"active":i<current?"previous":"next";
+      word.setAttribute("aria-hidden",i===current?"false":"true");
+    });
+  }
+  function start(){
+    if(timer||document.hidden)return;
+    timer=window.setInterval(function(){show((current+1)%words.length);},2000);
+  }
+  function stop(){
+    if(timer){window.clearInterval(timer);timer=0;}
+  }
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden)stop();else start();
+  });
+  show(0);
+  start();
+})();
+</script>
+<script id="nv-contact-controller">
+(function(){
+  "use strict";
+  var section=document.getElementById("nv-contact-sequence");
+  var heading=section&&section.querySelector(".nv-contact-heading");
+  var form=document.getElementById("nv-contact-form");
+  if(!section||!heading||!form)return;
+  var navContact=document.querySelector("#nuvia-react-navigation .nv-action--outline");
+  if(navContact)navContact.addEventListener("click",function(){
+    heading.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
+  });
+  var reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
+  var card=section.querySelector(".nv-contact-card");
+  var secondary=section.querySelector('[data-nv-reveal="description"]');
+  if(!card||!secondary)return;
+  var headlinePlayed=false;
+  var headlineStart=0;
+  var subtitlePlayed=false;
+  var subtitleStart=0;
+  heading.dataset.nvActive="false";
+  var clamp=function(x){return Math.max(0,Math.min(1,x));};
+  var smooth=function(x){x=clamp(x);return x*x*(3-2*x);};
+  var raf=0;
+  function setSubtitle(p){
+    secondary.style.setProperty("--nv-contact-opacity",p.toFixed(4));
+    secondary.style.setProperty("--nv-contact-translate",((1-p)*26).toFixed(2)+"px");
+    secondary.style.setProperty("--nv-contact-reveal",(p*100).toFixed(2)+"%");
+  }
+  function resetHeadline(){
+    if(!headlinePlayed)return;
+    headlinePlayed=false;
+    headlineStart=0;
+    heading.dataset.nvActive="false";
+  }
+  function resetSubtitle(){
+    if(!subtitlePlayed)return;
+    subtitlePlayed=false;
+    subtitleStart=0;
+    setSubtitle(0);
+  }
+  function resetSequence(){
+    resetHeadline();
+    resetSubtitle();
+  }
+  function inViewport(rect,vh){
+    return rect.bottom>0 && rect.top<vh;
+  }
+  function render(now){
+    raf=0;
+    if(reduced.matches)return;
+    if(typeof now!=="number")now=performance.now();
+    var vh=window.innerHeight||document.documentElement.clientHeight||800;
+    var cardBounds=card.getBoundingClientRect();
+    var titleBounds=heading.getBoundingClientRect();
+    var subtitleBounds=secondary.getBoundingClientRect();
+    var titleVisible=inViewport(titleBounds,vh);
+    var subtitleVisible=inViewport(subtitleBounds,vh);
+
+    // Each text resets independently, the instant ITS OWN bounds
+    // leave the viewport. The form position must never reset either text.
+    if(!titleVisible)resetHeadline();
+    if(!subtitleVisible)resetSubtitle();
+
+    // Keep the approved entrance: only 18–30px of the form are showing
+    // when the first headline word starts. This is a start gate only.
+    var peek=Math.max(18,Math.min(30,vh*.035));
+    if(titleVisible&&!headlinePlayed&&cardBounds.top<=vh-peek){
+      headlinePlayed=true;
+      headlineStart=now;
+      heading.dataset.nvActive="true";
+    }
+
+    if(subtitleVisible){
+      if(!subtitlePlayed){
+        if(headlinePlayed){
+          // Preserve the approved 380ms gap after the first title begins.
+          subtitleStart=Math.max(now,headlineStart+380);
+          subtitlePlayed=true;
+        }else if(!titleVisible){
+          // Returning from below: subtitle replays on its own,
+          // even when the first title is still off-screen.
+          subtitleStart=now+380;
+          subtitlePlayed=true;
+        }
+      }
+      if(subtitlePlayed){
+        var p=smooth((now-subtitleStart)/920);
+        setSubtitle(p);
+        if(p<1)raf=window.requestAnimationFrame(render);
+      }
+    }
+  }
+  function queue(){if(!raf)raf=window.requestAnimationFrame(render);}
+  if(!reduced.matches){
+    document.documentElement.classList.add("nv-contact-motion");
+    window.addEventListener("scroll",queue,{passive:true});
+    window.addEventListener("resize",queue,{passive:true});
+    render();
+  }
+  if(reduced.addEventListener)reduced.addEventListener("change",function(){
+    document.documentElement.classList.toggle("nv-contact-motion",!reduced.matches);
+    if(!reduced.matches){
+      resetSequence();
+      queue();
+    }
+  });
+  var submit=form.querySelector('button[type="submit"]');
+  var status=form.querySelector(".nv-contact-status");
+  form.addEventListener("submit",function(event){
+    event.preventDefault();
+    if(!form.reportValidity())return;
+    // Frontend-only prototype: no API, no POST, no misleading confirmation.
+    status.removeAttribute("data-state");
+    status.textContent="Le formulaire est en démonstration. L’envoi sera disponible prochainement.";
+  });
+})();
+</script>
+</body>
+</html>
