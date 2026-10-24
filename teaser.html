@@ -2931,6 +2931,7 @@ html{scroll-snap-type:y proximity}
           <input type="hidden" name="_subject" value="NUVIA — Nouvelle demande depuis le teaser">
           <input type="hidden" name="_template" value="table">
           <input type="hidden" name="_url" value="https://nuviasolution.com/teaser.html">
+          <input type="hidden" name="_next" value="https://nuviasolution.com/teaser.html?confirmation=envoyee#nv-contact-form">
           <p class="nv-contact-sr-only" aria-hidden="true"><label>Ne pas renseigner ce champ : <input type="text" name="_honey" tabindex="-1" autocomplete="off"></label></p>
           <div class="nv-contact-fields">
             <div class="nv-contact-field nv-contact-field--half">
@@ -3167,54 +3168,18 @@ document.addEventListener('DOMContentLoaded', function(){
       queue();
     }
   });
-  var submit=form.querySelector('button[type="submit"]');
+  // Envoi natif : le navigateur suit les vérifications de FormSubmit (activation,
+  // anti-spam, puis redirection). Un fetch AJAX ne pouvait pas les présenter.
   var status=form.querySelector(".nv-contact-status");
-  var sending=false;
-  var endpoint="https://formsubmit.co/ajax/studio@nuviasolution.com";
-  form.addEventListener("submit",async function(event){
-    event.preventDefault();
-    if(sending||!form.reportValidity())return;
-    // FormSubmit fonctionne sur GitHub Pages sans serveur.
-    // Premier envoi : une confirmation doit être acceptée dans la boîte studio@.
-    if(form.elements.namedItem("_honey").value.trim())return;
-    sending=true;
-    submit.disabled=true;
-    submit.setAttribute("aria-busy","true");
+  var params=new URLSearchParams(window.location.search);
+  if(params.get("confirmation")==="envoyee"){
     status.removeAttribute("data-state");
-    status.textContent="Envoi en cours…";
-    var controller=new AbortController();
-    var timeout=window.setTimeout(function(){controller.abort();},20000);
-    try {
-      var payload=Object.fromEntries(new FormData(form).entries());
-      var response=await fetch(endpoint,{
-        method:"POST",
-        headers:{"Content-Type":"application/json","Accept":"application/json"},
-        body:JSON.stringify(payload),
-        signal:controller.signal
-      });
-      var data=await response.json();
-      var ok=data&& (data.success===true||data.success==="true");
-      if(!response.ok||!ok)throw new Error("FormSubmit a refusé la demande");
-      var message=String(data.message||"");
-      if(/activat|confirm|vérif|verif/i.test(message)){
-        // Ne pas afficher de fausse réussite tant que la boîte n'est pas validée.
-        status.dataset.state="error";
-        status.textContent="Envoi en attente : l'adresse de réception NUVIA doit être confirmée.";
-      }else{
-        status.removeAttribute("data-state");
-        status.textContent="Votre demande a bien été transmise. Nous vous répondrons prochainement.";
-        form.reset();
-      }
-    }catch(error){
-      status.dataset.state="error";
-      status.textContent="L'envoi n'a pas abouti. Vérifiez votre connexion puis réessayez.";
-    }finally{
-      window.clearTimeout(timeout);
-      sending=false;
-      submit.disabled=false;
-      submit.removeAttribute("aria-busy");
+    status.textContent="Votre demande a bien été envoyée. Nous vous répondrons prochainement.";
+    // Supprime le paramètre pour ne pas réafficher un succès après actualisation.
+    if(window.history&&window.history.replaceState){
+      window.history.replaceState(null,"",window.location.pathname+"#nv-contact-form");
     }
-  });
+  }
 })();
 </script>
 <script id="nv-teaser-direct-scroll">
