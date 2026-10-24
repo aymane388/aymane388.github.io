@@ -2868,6 +2868,35 @@ body{margin:0;background:#387ff0;overflow-x:hidden;padding-bottom:0!important}
 #nv-contact-sequence{margin:0;background:linear-gradient(180deg,#387ff0 0%,#428df1 19%,#66adf4 55%,#8cc6f5 100%)!important}
 #nv-contact-sequence .nv-contact-space{display:none!important}
 #nv-contact-sequence .nv-contact-stage{min-height:100svh}
+/* Le teaser montre la vidéo héro de bord à bord, sans le masque de raccord
+   réservé aux longues sections du site complet. */
+#entree.nv-hero-cloud-video>.nv-hero-cloud-backdrop{
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+  height:100%!important;
+}
+#entree.nv-hero-cloud-video .nv-hero-cloud-film{
+  width:100%!important;height:100%!important;object-fit:cover!important;
+}
+/* Nuages NUVIA d'origine remis en scène sur les deux bords du contact. */
+#nv-contact-sequence>.nv-site-side-cloud{
+  display:block!important;visibility:visible!important;opacity:.78!important;
+  z-index:0!important;pointer-events:none!important;
+}
+#nv-contact-sequence>.nv-site-side-cloud--right{top:8%!important;right:-24%!important}
+#nv-contact-sequence>.nv-site-side-cloud--left{top:62%!important;left:-24%!important}
+#nv-contact-sequence .nv-contact-cloud{display:block!important;visibility:visible!important;opacity:.46!important}
+#nv-contact-sequence .nv-contact-cloud--left{top:33%!important;left:-27%!important}
+#nv-contact-sequence .nv-contact-cloud--right{top:73%!important;right:-27%!important;bottom:auto!important}
+#nv-contact-sequence>.nv-contact-stage{position:relative;z-index:2}
+@media(max-width:700px){
+  #nv-contact-sequence>.nv-site-side-cloud{opacity:.54!important}
+  #nv-contact-sequence .nv-contact-cloud{opacity:.27!important}
+  #nv-contact-sequence>.nv-site-side-cloud--left{left:-53%!important}
+  #nv-contact-sequence>.nv-site-side-cloud--right{right:-53%!important}
+  #nv-contact-sequence .nv-contact-cloud--left{left:-55%!important}
+  #nv-contact-sequence .nv-contact-cloud--right{right:-55%!important}
+}
 /* Le fondu vers le chapitre blanc du site complet n'a plus d'utilité : cette page s'arrête au contact. */
 #nv-contact-sequence::after{content:none!important;display:none!important;height:0!important;background:none!important}
 /* Les deux seules sections se rejoignent sans pause ni panneau intermédiaire. */
@@ -2890,25 +2919,25 @@ html{scroll-snap-type:y proximity}
   <div class="nv-launch-hero">
     <div class="nv-launch-copy">
       <h1 class="nv-launch-heading">
-        <span class="nv-launch-heading-intro">This is something</span>
-        <span class="nv-launch-rotator" aria-label="amazing new wonderful beautiful smart">
-          <span class="nv-launch-word" data-state="active">amazing</span>
-          <span class="nv-launch-word" data-state="next" aria-hidden="true">new</span>
-          <span class="nv-launch-word" data-state="next" aria-hidden="true">wonderful</span>
-          <span class="nv-launch-word" data-state="next" aria-hidden="true">beautiful</span>
-          <span class="nv-launch-word" data-state="next" aria-hidden="true">smart</span>
+        <span class="nv-launch-heading-intro">Un geste</span>
+        <span class="nv-launch-rotator" aria-label="unique raffiné personnalisé mémorable essentiel">
+          <span class="nv-launch-word" data-state="active">unique</span>
+          <span class="nv-launch-word" data-state="next" aria-hidden="true">raffiné</span>
+          <span class="nv-launch-word" data-state="next" aria-hidden="true">personnalisé</span>
+          <span class="nv-launch-word" data-state="next" aria-hidden="true">mémorable</span>
+          <span class="nv-launch-word" data-state="next" aria-hidden="true">essentiel</span>
         </span>
       </h1>
-      <p class="nv-launch-description">Great experiences are built on the smallest details. NUVIA transforms the individually wrapped wipe into a refined expression of your brand — thoughtfully designed, personalized, and made to elevate the final gesture of every guest experience.</p>
+      <p class="nv-launch-description">Les grandes expériences naissent des plus petits détails. NUVIA transforme la lingette emballée individuellement en une expression raffinée de votre marque — pensée avec soin, personnalisée et conçue pour sublimer la dernière attention portée à chaque client.</p>
     </div>
 
     <div class="nv-launch-actions">
       <a href="#nv-contact-sequence" class="nv-launch-btn nv-launch-btn--primary">
-        Start a project
+        Nous contacter
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
       </a>
       <a href="#nv-contact-form" class="nv-launch-btn nv-launch-btn--outline nv-launch-sample-kit">
-        Sample Kit
+        Demander un échantillon
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
       </a>
     </div>
@@ -3028,7 +3057,7 @@ document.addEventListener('DOMContentLoaded', function(){
   sampleKit.addEventListener("click",function(){
     var message=document.getElementById("nv-contact-message");
     if(message&&!message.value.trim()){
-      message.value="Bonjour, je souhaite recevoir un Sample Kit NUVIA. Pouvez-vous me préciser les options disponibles et les modalités ?";
+      message.value="Bonjour, je souhaite recevoir un échantillon NUVIA. Pouvez-vous me préciser les options disponibles et les modalités ?";
     }
   });
 })();
