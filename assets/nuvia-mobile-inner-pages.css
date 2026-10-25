@@ -1,0 +1,92 @@
+/* NUVIA — menu mobile partage pour les pages interieures.
+   Meme navigation et interactions que la page principale. */
+html,body{max-width:100%;overflow-x:clip!important}
+body{width:100%;min-width:0}
+main,footer{max-width:100%;min-width:0}
+@media(max-width:820px){
+  /* Menu mobile explicite : plus de navigation tronquee par un scroll horizontal. */
+  #nuvia-react-navigation{
+    top:calc(env(safe-area-inset-top,0px) + 10px)!important;
+    left:12px!important;right:12px!important;
+    width:calc(100% - 24px)!important;max-width:calc(100% - 24px)!important;
+    transform:none!important;overflow:visible!important;z-index:90
+  }
+  #nuvia-react-navigation .nv-mobile-toggle{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:18px;width:100%;min-height:47px;
+    border:1px solid rgba(214,224,236,.7);border-radius:13px;
+    padding:10px 14px;background:rgba(255,255,255,.92);
+    color:#171b22;box-shadow:0 6px 25px rgba(20,45,78,.06);
+    backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);
+    font:650 14px/1.2 var(--font-control,Inter,sans-serif);letter-spacing:.09em;
+    cursor:pointer;pointer-events:auto;
+  }
+  #nuvia-react-navigation .nv-mobile-toggle-icon{display:block;width:21px;height:21px;flex:none}
+  #nuvia-react-navigation .nv-mobile-toggle-icon svg{width:100%;height:100%;display:block}
+  #nuvia-react-navigation .nv-nav{
+    display:none!important;width:100%;box-sizing:border-box;
+  }
+  #nuvia-react-navigation[data-mobile-open="true"] .nv-nav{
+    display:block!important;margin-top:7px;max-height:calc(100dvh - 88px);
+    overflow-y:auto;overscroll-behavior:contain;
+    padding:8px 7px;border:1px solid rgba(216,225,234,.9);
+    border-radius:14px;background:rgba(255,255,255,.98);
+    box-shadow:0 15px 35px rgba(25,49,76,.12);
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    scrollbar-width:thin;
+  }
+  #nuvia-react-navigation .nv-links{
+    display:flex!important;flex-direction:column!important;
+    align-items:stretch!important;width:100%!important;max-width:100%!important;
+    overflow:visible!important;gap:0!important;
+  }
+  #nuvia-react-navigation .nv-navitem{position:relative;width:100%;flex:none}
+  #nuvia-react-navigation .nv-navitem>button{
+    display:flex;align-items:center;justify-content:space-between;
+    width:100%;min-height:45px;text-align:left;
+    padding:10px 13px;border-radius:9px;color:#161b22;
+    font-size:14px;white-space:normal;
+  }
+  #nuvia-react-navigation .nv-navitem>.nv-menu,
+  #nuvia-react-navigation .nv-navitem>.nv-menu.nv-menu--explore,
+  #nuvia-react-navigation .nv-navitem>.nv-menu.nv-menu--solutions,
+  #nuvia-react-navigation .nv-navitem>.nv-menu.nv-menu--studio{
+    position:relative!important;top:auto!important;left:auto!important;
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    transform:none!important;filter:none!important;
+    padding:5px 0 7px!important;
+    overflow-x:hidden!important;overflow-y:visible!important;
+    max-height:none!important;
+  }
+  #nuvia-react-navigation .nv-navitem:not([data-open="true"])>.nv-menu{
+    display:none!important;visibility:hidden!important;
+  }
+  #nuvia-react-navigation .nv-navitem[data-open="true"]>.nv-menu{
+    display:block!important;opacity:1!important;visibility:visible!important;
+  }
+  #nuvia-react-navigation .nv-menu .nuvi-panel,
+  #nuvia-react-navigation .nv-menu--explore .nuvi-panel,
+  #nuvia-react-navigation .nv-menu--studio .nuvi-panel,
+  #nuvia-react-navigation .nv-menu--solutions .nuvi-panel{
+    display:grid;grid-template-columns:minmax(0,1fr)!important;
+    width:100%!important;min-width:0!important;min-height:0!important;
+    padding:10px!important;gap:10px!important;
+    border-radius:11px;
+  }
+  #nuvia-react-navigation .nuvi-panel-column{min-width:0}
+  #nuvia-react-navigation .nuvi-panel-picture{display:none}
+  #nuvia-react-navigation .nuvi-panel-row{min-width:0;min-height:48px}
+  #nuvia-react-navigation .nuvi-panel-copy{min-width:0}
+  #nuvia-react-navigation .nuvi-panel-copy small{white-space:normal}
+  #nuvia-react-navigation .nuvi-panel-feature{padding:16px}
+}
+
+@media(min-width:821px){
+  #nuvia-react-navigation .nv-mobile-toggle{display:none!important}
+}
+/* Aucune marge laterale ne doit dependre de l'ecran agrandi par un media. */
+@media(max-width:560px){
+  main>section{max-width:100%;min-width:0}
+  main .container,main .wrap{max-width:100%;min-width:0}
+  img,video{max-width:100%}
+}
