@@ -13,6 +13,14 @@
   toggle.innerHTML='<span>NUVIA</span><span class="nv-mobile-toggle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>';
   nav.id='nv-mobile-nav-content';
   root.insertBefore(toggle,nav);
+  // Les pages intérieures doivent conserver un accès explicite à l'accueil.
+  var links=nav.querySelector('.nv-links');
+  if(links&&!links.querySelector('.nv-mobile-home-item')){
+    var homeItem=document.createElement('li');
+    homeItem.className='nv-mobile-home-item';
+    homeItem.innerHTML='<a href="./index.html">Accueil</a>';
+    links.insertBefore(homeItem,links.firstChild);
+  }
   function close(){
     root.dataset.mobileOpen='false';
     toggle.setAttribute('aria-expanded','false');
