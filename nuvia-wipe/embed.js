@@ -23,6 +23,22 @@
   // Seule la carte blanche du formulaire doit occulter la lingette.
   // Ni le titre, ni l'arrière-plan de la section contact ne sont masqués.
   const contactCard=document.querySelector("#nv-contact-sequence .nv-contact-card");
+  /* A rounded SVG alpha mask exactly matches the visible 13px white card.
+     Cache by geometry: do not regenerate SVG assets on every scroll frame. */
+  const roundedMaskCache=new Map();
+  const roundedCardMask=(width,height,radius)=>{
+    const w=Math.max(1,Math.round(width*100)/100);
+    const h=Math.max(1,Math.round(height*100)/100);
+    const rx=Math.min(w/2,h/2,Math.max(0,radius));
+    const key=w+"x"+h+"r"+rx;
+    if(!roundedMaskCache.has(key)){
+      const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+
+        '" viewBox="0 0 '+w+' '+h+'"><rect width="'+w+'" height="'+h+
+        '" rx="'+rx+'" ry="'+rx+'" fill="black"/></svg>';
+      roundedMaskCache.set(key,'url("data:image/svg+xml,'+encodeURIComponent(svg)+'")');
+    }
+    return roundedMaskCache.get(key);
+  };
   let protocolReady=false,modelReady=false,paused=false,destroyed=false;
   let modelReadyAt=0,fadeRAF=0;
   let frameLoaded=false,frameVerified=false,lastError="",lastSnapshot=null;
@@ -122,7 +138,7 @@
     const cardRects=[
       [launch?.frameLeft,launch?.frameTop,launch?.frameRight,launch?.frameBottom],
       [launch?.tabLeft,launch?.tabTop,launch?.tabRight,launch?.tabBottom],
-      [formRect?.left,formRect?.top,formRect?.right,formRect?.bottom]
+      [formRect?.left,formRect?.top,formRect?.right,formRect?.bottom,"form"]
     ];
     const activeRects=cardRects.filter(([x1,y1,x2,y2])=>
       [x1,y1,x2,y2].every(Number.isFinite)&&
@@ -134,11 +150,24 @@
     if(canExclude&&activeRects.length){
       // Le premier calque couvre tout le viewport du moteur ;
       // chaque calque suivant ne retranche QUE sa carte visible.
-      const holes=activeRects.map(([x1,y1,x2,y2])=>({
-        x:x1-shiftX-1,y:y1-shiftY-1,
-        w:Math.max(1,x2-x1+2),h:Math.max(1,y2-y1+2)
-      }));
-      const masks=Array(holes.length+1).fill("linear-gradient(#000,#000)");
+      const radius=contactCard
+        ?Math.max(0,parseFloat(getComputedStyle(contactCard).borderTopLeftRadius)||0)
+        :0;
+      const holes=activeRects.map(([x1,y1,x2,y2,kind])=>{
+        // Only rectangular video masks need 1px seam protection.
+        // Extending the FORM by 1px created a blue outline at its corners.
+        const bleed=kind==="form"?0:1;
+        return {
+          kind,x:x1-shiftX-bleed,y:y1-shiftY-bleed,
+          w:Math.max(1,x2-x1+2*bleed),h:Math.max(1,y2-y1+2*bleed),
+          radius:kind==="form"?radius:0
+        };
+      });
+      const masks=["linear-gradient(#000,#000)",...holes.map(r=>
+        r.kind==="form"
+          ?roundedCardMask(r.w,r.h,r.radius)
+          :"linear-gradient(#000,#000)"
+      )];
       const maskPositions=["0px 0px",...holes.map(r=>r.x.toFixed(2)+"px "+r.y.toFixed(2)+"px")];
       const maskSizes=["100% 100%",...holes.map(r=>r.w.toFixed(2)+"px "+r.h.toFixed(2)+"px")];
       iframe.style.maskImage=masks.join(",");
