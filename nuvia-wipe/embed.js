@@ -20,6 +20,9 @@
   const engineUrl=new URL("engine.html",script?.src||document.baseURI);
   iframe.src=engineUrl.href;
   const video=document.getElementById("nv-video-footer");
+  // Seule la carte blanche du formulaire doit occulter la lingette.
+  // Ni le titre, ni l'arrière-plan de la section contact ne sont masqués.
+  const contactCard=document.querySelector("#nv-contact-sequence .nv-contact-card");
   let protocolReady=false,modelReady=false,paused=false,destroyed=false;
   let modelReadyAt=0,fadeRAF=0;
   let frameLoaded=false,frameVerified=false,lastError="",lastSnapshot=null;
@@ -111,13 +114,15 @@
     const shiftY=targetY-vh*.51;
     iframe.style.transform="translate3d("+shiftX.toFixed(2)+"px,"+shiftY.toFixed(2)+"px,0)";
 
-    /* Limiter l'occlusion strictement à la vidéo de la section #hero.
-       Après cette section (MAKE IT YOURS, contact, etc.), AUCUN masque
-       ne peut couper le tissu. La trajectoire et les forces ne changent pas. */
+    /* La lingette reste devant les sections éditoriales, mais passe derrière
+       la carte vidéo, ses onglets et la SEULE carte blanche du formulaire.
+       Aucun masque de section, aucun clipping sur toute la page. */
     iframe.style.clipPath="none";
+    const formRect=contactCard?.getBoundingClientRect();
     const cardRects=[
       [launch?.frameLeft,launch?.frameTop,launch?.frameRight,launch?.frameBottom],
-      [launch?.tabLeft,launch?.tabTop,launch?.tabRight,launch?.tabBottom]
+      [launch?.tabLeft,launch?.tabTop,launch?.tabRight,launch?.tabBottom],
+      [formRect?.left,formRect?.top,formRect?.right,formRect?.bottom]
     ];
     const activeRects=cardRects.filter(([x1,y1,x2,y2])=>
       [x1,y1,x2,y2].every(Number.isFinite)&&
@@ -147,8 +152,7 @@
       iframe.style.maskComposite=Array(holes.length).fill("exclude").join(",");
       iframe.style.webkitMaskComposite=Array(holes.length).fill("xor").join(",");
     }else{
-      // Hors du cadre vidéo : le rendu 3D n'a aucune zone occultée.
-      // Repartir de 'none' évite les masques hors écran persistants.
+      // Hors des cartes visibles, ne conserver aucun masque persistant.
       iframe.style.maskImage="none";
       iframe.style.webkitMaskImage="none";
       iframe.style.maskComposite="";
