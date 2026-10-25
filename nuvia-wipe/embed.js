@@ -23,18 +23,27 @@
   // Seule la carte blanche du formulaire doit occulter la lingette.
   // Ni le titre, ni l'arrière-plan de la section contact ne sont masqués.
   const contactCard=document.querySelector("#nv-contact-sequence .nv-contact-card");
-  /* A rounded SVG alpha mask exactly matches the visible 13px white card.
-     Cache by geometry: do not regenerate SVG assets on every scroll frame. */
+  /* Coins de la carte inchangés, et fondu progressif UNIQUEMENT sous
+     son bord inférieur pour empêcher la petite pointe de tissu de ressortir. */
   const roundedMaskCache=new Map();
-  const roundedCardMask=(width,height,radius)=>{
+  const roundedCardMask=(width,height,radius,tail)=>{
     const w=Math.max(1,Math.round(width*100)/100);
     const h=Math.max(1,Math.round(height*100)/100);
+    const t=Math.max(0,Math.round(tail*100)/100);
     const rx=Math.min(w/2,h/2,Math.max(0,radius));
-    const key=w+"x"+h+"r"+rx;
+    const key=w+"x"+h+"r"+rx+"t"+t;
     if(!roundedMaskCache.has(key)){
-      const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+
-        '" viewBox="0 0 '+w+' '+h+'"><rect width="'+w+'" height="'+h+
-        '" rx="'+rx+'" ry="'+rx+'" fill="black"/></svg>';
+      const fullH=h+t;
+      const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+fullH+
+        '" viewBox="0 0 '+w+' '+fullH+'"><defs>'+
+        '<linearGradient id="tail" x1="0" y1="0" x2="0" y2="1">'+
+        '<stop offset="0%" stop-color="black" stop-opacity="1"/>'+
+        '<stop offset="42%" stop-color="black" stop-opacity="1"/>'+
+        '<stop offset="100%" stop-color="black" stop-opacity="0"/>'+
+        '</linearGradient></defs><rect width="'+w+'" height="'+h+
+        '" rx="'+rx+'" ry="'+rx+'" fill="black"/>'+
+        '<rect x="0" y="'+(h-1)+'" width="'+w+'" height="'+(t+1)+
+        '" fill="url(#tail)"/></svg>';
       roundedMaskCache.set(key,'url("data:image/svg+xml,'+encodeURIComponent(svg)+'")');
     }
     return roundedMaskCache.get(key);
@@ -153,19 +162,22 @@
       const radius=contactCard
         ?Math.max(0,parseFloat(getComputedStyle(contactCard).borderTopLeftRadius)||0)
         :0;
+      // La queue ne concerne QUE le bas du formulaire ; tout le reste de
+      // l'écran et les nuages restent visibles comme avant.
+      const contactTail=Math.max(48,Math.min(84,vh*.085));
       const holes=activeRects.map(([x1,y1,x2,y2,kind])=>{
-        // Only rectangular video masks need 1px seam protection.
-        // Extending the FORM by 1px created a blue outline at its corners.
         const bleed=kind==="form"?0:1;
+        const tail=kind==="form"?contactTail:0;
+        const cardH=Math.max(1,y2-y1+2*bleed);
         return {
           kind,x:x1-shiftX-bleed,y:y1-shiftY-bleed,
-          w:Math.max(1,x2-x1+2*bleed),h:Math.max(1,y2-y1+2*bleed),
-          radius:kind==="form"?radius:0
+          w:Math.max(1,x2-x1+2*bleed),h:cardH+tail,
+          cardH,radius:kind==="form"?radius:0,tail
         };
       });
       const masks=["linear-gradient(#000,#000)",...holes.map(r=>
         r.kind==="form"
-          ?roundedCardMask(r.w,r.h,r.radius)
+          ?roundedCardMask(r.w,r.cardH,r.radius,r.tail)
           :"linear-gradient(#000,#000)"
       )];
       const maskPositions=["0px 0px",...holes.map(r=>r.x.toFixed(2)+"px "+r.y.toFixed(2)+"px")];
