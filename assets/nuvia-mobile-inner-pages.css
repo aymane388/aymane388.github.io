@@ -151,3 +151,19 @@ main,footer{max-width:100%;min-width:0}
   .index-head,.hotel-heading{grid-template-columns:minmax(0,1fr)!important}
   .restaurant-grid,.event-grid,.networks-grid{grid-template-columns:minmax(0,1fr)!important}
 }
+
+/* Établissements : supprimer le deuxième logo posé sous le hamburger. */
+@media(max-width:820px){
+  #nuvia-react-navigation>.nv-page-home-logo{display:none!important}
+  #nuvia-react-navigation .nv-mobile-home-item{display:block;width:100%;list-style:none}
+  #nuvia-react-navigation .nv-mobile-home-item a{
+    display:flex;align-items:center;min-height:45px;
+    padding:10px 13px;border-radius:9px;color:#161b22;
+    text-decoration:none;font:500 14px/1.4 Inter,Arial,sans-serif;
+  }
+  #nuvia-react-navigation .nv-mobile-home-item a:focus-visible,
+  #nuvia-react-navigation .nv-mobile-home-item a:hover{background:#f2f4f7}
+}
+@media(min-width:821px){
+  #nuvia-react-navigation .nv-mobile-home-item{display:none!important}
+}
