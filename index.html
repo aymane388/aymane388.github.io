@@ -2970,6 +2970,79 @@ body{margin:0;background:#387ff0;overflow-x:hidden;padding-bottom:0!important}
   #nv-contact-sequence .nv-contact-cloud{animation:none!important}
 }
 
+
+/* NUVIA teaser — état de confirmation après retour de FormSubmit.
+   Le formulaire et sa confirmation ne doivent jamais être visibles ensemble. */
+#nv-contact-sequence .nv-contact-card form[hidden],
+#nv-contact-sequence .nv-form-success[hidden]{display:none!important}
+#nv-contact-sequence.nv-contact-confirmed .nv-contact-card{
+  width:min(100%,560px);
+  padding:clamp(36px,5vw,62px) clamp(24px,5vw,54px);
+  text-align:center;
+}
+#nv-contact-sequence .nv-form-success{display:flex;flex-direction:column;align-items:center;gap:0}
+#nv-contact-sequence .nv-form-success-mark{
+  display:grid;place-items:center;width:66px;height:66px;
+  color:#b99b62;background:#f8f4ea;border:1px solid #e9ddc3;
+  border-radius:50%;margin:0 auto 24px;
+}
+#nv-contact-sequence .nv-form-success-mark svg{display:block;width:32px;height:32px}
+#nv-contact-sequence .nv-form-success-eyebrow{
+  margin:0 0 12px;color:#9b865d;
+  font:600 10px/1.4 var(--font-control,Inter,sans-serif);
+  letter-spacing:.22em;
+}
+#nv-contact-sequence .nv-form-success-title{
+  color:#22252a;margin:0;
+  font:500 clamp(30px,4vw,41px)/1.13 var(--font-control,Inter,sans-serif);
+  letter-spacing:-.065em;
+}
+#nv-contact-sequence .nv-form-success-description{
+  color:#65707c;max-width:365px;margin:17px auto 30px;
+  font:400 15px/1.65 var(--font-control,Inter,sans-serif);
+}
+#nv-contact-sequence .nv-form-success-actions{
+  display:flex;align-items:center;justify-content:center;gap:16px;
+  flex-wrap:wrap;
+}
+#nv-contact-sequence .nv-form-success-home{
+  display:inline-flex;align-items:center;justify-content:center;gap:16px;
+  background:#242424;color:#fff;text-decoration:none;
+  min-height:45px;border-radius:9px;padding:10px 18px;
+  font:500 13px/1.4 var(--font-control,Inter,sans-serif);
+}
+#nv-contact-sequence .nv-form-success-again{
+  background:transparent;border:0;padding:10px 3px;
+  color:#617184;text-decoration:underline;text-underline-offset:4px;
+  font:500 12px/1.5 var(--font-control,Inter,sans-serif);
+  cursor:pointer;
+}
+#nv-contact-sequence .nv-form-success-home:focus-visible,
+#nv-contact-sequence .nv-form-success-again:focus-visible{
+  outline:2px solid #327fe5;outline-offset:4px;
+}
+/* En accès direct à la confirmation : ne pas relancer le masque d'apparition
+   de la description ni les animations de mots après restauration du scroll. */
+html.nv-contact-motion #nv-contact-sequence.nv-contact-confirmed .nv-contact-word{
+  opacity:1!important;transform:none!important;transition:none!important;
+}
+html.nv-contact-motion #nv-contact-sequence.nv-contact-confirmed .nv-contact-animate{
+  opacity:1!important;transform:none!important;
+}
+html.nv-contact-motion #nv-contact-sequence.nv-contact-confirmed .nv-contact-description,
+html.nv-contact-motion #nv-contact-sequence.nv-contact-confirmed .nv-contact-description-line{
+  -webkit-mask-image:none!important;mask-image:none!important;
+}
+@media(max-width:650px){
+  #nv-contact-sequence.nv-contact-confirmed .nv-contact-stage{
+    padding-top:clamp(75px,12svh,120px);
+    padding-bottom:clamp(50px,8svh,82px);
+  }
+  #nv-contact-sequence.nv-contact-confirmed .nv-contact-card{margin-top:28px}
+  #nv-contact-sequence .nv-form-success-actions{flex-direction:column;gap:4px}
+  #nv-contact-sequence .nv-form-success-description{font-size:14px;margin-bottom:25px}
+}
+
 /* Les deux seules sections se rejoignent sans pause ni panneau intermédiaire. */
 #entree,#nv-contact-sequence{scroll-snap-align:start}
 html{scroll-snap-type:y proximity}
@@ -3032,7 +3105,7 @@ html{scroll-snap-type:y proximity}
           <input type="hidden" name="_subject" value="NUVIA — Nouvelle demande depuis le teaser">
           <input type="hidden" name="_template" value="table">
           <input type="hidden" name="_url" value="https://nuviasolution.com/teaser.html">
-          <input type="hidden" name="_next" value="https://nuviasolution.com/?confirmation=envoyee#nv-contact-form">
+          <input type="hidden" name="_next" value="https://nuviasolution.com/?confirmation=envoyee#nv-contact-sequence">
           <p class="nv-contact-sr-only" aria-hidden="true"><label>Ne pas renseigner ce champ : <input type="text" name="_honey" tabindex="-1" autocomplete="off"></label></p>
           <div class="nv-contact-fields">
             <div class="nv-contact-field nv-contact-field--half">
@@ -3085,6 +3158,20 @@ html{scroll-snap-type:y proximity}
             <p class="nv-contact-status" role="status" aria-live="polite" aria-atomic="true"></p>
           </div>
         </form>
+        <div id="nv-form-success" class="nv-form-success" role="status" aria-live="polite" aria-atomic="true" hidden>
+          <div class="nv-form-success-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m7.5 16 5.5 5.5L24.5 10" />
+            </svg>
+          </div>
+          <p class="nv-form-success-eyebrow">NUVIA · CONTACT</p>
+          <h3 class="nv-form-success-title">Demande envoyée.</h3>
+          <p class="nv-form-success-description">Votre message nous est bien parvenu. Nous vous répondrons prochainement.</p>
+          <div class="nv-form-success-actions">
+            <a class="nv-form-success-home" href="#entree">Retour à l'accueil <span aria-hidden="true">→</span></a>
+            <button class="nv-form-success-again" type="button">Envoyer une autre demande</button>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -3269,16 +3356,45 @@ document.addEventListener('DOMContentLoaded', function(){
       queue();
     }
   });
-  // Envoi natif : le navigateur suit les vérifications de FormSubmit (activation,
-  // anti-spam, puis redirection). Un fetch AJAX ne pouvait pas les présenter.
-  var status=form.querySelector(".nv-contact-status");
+  // FormSubmit effectue un POST natif, puis redirige vers ?confirmation=envoyee.
+  // Ne jamais ancrer la confirmation sur le formulaire : cela coupe le titre
+  // et laisse les champs vides en dessous du message.
   var params=new URLSearchParams(window.location.search);
   if(params.get("confirmation")==="envoyee"){
-    status.removeAttribute("data-state");
-    status.textContent="Votre demande a bien été envoyée. Nous vous répondrons prochainement.";
-    // Supprime le paramètre pour ne pas réafficher un succès après actualisation.
-    if(window.history&&window.history.replaceState){
-      window.history.replaceState(null,"",window.location.pathname+"#nv-contact-form");
+    var success=section.querySelector("#nv-form-success");
+    var status=form.querySelector(".nv-contact-status");
+    if(success){
+      section.classList.add("nv-contact-confirmed");
+      form.hidden=true;
+      success.hidden=false;
+      heading.dataset.nvActive="true";
+      secondary.style.setProperty("--nv-contact-opacity","1");
+      secondary.style.setProperty("--nv-contact-translate","0px");
+      secondary.style.setProperty("--nv-contact-reveal","100%");
+      if(status)status.textContent="";
+      if(window.history&&window.history.replaceState){
+        // On conserve le lien vers la section mais pas la confirmation :
+        // actualiser la page ne fait jamais apparaître un faux succès.
+        window.history.replaceState(null,"",window.location.pathname+"#nv-contact-sequence");
+      }
+      function alignSuccess(){
+        // Le browser peut restaurer l'ancien ancrage du formulaire après le POST.
+        // Un seul repositionnement sur le début de la section préserve le titre.
+        section.scrollIntoView({block:"start",behavior:"instant"});
+      }
+      window.requestAnimationFrame(function(){
+        window.requestAnimationFrame(alignSuccess);
+      });
+      window.addEventListener("pageshow",alignSuccess,{once:true});
+      var again=success.querySelector(".nv-form-success-again");
+      if(again)again.addEventListener("click",function(){
+        success.hidden=true;
+        form.hidden=false;
+        form.reset();
+        section.classList.remove("nv-contact-confirmed");
+        window.history.replaceState(null,"",window.location.pathname+"#nv-contact-sequence");
+        section.scrollIntoView({block:"start",behavior:"instant"});
+      });
     }
   }
 })();
