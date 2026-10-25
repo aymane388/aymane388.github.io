@@ -2923,6 +2923,15 @@ body{margin:0;background:#387ff0;overflow-x:hidden;padding-bottom:0!important}
     rgba(56,127,240,.82) 82%,
     #387ff0 100%);
 }
+/* Raccord exact au pixel de jonction : le bleu du contact s'ouvre
+   progressivement sur les nuages en dessous, sans trait horizontal. */
+#nv-contact-sequence>.nv-teaser-sky-seam{
+  position:absolute;z-index:1;inset:0 0 auto;height:clamp(108px,17svh,170px);
+  pointer-events:none;
+  background:linear-gradient(to bottom,
+    #387ff0 0%,rgba(56,127,240,.96) 11%,
+    rgba(56,127,240,.68) 45%,rgba(56,127,240,.23) 75%,transparent 100%);
+}
 /* Le ciel n'est plus une plage bleue plate : lumiere diffuse et nuages
    irreguliers dans la profondeur, derriere les textes et la carte du formulaire. */
 #nv-contact-sequence{
@@ -3006,6 +3015,7 @@ html{scroll-snap-type:y proximity}
   </div>
 </section>
 <section id="nv-contact-sequence" aria-label="Parler de votre projet à NUVIA">
+  <div class="nv-teaser-sky-seam" aria-hidden="true"></div>
     <div class="nv-contact-space" aria-hidden="true"></div><div class="nv-site-side-cloud nv-site-side-cloud--right nv-side-cloud-variant-c" aria-hidden="true" style="top:17%"></div><div class="nv-site-side-cloud nv-site-side-cloud--left nv-side-cloud-variant-b" aria-hidden="true" style="top:74%"></div>
     <div class="nv-contact-cloud nv-contact-cloud--left" aria-hidden="true"></div>
     <div class="nv-contact-cloud nv-contact-cloud--right" aria-hidden="true"></div>
