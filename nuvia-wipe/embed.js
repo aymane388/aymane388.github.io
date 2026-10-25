@@ -86,34 +86,63 @@
     // Blender se déploie sous le cadre ; la vraie 3D prend le relais en fondu.
     // Le paquet 2D original n'est pas déployé : le vrai moteur V204 doit
     // pouvoir apparaître dès le bord du cadre, même sans images Blender.
-    const hasBitmapFallback=window.__NUVIA_WIPE_FALLBACK_AVAILABLE===true;
-    const scrollBlend=hasBitmapFallback
-      ?smooth((progress-.68)/.54)
-      :smooth((progress-.015)/.14);
+    /* La transparence est pilotée seulement par le chargement du moteur
+       et les vraies limites du site. La carte cache le tissu par géométrie :
+       plus de fondu anticipé avant que le tissu ne l'atteigne. */
     const readyBlend=modelReady?smooth((performance.now()-modelReadyAt)/900):0;
-    const blend=!videoVisible?scrollBlend*readyBlend:0;
-    const opacity=blend*finishing;
+    const scrollEntrance=smooth(progress/.06);
+    const opacity=(!videoVisible?readyBlend*scrollEntrance*finishing:0);
 
-    /* Centre du cadre vidéo -> centre de l'écran.
-       Les coordonnées ne dépendent QUE du scroll et de la géométrie stable.
-       Ainsi, descendre et remonter donnent exactement la même trajectoire. */
+    /* Trajectoire scroll déterministe : on part DERRIÈRE la carte, pas sous
+       une ligne de coupe pleine largeur. Le centre reste aligné au cadre. */
     const vh=Math.max(1,innerHeight), vw=Math.max(1,innerWidth);
     const frameX=Number.isFinite(launch?.x)?launch.x:vw*.5;
-    const tabBottom=Number.isFinite(launch?.tabBottom)?launch.tabBottom:vh;
-    const release=smooth((progress-.20)/.80);
+    const frameBottom=Number.isFinite(launch?.frameBottom)?launch.frameBottom:vh;
+    const release=smooth((progress-.50)/.72);
     const recenter=smooth((progress-.65)/.60);
-    const half=Math.max(78,Math.min(150,vh*.135));
+    const half=Math.max(90,Math.min(155,vh*.17));
+    const entry=smooth(progress/.62);
+    const attachedY=frameBottom-half+entry*(half*2);
     const targetX=frameX+(vw*.5-frameX)*recenter;
-    const targetY=(tabBottom+half)*(1-release)+(vh*.54)*release;
+    const targetY=attachedY*(1-release)+(vh*.54)*release;
     const shiftX=targetX-vw*.5;
     const shiftY=targetY-vh*.51;
     iframe.style.transform="translate3d("+shiftX.toFixed(2)+"px,"+shiftY.toFixed(2)+"px,0)";
 
-    /* Clipping horizontal stable jusqu'au bas des onglets.
-       Plus de polygone évidé pouvant couper la lingette sur un côté,
-       ni de morceau visible à travers la barre translucide. */
-    const clipTop=Math.max(0,Math.min(vh,tabBottom-shiftY));
-    iframe.style.clipPath="inset("+clipTop.toFixed(2)+"px 0 0 0)";
+    /* Masques CSS composés : surface visible partout SAUF dans les deux
+       rectangles réels (carte vidéo + onglets), arrimés à l'écran.
+       Le fond et les nuages ne sont jamais masqués. */
+    iframe.style.clipPath="none";
+    const rects=[
+      [launch?.frameLeft,launch?.frameTop,launch?.frameRight,launch?.frameBottom],
+      [launch?.tabLeft,launch?.tabTop,launch?.tabRight,launch?.tabBottom]
+    ];
+    const canExclude=typeof CSS!=="undefined"&&
+      (CSS.supports("mask-composite","exclude")||
+       CSS.supports("-webkit-mask-composite","xor"));
+    if(canExclude&&rects.every(r=>r.every(Number.isFinite))){
+      const holes=rects.map(([x1,y1,x2,y2])=>({
+        x:x1-shiftX-1,y:y1-shiftY-1,
+        w:Math.max(1,x2-x1+2),h:Math.max(1,y2-y1+2)
+      }));
+      const maskImages="linear-gradient(#000,#000),linear-gradient(#000,#000),linear-gradient(#000,#000)";
+      const maskPosition="0px 0px,"+holes.map(r=>r.x.toFixed(2)+"px "+r.y.toFixed(2)+"px").join(",");
+      const maskSize="100% 100%,"+holes.map(r=>r.w.toFixed(2)+"px "+r.h.toFixed(2)+"px").join(",");
+      iframe.style.maskImage=maskImages;
+      iframe.style.webkitMaskImage=maskImages;
+      iframe.style.maskPosition=maskPosition;
+      iframe.style.webkitMaskPosition=maskPosition;
+      iframe.style.maskSize=maskSize;
+      iframe.style.webkitMaskSize=maskSize;
+      iframe.style.maskRepeat="no-repeat";
+      iframe.style.webkitMaskRepeat="no-repeat";
+      iframe.style.maskComposite="exclude,exclude";
+      iframe.style.webkitMaskComposite="xor,xor";
+    }else{
+      // Navigateur dépourvu de masques composés : pas de coupe horizontale.
+      iframe.style.maskImage="none";
+      iframe.style.webkitMaskImage="none";
+    }
     window.__NUVIA_V204_BLEND=opacity;
     document.documentElement.classList.toggle("nv-wipe-v204-full",modelReady&&opacity>=.999);
     setVisible(opacity>.001,opacity);
