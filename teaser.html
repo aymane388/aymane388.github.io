@@ -2975,6 +2975,10 @@ body{margin:0;background:#387ff0;overflow-x:hidden;padding-bottom:0!important}
    Le formulaire et sa confirmation ne doivent jamais être visibles ensemble. */
 #nv-contact-sequence .nv-contact-card form[hidden],
 #nv-contact-sequence .nv-form-success[hidden]{display:none!important}
+#nv-contact-sequence.nv-contact-confirmed .nv-contact-stage{
+  padding-top:clamp(98px,14svh,145px);
+  padding-bottom:clamp(58px,9svh,94px);
+}
 #nv-contact-sequence.nv-contact-confirmed .nv-contact-card{
   width:min(100%,560px);
   padding:clamp(36px,5vw,62px) clamp(24px,5vw,54px);
