@@ -90,3 +90,64 @@ main,footer{max-width:100%;min-width:0}
   main .container,main .wrap{max-width:100%;min-width:0}
   img,video{max-width:100%}
 }
+
+
+/* QA visuelle 2026-10-25 : les feuilles editoriales R8 reinjectaient leurs grilles
+   desktop apres les media queries R7. Forcer la composition verticale uniquement
+   aux tailles mobiles/tablettes. */
+@media(max-width:830px){
+  .sn-hero-grid,.sn-design-head,.sn-prod-head,
+  .sn-demo,.sn-prod-display,.sn-storage-grid,.sn-delivery-scene,
+  .sn-finale-inner{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .sn-demo,.sn-prod-display,.sn-storage-grid,.sn-delivery-scene{
+    width:100%;max-width:100%;min-width:0;
+  }
+  .sn-demo-copy,.sn-prod-count,.sn-storage-copy,.sn-delivery-scene-copy{
+    width:100%;max-width:100%;min-width:0;box-sizing:border-box;
+  }
+  .sn-demo-copy>*,.sn-prod-count>*{max-width:100%}
+  .sn-demo-visual,.sn-prod-image{width:100%;min-width:0}
+  .sn-prod-count strong{font-size:clamp(65px,12vw,105px)}
+  .hero-grid,.index-head,.restaurant-grid,.hotel-heading,.event-grid,
+  .networks-grid,.closing-grid{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .hero-grid{gap:clamp(20px,4vw,35px)!important}
+  .hero-aside{width:100%;min-width:0;padding:0!important}
+  .hero-aside p{width:100%;max-width:min(100%,520px)}
+  .hero-aside .btn{max-width:100%}
+  .hero h1{max-width:100%}
+}
+@media(max-width:560px){
+  .sn-design{padding:70px 0 76px}
+  .sn-design-head h2{font-size:clamp(40px,11vw,55px)}
+  .sn-demo{display:grid!important;grid-template-columns:minmax(0,1fr)!important}
+  .sn-demo-visual{min-height:250px;aspect-ratio:1.37}
+  .sn-demo-copy{padding:26px 22px 30px!important;align-items:flex-start}
+  .sn-demo-copy h3{font-size:clamp(27px,7vw,34px);margin:11px 0 15px;line-height:1.15}
+  .sn-demo-copy p{font-size:14px;line-height:1.62;width:100%}
+  .sn-demo-copy .sn-link{margin-top:21px}
+  .sn-production{padding:76px 0 86px}
+  .sn-prod-head h2{font-size:clamp(44px,11vw,58px)}
+  .sn-prod-display{display:grid!important;grid-template-columns:minmax(0,1fr)!important;margin-top:30px}
+  .sn-prod-image{min-height:250px;aspect-ratio:1.35}
+  .sn-prod-count{padding:28px 22px 32px!important}
+  .sn-prod-count strong{font-size:clamp(66px,18vw,85px);letter-spacing:-.07em}
+  .sn-prod-count h3{font-size:19px;margin:13px 0 11px}
+  .sn-prod-count p{font-size:14px;line-height:1.58;width:100%}
+  .sn-prod-count .sn-link{margin-top:20px}
+  .sn-storage-copy,.sn-delivery-scene-copy{padding-inline:0;min-width:0}
+  .sn-prod-meta,.sn-delivery-meta{gap:10px}
+  .sn-prod-meta span,.sn-delivery-meta span{white-space:normal}
+  .hero{padding:112px 0 66px!important}
+  .hero-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:19px!important}
+  .hero h1{font-size:clamp(51px,13vw,68px)!important;line-height:1.04;margin:19px 0 0}
+  .hero-aside p{font-size:15px;line-height:1.6;margin:0 0 18px}
+  .hero-aside .btn{display:inline-flex;width:auto;min-height:47px;padding:10px 17px;gap:18px}
+  .hero-film{margin-top:32px;height:clamp(340px,106vw,455px)}
+  .hero-film .hero-feature-note{max-width:calc(100% - 30px)}
+  .index-head,.hotel-heading{grid-template-columns:minmax(0,1fr)!important}
+  .restaurant-grid,.event-grid,.networks-grid{grid-template-columns:minmax(0,1fr)!important}
+}
