@@ -3123,7 +3123,7 @@ html{scroll-snap-type:none}
           <input type="hidden" name="_subject" value="NUVIA — Nouvelle demande depuis le teaser">
           <input type="hidden" name="_template" value="table">
           <input type="hidden" name="_captcha" value="false">
-          <input type="hidden" name="_url" value="https://nuviasolution.com/teaser.html">
+          <input type="hidden" name="_url" value="https://nuviasolution.com/">
           <input type="hidden" name="_next" value="https://nuviasolution.com/?confirmation=envoyee#nv-contact-sequence">
           <p class="nv-contact-sr-only" aria-hidden="true"><label>Ne pas renseigner ce champ : <input type="text" name="_honey" tabindex="-1" autocomplete="off"></label></p>
           <div class="nv-contact-fields">
@@ -3404,47 +3404,105 @@ document.addEventListener('DOMContentLoaded', function(){
       queue();
     }
   });
-  // FormSubmit effectue un POST natif, puis redirige vers ?confirmation=envoyee.
-  // Ne jamais ancrer la confirmation sur le formulaire : cela coupe le titre
-  // et laisse les champs vides en dessous du message.
+  // FormSubmit: soumission AJAX officielle, sans navigation vers une page
+  // de vérification externe. Ne déclarer un succès que si son JSON le confirme.
+  var success=section.querySelector("#nv-form-success");
+  var status=form.querySelector(".nv-contact-status");
+  var sendButton=form.querySelector('button[type="submit"]');
+  var sending=false;
+
+  function alignContact(){
+    section.scrollIntoView({block:"start",behavior:"instant"});
+  }
+  function showSuccess(){
+    if(!success)return;
+    section.classList.add("nv-contact-confirmed");
+    form.hidden=true;
+    success.hidden=false;
+    heading.dataset.nvActive="true";
+    secondary.style.setProperty("--nv-contact-opacity","1");
+    secondary.style.setProperty("--nv-contact-translate","0px");
+    secondary.style.setProperty("--nv-contact-reveal","100%");
+    if(status){status.textContent="";status.removeAttribute("data-state");}
+    if(window.history&&window.history.replaceState){
+      // Aucun faux succès après rechargement de la page.
+      window.history.replaceState(null,"",window.location.pathname+"#nv-contact-sequence");
+    }
+    window.requestAnimationFrame(function(){
+      window.requestAnimationFrame(alignContact);
+    });
+  }
+
+  // Compatibilité avec les anciennes redirections FormSubmit (sans JavaScript).
   var params=new URLSearchParams(window.location.search);
   if(params.get("confirmation")==="envoyee"){
-    var success=section.querySelector("#nv-form-success");
-    var status=form.querySelector(".nv-contact-status");
-    if(success){
-      section.classList.add("nv-contact-confirmed");
-      form.hidden=true;
-      success.hidden=false;
-      heading.dataset.nvActive="true";
-      secondary.style.setProperty("--nv-contact-opacity","1");
-      secondary.style.setProperty("--nv-contact-translate","0px");
-      secondary.style.setProperty("--nv-contact-reveal","100%");
-      if(status)status.textContent="";
-      if(window.history&&window.history.replaceState){
-        // On conserve le lien vers la section mais pas la confirmation :
-        // actualiser la page ne fait jamais apparaître un faux succès.
-        window.history.replaceState(null,"",window.location.pathname+"#nv-contact-sequence");
-      }
-      function alignSuccess(){
-        // Le browser peut restaurer l'ancien ancrage du formulaire après le POST.
-        // Un seul repositionnement sur le début de la section préserve le titre.
-        section.scrollIntoView({block:"start",behavior:"instant"});
-      }
-      window.requestAnimationFrame(function(){
-        window.requestAnimationFrame(alignSuccess);
-      });
-      window.addEventListener("pageshow",alignSuccess,{once:true});
-      var again=success.querySelector(".nv-form-success-again");
-      if(again)again.addEventListener("click",function(){
-        success.hidden=true;
-        form.hidden=false;
-        form.reset();
-        section.classList.remove("nv-contact-confirmed");
-        window.history.replaceState(null,"",window.location.pathname+"#nv-contact-sequence");
-        section.scrollIntoView({block:"start",behavior:"instant"});
-      });
-    }
+    showSuccess();
+    window.addEventListener("pageshow",alignContact,{once:true});
   }
+
+  if(success){
+    var again=success.querySelector(".nv-form-success-again");
+    if(again)again.addEventListener("click",function(){
+      success.hidden=true;
+      form.hidden=false;
+      form.reset();
+      if(status){status.textContent="";status.removeAttribute("data-state");}
+      section.classList.remove("nv-contact-confirmed");
+      window.history.replaceState(null,"",window.location.pathname+"#nv-contact-sequence");
+      alignContact();
+    });
+  }
+
+  form.addEventListener("submit",async function(event){
+    event.preventDefault();
+    if(sending||!form.reportValidity())return;
+
+    // Le honeypot reste actif. Un remplissage automatisé ne doit pas
+    // déclencher de demande sortante ni afficher un succès trompeur.
+    var trap=form.querySelector('input[name="_honey"]');
+    if(trap&&trap.value.trim())return;
+
+    sending=true;
+    sendButton.disabled=true;
+    sendButton.setAttribute("aria-busy","true");
+    if(status){
+      status.removeAttribute("data-state");
+      status.textContent="Envoi de votre demande en cours…";
+    }
+    try{
+      var data={};
+      new FormData(form).forEach(function(value,key){
+        if(typeof value==="string"&&key!=="_next")data[key]=value;
+      });
+      data._captcha="false";
+      data._url="https://nuviasolution.com/";
+
+      // API publiée par FormSubmit : réponse JSON au lieu d'une page CAPTCHA.
+      var response=await fetch("https://formsubmit.co/ajax/studio@nuviasolution.com",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Accept":"application/json"},
+        body:JSON.stringify(data)
+      });
+      var result;
+      try{result=await response.json();}
+      catch(parseError){throw new Error("unexpected-response");}
+      var accepted=response.ok&&result&&
+        (result.success===true||result.success==="true"||result.success===1);
+      if(!accepted)throw new Error("submission-rejected");
+      showSuccess();
+    }catch(error){
+      // Ne jamais effacer les champs ou afficher « envoyé » en cas de refus,
+      // de CAPTCHA forcé côté serveur ou de problème réseau/CORS.
+      if(status){
+        status.dataset.state="error";
+        status.textContent="L'envoi n'a pas abouti. Veuillez réessayer ou nous écrire à studio@nuviasolution.com.";
+      }
+    }finally{
+      sending=false;
+      sendButton.disabled=false;
+      sendButton.removeAttribute("aria-busy");
+    }
+  });
 })();
 </script>
 <script id="nv-teaser-direct-scroll">
