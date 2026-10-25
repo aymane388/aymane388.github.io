@@ -3098,7 +3098,7 @@ html{scroll-snap-type:none}
         Nous contacter
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
       </a>
-      <a href="#nv-contact-form" class="nv-launch-btn nv-launch-btn--outline nv-launch-sample-kit">
+      <a href="#nv-contact-sequence" class="nv-launch-btn nv-launch-btn--outline nv-launch-sample-kit">
         Demander un échantillon
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
       </a>
@@ -3306,7 +3306,7 @@ document.addEventListener('DOMContentLoaded', function(){
   if(!section||!heading||!form)return;
   var navContact=document.querySelector("#nuvia-react-navigation .nv-action--outline");
   if(navContact)navContact.addEventListener("click",function(){
-    heading.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
+    section.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"instant":"smooth",block:"start"});
   });
   var reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
   var card=section.querySelector(".nv-contact-card");
