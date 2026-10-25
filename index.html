@@ -3048,8 +3048,10 @@ html.nv-contact-motion #nv-contact-sequence.nv-contact-confirmed .nv-contact-des
 }
 
 /* Les deux seules sections se rejoignent sans pause ni panneau intermédiaire. */
-#entree,#nv-contact-sequence{scroll-snap-align:start}
-html{scroll-snap-type:y proximity}
+/* Le script de navigation desktop gère l'unique transition. Le scroll-snap
+   natif est désactivé : ses corrections de position créaient des à-coups. */
+#entree,#nv-contact-sequence{scroll-snap-align:none}
+html{scroll-snap-type:none}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style></head>
 <body>
@@ -3404,37 +3406,73 @@ document.addEventListener('DOMContentLoaded', function(){
 })();
 </script>
 <script id="nv-teaser-direct-scroll">
-/* Navigation directe entre les deux sections existantes, sans toucher au scroll du formulaire. */
+/* Deux sections seulement : transition dirigée à la molette, mais défilement
+   entièrement natif à l'intérieur du formulaire. Une seule animation contrôlée :
+   pas de scroll-snap concurrent, pas de cooldown qui avale la molette. */
 (function(){
   "use strict";
   var hero=document.getElementById("entree");
   var contact=document.getElementById("nv-contact-sequence");
   if(!hero||!contact)return;
-  var cooldown=0;
-  function prefersReduced(){return window.matchMedia("(prefers-reduced-motion: reduce)").matches;}
-  function targetY(){return Math.max(0,Math.round(contact.getBoundingClientRect().top+window.scrollY));}
-  function go(y){
-    cooldown=performance.now()+(prefersReduced()?260:900);
-    window.scrollTo({top:y,behavior:prefersReduced()?"instant":"smooth"});
+  var active=null;
+  function reduced(){return window.matchMedia("(prefers-reduced-motion: reduce)").matches;}
+  function boundary(){return Math.max(0,Math.round(contact.getBoundingClientRect().top+window.scrollY));}
+  function scrollInstant(y){window.scrollTo({top:y,behavior:"instant"});}
+  function go(target,direction){
+    target=Math.max(0,target);
+    if(active&&active.raf)cancelAnimationFrame(active.raf);
+    var origin=window.scrollY;
+    if(reduced()||Math.abs(origin-target)<2){
+      active=null;scrollInstant(target);return;
+    }
+    var state={raf:0,direction:direction,started:0,from:origin,to:target};
+    active=state;
+    function tick(now){
+      if(active!==state)return;
+      if(!state.started)state.started=now;
+      var p=Math.min(1,(now-state.started)/460);
+      var ease=1-Math.pow(1-p,3);
+      scrollInstant(state.from+(state.to-state.from)*ease);
+      if(p<1)state.raf=requestAnimationFrame(tick);
+      else{scrollInstant(state.to);active=null;}
+    }
+    state.raf=requestAnimationFrame(tick);
+  }
+  function handle(direction,delta,e){
+    if(!direction)return;
+    var y=window.scrollY,b=boundary();
+    if(active){
+      // Un geste inverse annule immédiatement la transition en cours.
+      // Les répétitions du même geste ne créent pas plusieurs animations.
+      if(direction!==active.direction&&Math.abs(delta)>12){
+        e.preventDefault();
+        go(direction>0?b:0,direction);
+      }else e.preventDefault();
+      return;
+    }
+    if(direction>0&&y<b-10){
+      e.preventDefault();go(b,1);
+    }else if(direction<0&&y>=b-10&&y<=b+Math.min(135,window.innerHeight*.22)){
+      e.preventDefault();go(0,-1);
+    }
+    // Plus bas dans le formulaire, laisser la molette fonctionner normalement.
   }
   window.addEventListener("wheel",function(e){
     if(e.defaultPrevented||e.ctrlKey||e.metaKey||Math.abs(e.deltaY)<3)return;
-    if(e.target&&e.target.closest&&e.target.closest("input,select,textarea,[contenteditable], [role=dialog]"))return;
-    if(performance.now()<cooldown){e.preventDefault();return;}
-    var boundary=targetY(),y=window.scrollY;
-    if(e.deltaY>0&&y<boundary-3){e.preventDefault();go(boundary);}
-    else if(e.deltaY<0&&y>=boundary-3&&y<=boundary+Math.min(135,window.innerHeight*.22)){
-      e.preventDefault();go(0);
-    }
+    if(e.target&&e.target.closest&&e.target.closest("input,select,textarea,[contenteditable],[role=dialog]"))return;
+    handle(Math.sign(e.deltaY),e.deltaY,e);
   },{passive:false});
   window.addEventListener("keydown",function(e){
-    if(e.defaultPrevented||e.ctrlKey||e.altKey||e.metaKey||e.target?.closest?.("input,select,textarea,button,[contenteditable]"))return;
-    var boundary=targetY(),y=window.scrollY;
-    if((e.key==="PageDown"||e.key===" "||e.key==="ArrowDown")&&y<boundary-3){
-      e.preventDefault();go(boundary);
-    }else if((e.key==="PageUp"||e.key==="ArrowUp")&&y>=boundary-3&&y<=boundary+Math.min(135,window.innerHeight*.22)){
-      e.preventDefault();go(0);
-    }
+    if(e.defaultPrevented||e.ctrlKey||e.altKey||e.metaKey||
+       (e.target&&e.target.closest&&e.target.closest("input,select,textarea,button,[contenteditable]")))return;
+    var d=(e.key==="PageDown"||e.key===" "||e.key==="ArrowDown")?1:
+          (e.key==="PageUp"||e.key==="ArrowUp")?-1:0;
+    if(d)handle(d,d*100,e);
+  });
+  // Lors d'un changement d'onglet ou d'historique, ne pas conserver de raf ancien.
+  window.addEventListener("pagehide",function(){
+    if(active&&active.raf)cancelAnimationFrame(active.raf);
+    active=null;
   });
 })();
 </script>
