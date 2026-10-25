@@ -2907,6 +2907,60 @@ body{margin:0;background:#387ff0;overflow-x:hidden;padding-bottom:0!important}
 }
 /* Le fondu vers le chapitre blanc du site complet n'a plus d'utilité : cette page s'arrête au contact. */
 #nv-contact-sequence::after{content:none!important;display:none!important;height:0!important;background:none!important}
+
+/* NUVIA TEASER — raccord atmospherique et nuages du contact.
+   AUCUN changement au site complet index.html ni aux lecteurs videos.
+   Fin du film = exactement la premiere couleur du ciel du formulaire. */
+#entree.nv-hero-cloud-video::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;
+  height:clamp(240px,38svh,400px);
+  z-index:1;pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(56,127,240,0) 0%,
+    rgba(56,127,240,.07) 20%,
+    rgba(56,127,240,.25) 42%,
+    rgba(56,127,240,.53) 63%,
+    rgba(56,127,240,.82) 82%,
+    #387ff0 100%);
+}
+/* Le ciel n'est plus une plage bleue plate : lumiere diffuse et nuages
+   irreguliers dans la profondeur, derriere les textes et la carte du formulaire. */
+#nv-contact-sequence{
+  background:
+    radial-gradient(ellipse 35% 21% at 3% 24%,rgba(236,249,255,.25) 0%,rgba(228,245,255,.12) 58%,transparent 100%),
+    radial-gradient(ellipse 36% 23% at 94% 16%,rgba(246,252,255,.28) 0%,rgba(235,248,255,.11) 59%,transparent 100%),
+    radial-gradient(ellipse 45% 26% at 10% 87%,rgba(240,250,255,.33) 0%,rgba(236,249,255,.09) 67%,transparent 100%),
+    radial-gradient(ellipse 42% 26% at 104% 83%,rgba(244,252,255,.34) 0%,rgba(237,249,255,.09) 67%,transparent 100%),
+    linear-gradient(180deg,#387ff0 0%,#4993f0 24%,#65aaef 60%,#96cffa 100%)!important;
+}
+#nv-contact-sequence::before{
+  content:"";position:absolute;inset:-4% -4%;z-index:0;
+  pointer-events:none;opacity:.75;filter:blur(13px);
+  background:
+    radial-gradient(ellipse 17% 10% at 0% 15%,rgba(255,255,255,.84) 2%,rgba(242,249,255,.53) 49%,transparent 100%),
+    radial-gradient(ellipse 15% 9% at 12% 22%,rgba(255,255,255,.72) 3%,rgba(234,247,255,.4) 52%,transparent 100%),
+    radial-gradient(ellipse 16% 10% at 2% 31%,rgba(241,250,255,.66) 0%,rgba(225,241,254,.33) 53%,transparent 100%),
+    radial-gradient(ellipse 17% 11% at 99% 10%,rgba(255,255,255,.83) 3%,rgba(239,249,255,.55) 55%,transparent 100%),
+    radial-gradient(ellipse 16% 10% at 88% 20%,rgba(255,255,255,.66) 4%,rgba(234,245,255,.32) 59%,transparent 100%),
+    radial-gradient(ellipse 18% 11% at 105% 33%,rgba(241,250,255,.74) 0%,rgba(223,241,255,.27) 64%,transparent 100%),
+    radial-gradient(ellipse 22% 13% at 0% 78%,rgba(247,252,255,.89) 2%,rgba(238,248,255,.52) 54%,transparent 100%),
+    radial-gradient(ellipse 19% 11% at 15% 85%,rgba(251,253,255,.69) 3%,rgba(235,248,255,.34) 60%,transparent 100%),
+    radial-gradient(ellipse 21% 13% at 96% 85%,rgba(247,252,255,.88) 3%,rgba(232,244,255,.53) 54%,transparent 100%),
+    radial-gradient(ellipse 16% 10% at 82% 91%,rgba(251,253,255,.63) 0%,rgba(233,246,255,.31) 60%,transparent 100%);
+}
+#nv-contact-sequence>.nv-site-side-cloud{opacity:.89!important}
+#nv-contact-sequence .nv-contact-cloud{opacity:.54!important}
+@media(max-width:700px){
+  #entree.nv-hero-cloud-video::after{height:clamp(205px,31svh,305px)}
+  #nv-contact-sequence::before{opacity:.68;filter:blur(11px)}
+  #nv-contact-sequence>.nv-site-side-cloud{opacity:.68!important}
+  #nv-contact-sequence .nv-contact-cloud{opacity:.40!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #nv-contact-sequence>.nv-site-side-cloud,
+  #nv-contact-sequence .nv-contact-cloud{animation:none!important}
+}
+
 /* Les deux seules sections se rejoignent sans pause ni panneau intermédiaire. */
 #entree,#nv-contact-sequence{scroll-snap-align:start}
 html{scroll-snap-type:y proximity}
