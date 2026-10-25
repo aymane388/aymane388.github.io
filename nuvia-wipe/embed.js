@@ -2,7 +2,9 @@
  * The 3D geometry, V97 morphs, V98-A materials and physics live in engine.html.
  * This transparent layer never intercepts navigation or native scrolling.
  * The legacy 2D wipe remains visible until the real 3D model is ready.
- * Layer order: sky #sky=0 < this 3D iframe=1 < site main=2, nav and actions higher. */
+ * Layer order: sky #sky=0 < site main=2 < this 3D iframe=4 < nav and actions.
+ * Only the SECOND section's video card and its tabs occlude the 3D cloth.
+ * The card masks are released entirely once the card has left the viewport. */
 (()=>{
   "use strict";
   const TOKEN="NUVIA_WIPE_V204";
@@ -14,7 +16,7 @@
   iframe.setAttribute("aria-hidden","true");
   iframe.tabIndex=-1;
   iframe.setAttribute("scrolling","no");
-  iframe.style.cssText="position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;border:0!important;background:transparent!important;pointer-events:none!important;z-index:1!important;overflow:visible!important;opacity:0;transition:none!important;will-change:opacity,transform,clip-path;color-scheme:normal!important;";
+  iframe.style.cssText="position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;border:0!important;background:transparent!important;pointer-events:none!important;z-index:4!important;overflow:visible!important;opacity:0;transition:none!important;will-change:opacity,transform,clip-path;color-scheme:normal!important;";
   const engineUrl=new URL("engine.html",script?.src||document.baseURI);
   iframe.src=engineUrl.href;
   const video=document.getElementById("nv-video-footer");
@@ -109,39 +111,48 @@
     const shiftY=targetY-vh*.51;
     iframe.style.transform="translate3d("+shiftX.toFixed(2)+"px,"+shiftY.toFixed(2)+"px,0)";
 
-    /* Masques CSS composés : surface visible partout SAUF dans les deux
-       rectangles réels (carte vidéo + onglets), arrimés à l'écran.
-       Le fond et les nuages ne sont jamais masqués. */
+    /* Limiter l'occlusion strictement à la vidéo de la section #hero.
+       Après cette section (MAKE IT YOURS, contact, etc.), AUCUN masque
+       ne peut couper le tissu. La trajectoire et les forces ne changent pas. */
     iframe.style.clipPath="none";
-    const rects=[
+    const cardRects=[
       [launch?.frameLeft,launch?.frameTop,launch?.frameRight,launch?.frameBottom],
       [launch?.tabLeft,launch?.tabTop,launch?.tabRight,launch?.tabBottom]
     ];
+    const activeRects=cardRects.filter(([x1,y1,x2,y2])=>
+      [x1,y1,x2,y2].every(Number.isFinite)&&
+      x2>x1&&y2>y1&&x2>0&&x1<vw&&y2>0&&y1<vh
+    );
     const canExclude=typeof CSS!=="undefined"&&
       (CSS.supports("mask-composite","exclude")||
        CSS.supports("-webkit-mask-composite","xor"));
-    if(canExclude&&rects.every(r=>r.every(Number.isFinite))){
-      const holes=rects.map(([x1,y1,x2,y2])=>({
+    if(canExclude&&activeRects.length){
+      // Le premier calque couvre tout le viewport du moteur ;
+      // chaque calque suivant ne retranche QUE sa carte visible.
+      const holes=activeRects.map(([x1,y1,x2,y2])=>({
         x:x1-shiftX-1,y:y1-shiftY-1,
         w:Math.max(1,x2-x1+2),h:Math.max(1,y2-y1+2)
       }));
-      const maskImages="linear-gradient(#000,#000),linear-gradient(#000,#000),linear-gradient(#000,#000)";
-      const maskPosition="0px 0px,"+holes.map(r=>r.x.toFixed(2)+"px "+r.y.toFixed(2)+"px").join(",");
-      const maskSize="100% 100%,"+holes.map(r=>r.w.toFixed(2)+"px "+r.h.toFixed(2)+"px").join(",");
-      iframe.style.maskImage=maskImages;
-      iframe.style.webkitMaskImage=maskImages;
-      iframe.style.maskPosition=maskPosition;
-      iframe.style.webkitMaskPosition=maskPosition;
-      iframe.style.maskSize=maskSize;
-      iframe.style.webkitMaskSize=maskSize;
+      const masks=Array(holes.length+1).fill("linear-gradient(#000,#000)");
+      const maskPositions=["0px 0px",...holes.map(r=>r.x.toFixed(2)+"px "+r.y.toFixed(2)+"px")];
+      const maskSizes=["100% 100%",...holes.map(r=>r.w.toFixed(2)+"px "+r.h.toFixed(2)+"px")];
+      iframe.style.maskImage=masks.join(",");
+      iframe.style.webkitMaskImage=masks.join(",");
+      iframe.style.maskPosition=maskPositions.join(",");
+      iframe.style.webkitMaskPosition=maskPositions.join(",");
+      iframe.style.maskSize=maskSizes.join(",");
+      iframe.style.webkitMaskSize=maskSizes.join(",");
       iframe.style.maskRepeat="no-repeat";
       iframe.style.webkitMaskRepeat="no-repeat";
-      iframe.style.maskComposite="exclude,exclude";
-      iframe.style.webkitMaskComposite="xor,xor";
+      iframe.style.maskComposite=Array(holes.length).fill("exclude").join(",");
+      iframe.style.webkitMaskComposite=Array(holes.length).fill("xor").join(",");
     }else{
-      // Navigateur dépourvu de masques composés : pas de coupe horizontale.
+      // Hors du cadre vidéo : le rendu 3D n'a aucune zone occultée.
+      // Repartir de 'none' évite les masques hors écran persistants.
       iframe.style.maskImage="none";
       iframe.style.webkitMaskImage="none";
+      iframe.style.maskComposite="";
+      iframe.style.webkitMaskComposite="";
     }
     window.__NUVIA_V204_BLEND=opacity;
     document.documentElement.classList.toggle("nv-wipe-v204-full",modelReady&&opacity>=.999);
