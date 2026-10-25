@@ -3047,6 +3047,18 @@ html.nv-contact-motion #nv-contact-sequence.nv-contact-confirmed .nv-contact-des
   #nv-contact-sequence .nv-form-success-description{font-size:14px;margin-bottom:25px}
 }
 
+/* Lecture mobile sur vidéo claire : rendre le texte lisible sur les
+   nuages blancs sans masquer le paysage par une grande carte ou un voile. */
+@media(max-width:700px){
+  #entree.nv-hero-cloud-video .nv-launch-description{
+    color:#fff;
+    text-shadow:0 1px 3px rgba(9,29,51,.89),0 2px 11px rgba(6,25,48,.83);
+  }
+  #entree.nv-hero-cloud-video .nv-launch-heading{
+    text-shadow:0 2px 9px rgba(8,29,53,.47);
+  }
+}
+
 /* Les deux seules sections se rejoignent sans pause ni panneau intermédiaire. */
 /* Le script de navigation desktop gère l'unique transition. Le scroll-snap
    natif est désactivé : ses corrections de position créaient des à-coups. */
@@ -3183,19 +3195,48 @@ html{scroll-snap-type:none}
   </section>
 </main>
 <script id="nv-hero-cloud-video-control">
+/* NUVIA teaser : le film du héros est lu uniquement lorsque ce chapitre
+   est à l'écran. Le contact ne doit pas décoder une vidéo invisible.
+   Aucun rechargement ni seek lors d'un retour vers le haut. */
 document.addEventListener('DOMContentLoaded',function(){
-  const film=document.querySelector('#entree .nv-hero-cloud-film');
-  if(film){film.defaultPlaybackRate=1;film.playbackRate=1;film.addEventListener('loadedmetadata',()=>{film.playbackRate=1;},{once:true});}
-  if(!film)return;
-  const show=()=>{if(film.videoWidth>0)film.classList.add('nv-film-ready')};
+  var film=document.querySelector('#entree .nv-hero-cloud-film');
+  var hero=document.getElementById('entree');
+  if(!film||!hero)return;
+  film.defaultPlaybackRate=1;film.playbackRate=1;
+  film.addEventListener('loadedmetadata',function(){film.playbackRate=1;},{once:true});
+  function show(){if(film.videoWidth>0)film.classList.add('nv-film-ready')}
   film.addEventListener('loadeddata',show,{once:true});
   film.addEventListener('canplay',show,{once:true});
   if(film.readyState>=2)show();
-  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
-  if(reduce.matches){film.pause();return}
-  const tryPlay=()=>{const p=film.play();if(p&&p.catch)p.catch(()=>{})};
-  if(document.visibilityState==='visible')tryPlay();
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)film.pause();else tryPlay()});
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
+  var nearHero=hero.getBoundingClientRect().bottom>0;
+  function sync(){
+    if(document.hidden||reduce.matches||!nearHero){film.pause();return;}
+    var p=film.play();if(p&&p.catch)p.catch(function(){});
+  }
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      nearHero=entries[0].intersectionRatio>0.08;
+      sync();
+    },{threshold:[0,.08,.15]});
+    io.observe(hero);
+  }else{
+    var queued=false;
+    function queue(){
+      if(queued)return;queued=true;
+      requestAnimationFrame(function(){
+        queued=false;var r=hero.getBoundingClientRect();
+        nearHero=r.bottom>0&&r.top<window.innerHeight;
+        sync();
+      });
+    }
+    window.addEventListener('scroll',queue,{passive:true});
+    window.addEventListener('resize',queue,{passive:true});
+  }
+  document.addEventListener('visibilitychange',sync);
+  window.addEventListener('pageshow',sync);
+  if(reduce.addEventListener)reduce.addEventListener('change',sync);
+  sync();
 });
 </script>
 <script id="nv-hero-video-performance-gate">
