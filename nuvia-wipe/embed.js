@@ -23,27 +23,19 @@
   // Seule la carte blanche du formulaire doit occulter la lingette.
   // Ni le titre, ni l'arrière-plan de la section contact ne sont masqués.
   const contactCard=document.querySelector("#nv-contact-sequence .nv-contact-card");
-  /* Coins de la carte inchangés, et fondu progressif UNIQUEMENT sous
-     son bord inférieur pour empêcher la petite pointe de tissu de ressortir. */
+  /* Masque géométrique exact de la carte blanche, sans queue artificielle.
+     La sortie définitive du tissu est gérée par le scroll AU-DESSUS de la
+     carte, non par un prolongement du rectangle sur le ciel. */
   const roundedMaskCache=new Map();
-  const roundedCardMask=(width,height,radius,tail)=>{
+  const roundedCardMask=(width,height,radius)=>{
     const w=Math.max(1,Math.round(width*100)/100);
     const h=Math.max(1,Math.round(height*100)/100);
-    const t=Math.max(0,Math.round(tail*100)/100);
     const rx=Math.min(w/2,h/2,Math.max(0,radius));
-    const key=w+"x"+h+"r"+rx+"t"+t;
+    const key=w+"x"+h+"r"+rx;
     if(!roundedMaskCache.has(key)){
-      const fullH=h+t;
-      const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+fullH+
-        '" viewBox="0 0 '+w+' '+fullH+'"><defs>'+
-        '<linearGradient id="tail" x1="0" y1="0" x2="0" y2="1">'+
-        '<stop offset="0%" stop-color="black" stop-opacity="1"/>'+
-        '<stop offset="42%" stop-color="black" stop-opacity="1"/>'+
-        '<stop offset="100%" stop-color="black" stop-opacity="0"/>'+
-        '</linearGradient></defs><rect width="'+w+'" height="'+h+
-        '" rx="'+rx+'" ry="'+rx+'" fill="black"/>'+
-        '<rect x="0" y="'+(h-1)+'" width="'+w+'" height="'+(t+1)+
-        '" fill="url(#tail)"/></svg>';
+      const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+
+        '" viewBox="0 0 '+w+' '+h+'"><rect width="'+w+'" height="'+h+
+        '" rx="'+rx+'" ry="'+rx+'" fill="black"/></svg>';
       roundedMaskCache.set(key,'url("data:image/svg+xml,'+encodeURIComponent(svg)+'")');
     }
     return roundedMaskCache.get(key);
@@ -121,11 +113,20 @@
        plus de fondu anticipé avant que le tissu ne l'atteigne. */
     const readyBlend=modelReady?smooth((performance.now()-modelReadyAt)/900):0;
     const scrollEntrance=smooth(progress/.06);
-    const opacity=(!videoVisible?readyBlend*scrollEntrance*finishing:0);
+    // Formulaire : la lingette s'efface lorsqu'elle passe SOUS sa carte.
+    // Dès que le formulaire est derrière le point de vol, elle reste
+    // invisible jusqu'au bas du site : plus de réapparition sous le bord.
+    // La formule ne dépend que de la position DOM => aller/retour identiques.
+    const vh=Math.max(1,innerHeight), vw=Math.max(1,innerWidth);
+    const formRect=contactCard?.getBoundingClientRect();
+    const clothCenter=vh*.54;
+    const start=clothCenter+Math.max(150,Math.min(220,vh*.23));
+    const end=clothCenter-Math.max(36,Math.min(65,vh*.075));
+    const contactFade=formRect?smooth((formRect.top-end)/(start-end)):1;
+    const opacity=(!videoVisible?readyBlend*scrollEntrance*finishing*contactFade:0);
 
     /* Trajectoire scroll déterministe : on part DERRIÈRE la carte, pas sous
        une ligne de coupe pleine largeur. Le centre reste aligné au cadre. */
-    const vh=Math.max(1,innerHeight), vw=Math.max(1,innerWidth);
     const frameX=Number.isFinite(launch?.x)?launch.x:vw*.5;
     const frameBottom=Number.isFinite(launch?.frameBottom)?launch.frameBottom:vh;
     const release=smooth((progress-.50)/.72);
@@ -143,7 +144,6 @@
        la carte vidéo, ses onglets et la SEULE carte blanche du formulaire.
        Aucun masque de section, aucun clipping sur toute la page. */
     iframe.style.clipPath="none";
-    const formRect=contactCard?.getBoundingClientRect();
     const cardRects=[
       [launch?.frameLeft,launch?.frameTop,launch?.frameRight,launch?.frameBottom],
       [launch?.tabLeft,launch?.tabTop,launch?.tabRight,launch?.tabBottom],
@@ -162,22 +162,17 @@
       const radius=contactCard
         ?Math.max(0,parseFloat(getComputedStyle(contactCard).borderTopLeftRadius)||0)
         :0;
-      // La queue ne concerne QUE le bas du formulaire ; tout le reste de
-      // l'écran et les nuages restent visibles comme avant.
-      const contactTail=Math.max(48,Math.min(84,vh*.085));
       const holes=activeRects.map(([x1,y1,x2,y2,kind])=>{
         const bleed=kind==="form"?0:1;
-        const tail=kind==="form"?contactTail:0;
-        const cardH=Math.max(1,y2-y1+2*bleed);
         return {
           kind,x:x1-shiftX-bleed,y:y1-shiftY-bleed,
-          w:Math.max(1,x2-x1+2*bleed),h:cardH+tail,
-          cardH,radius:kind==="form"?radius:0,tail
+          w:Math.max(1,x2-x1+2*bleed),h:Math.max(1,y2-y1+2*bleed),
+          radius:kind==="form"?radius:0
         };
       });
       const masks=["linear-gradient(#000,#000)",...holes.map(r=>
         r.kind==="form"
-          ?roundedCardMask(r.w,r.cardH,r.radius,r.tail)
+          ?roundedCardMask(r.w,r.h,r.radius)
           :"linear-gradient(#000,#000)"
       )];
       const maskPositions=["0px 0px",...holes.map(r=>r.x.toFixed(2)+"px "+r.y.toFixed(2)+"px")];
