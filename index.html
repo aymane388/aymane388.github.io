@@ -2868,20 +2868,12 @@ body{margin:0;background:#387ff0;overflow-x:hidden;padding-bottom:0!important}
 #nv-contact-sequence{margin:0;background:linear-gradient(180deg,#387ff0 0%,#428df1 19%,#66adf4 55%,#8cc6f5 100%)!important}
 #nv-contact-sequence .nv-contact-space{display:none!important}
 #nv-contact-sequence .nv-contact-stage{min-height:100svh}
-/* Même raccord atmosphérique que le site NUVIA interne.
-   Le teaser conservait "mask-image:none!important", qui annulait
-   intégralement le dégradé déjà défini plus haut dans ce fichier.
-   Ne toucher ni à la vidéo, ni au reste du design. */
+/* Le teaser montre la vidéo héro de bord à bord, sans le masque de raccord
+   réservé aux longues sections du site complet. */
 #entree.nv-hero-cloud-video>.nv-hero-cloud-backdrop{
-  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 68%,rgba(0,0,0,.88) 78%,rgba(0,0,0,.42) 92%,transparent 100%)!important;
-  mask-image:linear-gradient(to bottom,#000 0%,#000 68%,rgba(0,0,0,.88) 78%,rgba(0,0,0,.42) 92%,transparent 100%)!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
   height:100%!important;
-}
-@media(max-width:700px){
-  #entree.nv-hero-cloud-video>.nv-hero-cloud-backdrop{
-    -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 72%,rgba(0,0,0,.6) 90%,transparent 100%)!important;
-    mask-image:linear-gradient(to bottom,#000 0%,#000 72%,rgba(0,0,0,.6) 90%,transparent 100%)!important;
-  }
 }
 #entree.nv-hero-cloud-video .nv-hero-cloud-film{
   width:100%!important;height:100%!important;object-fit:cover!important;
@@ -2915,10 +2907,6 @@ body{margin:0;background:#387ff0;overflow-x:hidden;padding-bottom:0!important}
 }
 /* Le fondu vers le chapitre blanc du site complet n'a plus d'utilité : cette page s'arrête au contact. */
 #nv-contact-sequence::after{content:none!important;display:none!important;height:0!important;background:none!important}
-/* Le raccord vidéo est désormais un masque alpha comme sur le site
-   interne ; supprimer le voile bleu indépendant qui doublait le fondu
-   et créait une zone trop opaque en bas de l'image. */
-#entree.nv-hero-cloud-video::after{display:none!important;content:none!important}
 
 /* NUVIA TEASER — raccord atmospherique et nuages du contact.
    AUCUN changement au site complet index.html ni aux lecteurs videos.
